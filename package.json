@@ -1,0 +1,28 @@
+{
+  "name": "homyo",
+  "version": "1.0.0",
+  "description": "canvas html5",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iswear/homyo.git"
+  },
+  "keywords": [
+    "canvas",
+    "html5"
+  ],
+  "author": "471291492@qq.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iswear/homyo/issues"
+  },
+  "homepage": "https://github.com/iswear/homyo#readme",
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "webpack": "^3.5.3"
+  }
+}
