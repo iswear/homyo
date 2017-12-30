@@ -69,9 +69,11 @@ export default (
       var height = (rect.bottom < this.containerBottom ? rect.bottom : this.containerBottom) - top;
       var x = left - mapCache.leftCol * this.gridWidth;
       var y = top - mapCache.topRow * this.gridHeight;
-      render.drawImageExt(
-        mapCache.cacheFore.getCanvas(), x, y, width, height, left, top, width, height
-      );
+      if (width > 0 && height > 0) {
+        render.drawImageExt(
+          mapCache.cacheFore.getCanvas(), x, y, width, height, left, top, width, height
+        );
+      }
     }
 
     function render_tiledMapCache() {
@@ -137,9 +139,11 @@ export default (
             var clipY = (clipTopRow - cacheTopRow) * gridHeight;
             var clipWidth = (clipRightCol - clipLeftCol + 1) * gridWidth;
             var clipHeight = (clipBottomRow - clipTopRow + 1) * gridHeight;
-            backRender.drawImageExt(
-              foreRender.getCanvas(), clipX, clipY, clipWidth, clipHeight, (clipLeftCol - leftCol) * gridWidth, (clipTopRow - topRow) * gridHeight, clipWidth, clipHeight
-            );
+            if (clipWidth > 0 && clipHeight > 0) {
+              backRender.drawImageExt(
+                foreRender.getCanvas(), clipX, clipY, clipWidth, clipHeight, (clipLeftCol - leftCol) * gridWidth, (clipTopRow - topRow) * gridHeight, clipWidth, clipHeight
+              );
+            }
           }
           foreRender.clear();
           mapRenderCache.cacheFore = backRender;
