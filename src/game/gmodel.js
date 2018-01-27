@@ -4,64 +4,130 @@
  * Date: 2017/8/15
  */
 import LangUtil from '../utils/lang-util';
+import Notifier from '../core/notifier';
 import GUtil from './gutil';
-import GSprite from './gsprite';
+import GNode from './gnode';
 
 
 export default (
   function () {
+    var functions = (function () {
+      function createModelNodes (model, conf, nodeMap) {
+        var node = new GNode(conf);
+        if (conf.children) {
+          var children = conf.children;
+          for (var i = 0, len = children.length; i < len; ++i) {
+            var childNode = createModelNodes(model, children[i], nodeMap);
+            node.addChildNode(childNode.root);
+          }
+        }
+        node.model = model;
+        if (conf.actId) {
+          nodeMap[conf.actId] = node;
+        }
+        return {
+          root: node,
+          map: nodeMap
+        };
+      }
 
-    var GModel = LangUtil.extend(GSprite);
-
-    GModel.prototype.init = function (conf) {
-      this.super('init', [conf]);
-      this._actions = {};
-      create_modelSprite.call(this, this, conf, true);
-    }
-
-    GModel.prototype.runActionOfName = function (name, loop) {
-      var actions = this._actions[name];
-      if (actions) {
-        for (var i = 0, len = actions.length; i < len; ++i) {
-          var action = actions[i];
-          action.node.runAnimation(action.animation, null, null, loop);
+      function compileModelActions (actions, nodeMap) {
+        var compiledActions = {};
+        if (actions) {
+          for (var i = 0, len = actions.length; i < len; ++i) {
+            var action = actions[i];
+            if (action) {
+              var name = action.name;
+              var nodeActions = action.action;
+              compiledActions[name] = [];
+              for (var actId in nodeActions) {
+                var node = nodeMap[actId];
+                var nodeAction = nodeActions[actId];
+                if (node) {
+                  var animation = GUtil.compileFrames(node, nodeAction, false);
+                  if (animation) {
+                    compiledActions[name].push({
+                      node: node,
+                      animation: animation
+                    })
+                  }
+                }
+              }
+            }
+          }
+        }
+        return compiledActions;
+      }
+      
+      function actionRunProgress (binder, deltaTime, finish) {
+        if (finish) {
+          this._actionProgress -= 1;
+          if (this._actionProgress === 0 && this._actionLoop) {
+            this.runAction(this._actionRunning);
+          }
         }
       }
-    }
 
-    GModel.prototype.stopActionOfName = function (name) {
-      var actions = this._actions[name];
-      if (actions) {
-        for (var i = 0, len = actions.length; i < len; ++i) {
-          var action = actions[i];
-          action.node.stopAnimation(action.animation);
+      return {
+        createModelNodes: createModelNodes,
+        compileModelActions: compileModelActions,
+        actionRunProgress: actionRunProgress
+      };
+    })();
+
+    var GModel = (function () {
+      var InnerGModel = LangUtil.extend(Notifier);
+
+      InnerGModel.prototype.init = function (conf) {
+        this.super('init', [conf]);
+        this.defineNotifyProperty('bizId', LangUtil.checkAndGet(conf.bizId, null));
+
+        this._nodes = functions.createModelNodes(this, LangUtil.checkAndGet(conf.nodes, {}), {});
+        this._actions = functions.compileModelActions(conf.actions);
+        this._actionRunning = null;
+        this._actionProgress = 0;
+        this._actionLoop = false;
+      }
+
+      InnerGModel.prototype.getNodeRoot = function () {
+        return this._nodes.root;
+      }
+
+      InnerGModel.prototype.getNodeMap = function () {
+        return this._nodes.map;
+      }
+
+      InnerGModel.prototype.runAction = function (name, loop) {
+        var actions = this._actions[name];
+        if (name === this._actionRunning) {
+          return;
+        }
+        if (actions) {
+          this.stopAction();
+          if (actions.length > 0) {
+            this._actionLoop = loop;
+            this._actionRunning = name;
+            for (var i = 0, len = actions.length; i < len; ++i) {
+              var action = actions[i];
+              this._actionProgress += 1;
+              action.node.runAnimation(action.animation, functions.actionRunProgress, this, false);
+            }
+          }
         }
       }
-    }
-    
-    function create_modelSprite(sprite, conf, model) {
-      var anis = conf.animations;
-      for (var name in anis) {
-        if (!this._actions[name]) {
-          this._actions[name] = [];
-        }
-        this._actions[name].push({
-          node: sprite,
-          animation: GUtil.compileFrames(sprite, anis[name], model)
-        });
-      }
-      var children = conf.children;
-      if (children && children.length > 0) {
-        for (var i = 0, len = children.length; i < len; ++i) {
-          var childSprite = new GSprite(children[i]);
-          sprite.addChildNode(childSprite);
-          create_modelSprite.call(this, childSprite, children[i], false);
+
+      InnerGModel.prototype.stopAction = function () {
+        if (this._actionRunning != null) {
+          this._actionRunning = null;
+          this._actionProgress = 0;
+          this._actionLoop = false;
+          this._nodes.root.stopAnimation(true);
         }
       }
-    }
+
+      return InnerGModel;
+    })();
 
     return GModel;
-
   }
-
 )();

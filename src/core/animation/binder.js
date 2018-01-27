@@ -17,44 +17,46 @@ import Notifier from '../notifier';
  */
 export default (
   function () {
+    var Binder = (function () {
+      var InnerBinder = LangUtil.extend(Notifier);
 
-    var Binder = LangUtil.extend(Notifier);
-
-    Binder.prototype.init = function (conf) {
-      this.super('init', [conf]);
-      this.defineNotifyProperty('node', LangUtil.checkAndGet(conf.node, null));
-      this.defineNotifyProperty('animation', LangUtil.checkAndGet(conf.animation, null));
-      this.defineNotifyProperty('fn', LangUtil.checkAndGet(conf.fn, null));
-      this.defineNotifyProperty('target', LangUtil.checkAndGet(conf.target, null));
-      this.defineNotifyProperty('loop', LangUtil.checkAndGet(conf.loop, null));
-      this._runParams = {};
-    }
-
-    Binder.prototype.execute = function (deltaTime) {
-      var result = this.animation.execute(this, deltaTime);
-      if (this.fn != null) {
-        this.fn.apply(this.target, [this, result]);
+      InnerBinder.prototype.init = function (conf) {
+        this.super('init', [conf]);
+        this.defineNotifyProperty('node', LangUtil.checkAndGet(conf.node, null));
+        this.defineNotifyProperty('animation', LangUtil.checkAndGet(conf.animation, null));
+        this.defineNotifyProperty('fn', LangUtil.checkAndGet(conf.fn, null));
+        this.defineNotifyProperty('target', LangUtil.checkAndGet(conf.target, null));
+        this.defineNotifyProperty('loop', LangUtil.checkAndGet(conf.loop, null));
+        this._runParams = {};
       }
-      return result;
-    }
 
-    Binder.prototype.getRunParam = function (key) {
-      return this._runParams[key];
-    }
+      InnerBinder.prototype.execute = function (deltaTime) {
+        var result = this.animation.execute(this, deltaTime);
+        if (this.fn != null) {
+          this.fn.apply(this.target, [this, result]);
+        }
+        return result;
+      }
 
-    Binder.prototype.setRunParam = function (key, value) {
-      this._runParams[key] = value;
-    }
+      InnerBinder.prototype.getRunParam = function (key) {
+        return this._runParams[key];
+      }
 
-    Binder.prototype.destroy = function () {
-      this.node = null;
-      this.animation = null;
-      this.fn = null;
-      this.target = null;
-      this.super('destroy');
-    }
+      InnerBinder.prototype.setRunParam = function (key, value) {
+        this._runParams[key] = value;
+      }
+
+      InnerBinder.prototype.destroy = function () {
+        this.node = null;
+        this.animation = null;
+        this.fn = null;
+        this.target = null;
+        this.super('destroy');
+      }
+
+      return InnerBinder;
+    })();
 
     return Binder;
-
   }
 )();

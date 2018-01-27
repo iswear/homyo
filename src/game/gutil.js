@@ -10,9 +10,6 @@ import QueueAnimation from '../core/animation/queue-animation';
 
 export default (
   function () {
-
-    var GUtil = {};
-
     var modelProperties = [
       {
         name: 'width',
@@ -99,149 +96,18 @@ export default (
       }
     ];
 
-    GUtil.compileFrames = function (node, frames, model) {
-      var preStatus = {time: 0, tween: false}, properties = model ? modelProperties : otherProperties;
-      for (var i = 0, len = properties.length; i < len; ++i) {
-        var property = properties[i];
-        preStatus[property] = node[property];
-      }
-      if (frames && frames.length > 0) {
-        var syncQueue = [];
-        for (var i = 0, len = frames.length; i < len; ++i) {
-          var asyncQueue = [];
-          var frame = frames[i];
-          if (i === 0) {
-            if (frame.time !== 0) {
-              throw 'first frame time should be zero';
-            } else {
-              for (var j = 0, len2 = properties.length; j < len2; ++j) {
-                var property = properties[j];
-                var value = frame[property.name];
-                if (!LangUtil.isUndefined(value) && value !== preStatus[property.name]) {
-                  asyncQueue.push(
-                    new SchedulerAnimation({
-                      fn: propertyUnTweenUpdate,
-                      target: undefined,
-                      interval: 0,
-                      repeats: 1,
-                      param: {
-                        property: property.name,
-                        value: value
-                      }
-                    })
-                  );
-                  preStatus[property.name] = value;
-                }
-              }
-            }
-          } else {
-            if (frame.tween) {
-              for (var j = 0, len2 = properties.length; j < len2; ++j) {
-                var property = properties[j];
-                var value = frame[property.name];
-                if (!LangUtil.isUndefined(value) && value !== preStatus[property.name]) {
-                  if (property.tween) {
-                    var curve = frame[property.name + 'Curve'];
-                    var targetOffset = value - preStatus[property.name];
-                    var deltaTime = frame.time - preStatus.time;
-                    if (curve) {
-                      var params = [];
-                      var xWidth = curve[6] - curve[0];
-                      var yHeight = curve[7] - curve[1];
-                      params[0] = 0;
-                      params[2] = (curve[2] - curve[0]) / xWidth * deltaTime;
-                      params[4] = (curve[4] - curve[0]) / xWidth * deltaTime;
-                      params[6] = deltaTime;
-                      params[1] = 0;
-                      params[3] = (curve[3] - curve[1]) / yHeight * targetOffset;
-                      params[5] = (curve[5] - curve[1]) / yHeight * targetOffset;
-                      params[7] = targetOffset;
-                      asyncQueue.push(
-                        new PropertyAnimation({
-                          property: property.name,
-                          targetOffset: targetOffset,
-                          offsetFn: propertyCurveTweenUpdate(params)
-                        })
-                      );
-                    } else {
-                      asyncQueue.push(
-                        new PropertyAnimation({
-                          property: property.name,
-                          targetOffset: targetOffset,
-                          offsetFn: propertyLineTweenUpdate(targetOffset, deltaTime)
-                        })
-                      );
-                    }
-                  } else {
-                    var deltaTime = frame.time - preStatus.time;
-                    asyncQueue.push(
-                      new SchedulerAnimation({
-                        fn: propertyUnTweenUpdate,
-                        target: undefined,
-                        interval: deltaTime,
-                        repeats: 1,
-                        param: {
-                          property: property.name,
-                          value: value
-                        }
-                      })
-                    );
-                  }
-                  preStatus[property.name] = value;
-                }
-              }
-            } else {
-              for (var j = 0, len2 = properties.length; j < len2; ++j) {
-                var property = properties[j];
-                var value = frame[property.name];
-                if (!LangUtil.isUndefined(value) && value !== preStatus[property.name]) {
-                  var deltaTime = frame.time - preStatus.time;
-                  asyncQueue.push(
-                    new SchedulerAnimation({
-                      fn: propertyUnTweenUpdate,
-                      target: undefined,
-                      interval: deltaTime,
-                      repeats: 1,
-                      param: {
-                        property: property.name,
-                        value: value
-                      }
-                    })
-                  );
-                  preStatus[property.name] = value;
-                }
-              }
-            }
-          }
-          syncQueue.push(new QueueAnimation({
-            animations: asyncQueue,
-            sync: false
-          }));
-          preStatus.time = frame.time;
-          preStatus.tween = frame.tween;
-        }
-        return new QueueAnimation({
-          animations: syncQueue,
-          sync: true
-        });
-      } else {
-        return null;
-      }
-    }
-    
-    
-    function propertyUnTweenUpdate(binder, param) {
+    var propertyUnTweenUpdate = function (binder, param) {
       binder.node[param.property] = param.value;
     }
     
-    function propertyLineTweenUpdate(offset, deltaTime) {
+    var propertyLineTweenUpdate = function (offset, deltaTime) {
       var v = offset / deltaTime;
       return function (binder, dt, st) {
         return st * v;
       }
     }
     
-    function propertyCurveTweenUpdate(params) {
+    var propertyCurveTweenUpdate = function (params) {
       return function (binder, dt, st) {
         var t = newtonMethod(params, st, 0.5);
         var t_ = 1 - t;
@@ -250,7 +116,7 @@ export default (
       }
     }
     
-    function newtonMethod(params, st, t) {
+    var newtonMethod = function (params, st, t) {
       var count = 0;
       while(count < 5) {
         var t_ = 1 - t;
@@ -276,7 +142,138 @@ export default (
       }
     }
 
-    return GUtil;
+    var GUtil = {
+      compileFrames: function (node, frames, model) {
+        var preStatus = {time: 0, tween: false}, properties = model ? modelProperties : otherProperties;
+        for (var i = 0, len = properties.length; i < len; ++i) {
+          var property = properties[i];
+          preStatus[property] = node[property];
+        }
+        if (frames && frames.length > 0) {
+          var syncQueue = [];
+          for (var i = 0, len = frames.length; i < len; ++i) {
+            var asyncQueue = [];
+            var frame = frames[i];
+            if (i === 0) {
+              if (frame.time !== 0) {
+                throw 'first frame time should be zero';
+              } else {
+                for (var j = 0, len2 = properties.length; j < len2; ++j) {
+                  var property = properties[j];
+                  var value = frame[property.name];
+                  if (!LangUtil.isUndefined(value) && value !== preStatus[property.name]) {
+                    asyncQueue.push(
+                      new SchedulerAnimation({
+                        fn: propertyUnTweenUpdate,
+                        target: undefined,
+                        interval: 0,
+                        repeats: 1,
+                        param: {
+                          property: property.name,
+                          value: value
+                        }
+                      })
+                    );
+                    preStatus[property.name] = value;
+                  }
+                }
+              }
+            } else {
+              if (frame.tween) {
+                for (var j = 0, len2 = properties.length; j < len2; ++j) {
+                  var property = properties[j];
+                  var value = frame[property.name];
+                  if (!LangUtil.isUndefined(value) && value !== preStatus[property.name]) {
+                    if (property.tween) {
+                      var curve = frame[property.name + 'Curve'];
+                      var targetOffset = value - preStatus[property.name];
+                      var deltaTime = frame.time - preStatus.time;
+                      if (curve) {
+                        var params = [];
+                        var xWidth = curve[6] - curve[0];
+                        var yHeight = curve[7] - curve[1];
+                        params[0] = 0;
+                        params[2] = (curve[2] - curve[0]) / xWidth * deltaTime;
+                        params[4] = (curve[4] - curve[0]) / xWidth * deltaTime;
+                        params[6] = deltaTime;
+                        params[1] = 0;
+                        params[3] = (curve[3] - curve[1]) / yHeight * targetOffset;
+                        params[5] = (curve[5] - curve[1]) / yHeight * targetOffset;
+                        params[7] = targetOffset;
+                        asyncQueue.push(
+                          new PropertyAnimation({
+                            property: property.name,
+                            targetOffset: targetOffset,
+                            offsetFn: propertyCurveTweenUpdate(params)
+                          })
+                        );
+                      } else {
+                        asyncQueue.push(
+                          new PropertyAnimation({
+                            property: property.name,
+                            targetOffset: targetOffset,
+                            offsetFn: propertyLineTweenUpdate(targetOffset, deltaTime)
+                          })
+                        );
+                      }
+                    } else {
+                      var deltaTime = frame.time - preStatus.time;
+                      asyncQueue.push(
+                        new SchedulerAnimation({
+                          fn: propertyUnTweenUpdate,
+                          target: undefined,
+                          interval: deltaTime,
+                          repeats: 1,
+                          param: {
+                            property: property.name,
+                            value: value
+                          }
+                        })
+                      );
+                    }
+                    preStatus[property.name] = value;
+                  }
+                }
+              } else {
+                for (var j = 0, len2 = properties.length; j < len2; ++j) {
+                  var property = properties[j];
+                  var value = frame[property.name];
+                  if (!LangUtil.isUndefined(value) && value !== preStatus[property.name]) {
+                    var deltaTime = frame.time - preStatus.time;
+                    asyncQueue.push(
+                      new SchedulerAnimation({
+                        fn: propertyUnTweenUpdate,
+                        target: undefined,
+                        interval: deltaTime,
+                        repeats: 1,
+                        param: {
+                          property: property.name,
+                          value: value
+                        }
+                      })
+                    );
+                    preStatus[property.name] = value;
+                  }
+                }
+              }
+            }
+            syncQueue.push(new QueueAnimation({
+              animations: asyncQueue,
+              sync: false
+            }));
+            preStatus.time = frame.time;
+            preStatus.tween = frame.tween;
+          }
+          return new QueueAnimation({
+            animations: syncQueue,
+            sync: true
+          });
+        } else {
+          return null;
+        }
+      }
+    };
 
+    return GUtil;
   }
 )();

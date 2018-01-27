@@ -6,25 +6,12 @@
 
 export default (
   function () {
-    var util = {};
-
-    var isMobile = navigator.userAgent.toLowerCase().indexOf("mobile") != -1;
-    var isDeskTop = !isMobile;
-    var isIE = navigator.userAgent.toLowerCase().indexOf("msie") != -1;
-
-    util.isMobile = function () {
-      return isMobile;
-    }
-
-    util.isDeskTop = function () {
-      return isDeskTop;
-    }
-
-    util.isIE = function () {
-      return isIE;
-    }
+    var util = {
+      isMobile: navigator.userAgent.toLowerCase().indexOf("mobile") != -1,
+      isDeskTop: !(navigator.userAgent.toLowerCase().indexOf("mobile") != -1),
+      isIE: navigator.userAgent.toLowerCase().indexOf("msie") != -1
+    };
 
     return util;
-
   }
 )();

@@ -3,38 +3,40 @@
  * Author: iswear(471291492@qq.com)
  * Date: 2017/8/18
  */
-import GSprite from './gsprite';
-import GModel from './gmodel';
+import GScene from './gscene';
+import GMap from './gmap';
 import GImageMap from './gimagemap';
 import GTiledMap from './gtiledmap';
-import GScene from './gscene';
+import GModel from './gmodel';
+import GNode from './gmodel';
+import GTexture from './gtexture';
 
 export default (
   function () {
-
-    var factory = {};
-
-    factory.createSprite = function (conf) {
-      return new GSprite(conf);
-    }
-
-    factory.createModel = function (conf) {
-      return new GModel(conf);
-    }
-
-    factory.createImageMap = function (conf) {
-      return new GImageMap(conf);
-    }
-
-    factory.createTiledMap = function (conf) {
-      return new GTiledMap(conf);
-    }
-
-    factory.createScene = function (conf) {
-      return new GScene(conf);
-    }
+    var factory = {
+      createScene: function (conf) {
+        return new GScene(conf);
+      },
+      createMap: function (conf) {
+        return new GMap(conf);
+      },
+      createImageMap: function (conf) {
+        return new GImageMap(conf);
+      },
+      createTiledMap: function (conf) {
+        return new GTiledMap(conf);
+      },
+      createModel: function (conf) {
+        return new GModel(conf);
+      },
+      createNode: function (conf) {
+        return new GNode(conf);
+      },
+      createTexture: function (conf) {
+        return new GTexture(conf);
+      }
+    };
 
     return factory;
-
   }
 )();

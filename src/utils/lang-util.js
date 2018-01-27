@@ -46,81 +46,72 @@ export default (
     }
 
 
-    var util = {};
-
-    util.extend = function (base) {
-      var obj = function (conf) {
-        this.init(conf)
-      }
-      if (base) {
-        obj.prototype = Object.create(base.prototype);
-        obj.prototype._super_ = base.prototype;
-      } else {
-        obj.prototype._super_ = {};
-      }
-      if (obj.prototype.init === undefined) {
-        obj.prototype.init = defaultInitFn;
-      }
-      if (obj.prototype.destroy === undefined) {
-        obj.prototype.destroy = defaultDestroyFn;
-      }
-      if (obj.prototype.super === undefined) {
-        obj.prototype.super = superCallFn;
-      }
-      return obj;
-    }
-
-    util.isUndefined = function (val) {
-      return val === undefined;
-    }
-
-    util.isBoolean = function (val) {
-      return typeof val === 'boolean';
-    }
-
-    util.isNumber = function (val) {
-      return typeof val === 'number' && !isNaN(val);
-    }
-
-    util.isString = function (val) {
-      return typeof val === 'string';
-    }
-    
-    util.isArray = function (val) {
-      return val instanceof Array;
-    }
-
-    util.isObject = function (val) {
-      return typeof val === 'object';
-    }
-    
-    util.isFunction = function (val) {
-      return typeof val === 'function';
-    }
-
-    util.clone = function (val) {
-      if (util.isArray(val)) {
-        var rArr = [];
-        for (var i = 0, size = val.length; i < size; ++i) {
-          rArr.push(util.clone(val[i]));
+    var util = {
+      extend: function (base) {
+        var obj = function (conf) {
+          this.init(conf)
         }
-        return rArr;
-      } else if (util.isObject()) {
-        var rObj = {};
-        for (var item in val) {
-          if (val.hasOwnProperty(item)) {
-            rObj[item] = util.clone(val[item]);
+        if (base) {
+          obj.prototype = Object.create(base.prototype);
+          obj.prototype._super_ = base.prototype;
+        } else {
+          obj.prototype._super_ = {};
+        }
+        if (obj.prototype.init === undefined) {
+          obj.prototype.init = defaultInitFn;
+        }
+        if (obj.prototype.destroy === undefined) {
+          obj.prototype.destroy = defaultDestroyFn;
+        }
+        if (obj.prototype.super === undefined) {
+          obj.prototype.super = superCallFn;
+        }
+        return obj;
+      },
+      isUndefined: function (val) {
+        return val === undefined;
+      },
+      isBoolean: function (val) {
+        return typeof val === 'boolean';
+      },
+      isNumber: function (val) {
+        return typeof val === 'number' && !isNaN(val);
+      },
+      isString: function (val) {
+        return typeof val === 'string';
+      },
+      isArray: function (val) {
+        return val instanceof Array;
+      },
+      isObject: function (val) {
+        return typeof val === 'object';
+      },
+      isFunction: function (val) {
+        return typeof val === 'function';
+      },
+      clone: function (val) {
+        if (util.isArray(val)) {
+          var rArr = [];
+          for (var i = 0, size = val.length; i < size; ++i) {
+            rArr.push(util.clone(val[i]));
           }
+          return rArr;
+        } else if (util.isObject()) {
+          var rObj = {};
+          for (var item in val) {
+            if (val.hasOwnProperty(item)) {
+              rObj[item] = util.clone(val[item]);
+            }
+          }
+          return rObj;
+        } else {
+          return val;
         }
-        return rObj;
-      } else {
-        return val;
+      },
+      checkAndGet: function (val, defVal) {
+        return util.isUndefined(val) ? defVal : val;
       }
-    }
-
-    util.checkAndGet = function (val, defVal) {
-      return util.isUndefined(val) ? defVal : val;
-    }
+    };
 
     return util;
   }

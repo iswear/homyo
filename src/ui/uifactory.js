@@ -8,18 +8,15 @@ import UILabel from './uilabel';
 
 export default (
   function () {
-
-    var factory = {};
-
-    factory.createNode = function (conf) {
-      return new UINode(conf);
-    }
-    
-    factory.createLabel = function (conf) {
-      return new UILabel(conf);
-    }
+    var factory = {
+      createNode: function (conf) {
+        return new UINode(conf);
+      },
+      createLabel: function (conf) {
+        return new UILabel(conf);
+      }
+    };
 
     return factory;
-    
   }
 )();

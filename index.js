@@ -3,8 +3,7 @@ import Core_Application from './src/core/application';
 import Core_Node from './src/core/node';
 import Core_Notifier from './src/core/notifier';
 
-import Core_Render_CanvasRender from './src/core/render/canvas/canvas-render';
-import Core_Render_WebglRender from './src/core/render/webgl/webgl-render';
+import Core_IO_FileLoader from './src/core/io/file-loader';
 
 import Core_Animation_Manager from './src/core/animation/manager';
 import Core_Animation_Binder from './src/core/animation/binder';
@@ -13,15 +12,19 @@ import Core_Animation_QueueAnimation from './src/core/animation/queue-animation'
 import Core_Animation_SchedulerAnimation from './src/core/animation/scheduler-animation';
 import Core_Animation_PropertyAnimation from './src/core/animation/property-animation';
 
+import Core_Render_CanvasRender from './src/core/render/canvas/canvas-render';
+import Core_Render_WebglRender from './src/core/render/webgl/webgl-render';
+
 import UI_Node from './src/ui/uinode';
 import UI_Label from './src/ui/uilabel';
 
-import G_Sprite from './src/game/gsprite';
-import G_Model from './src/game/gmodel';
 import G_Scene from './src/game/gscene';
 import G_Map from './src/game/gmap';
 import G_ImageMap from './src/game/gimagemap';
 import G_TiledMap from './src/game/gtiledmap';
+import G_Model from './src/game/gmodel';
+import G_Node from './src/game/gnode';
+import G_Texture from './src/game/gtexture';
 
 import Util_EventUtil from './src/utils/event-util';
 import Util_LangUtil from './src/utils/lang-util';
@@ -40,6 +43,10 @@ export default (
         Node: Core_Node,
         Notifier: Core_Notifier,
 
+        io: {
+          FileLoader: Core_IO_FileLoader
+        },
+
         render: {
           CanvasRender: Core_Render_CanvasRender,
           WebglRender: Core_Render_WebglRender
@@ -57,16 +64,17 @@ export default (
 
       ui: {
         Node: UI_Node,
-        Label: UI_Label,
+        Label: UI_Label
       },
 
       game: {
-        Sprite: G_Sprite,
-        Model: G_Model,
         Scene: G_Scene,
         Map: G_Map,
         ImageMap: G_ImageMap,
-        TiledMap: G_TiledMap
+        TiledMap: G_TiledMap,
+        Model: G_Model,
+        Node: G_Node,
+        Texture: G_Texture
       },
 
       utils: {

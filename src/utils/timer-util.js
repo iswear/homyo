@@ -6,36 +6,37 @@
 
 export default (function () {
   var win = window;
-  var reqAniFrame;
-  if (win.requestAnimationFrame) {
-    reqAniFrame = win.requestAnimationFrame;
-  } else if (win.webkitRequestAnimationFrame) {
-    reqAniFrame = win.webkitRequestAnimationFrame;
-  } else if (win.msRequestAnimationFrame) {
-    reqAniFrame = win.msRequestAnimationFrame;
-  } else if (win.mozRequestAnimationFrame) {
-    reqAniFrame = win.mozRequestAnimationFrame;
-  } else if (win.oRequestAnimationFrame) {
-    reqAniFrame = win.oRequestAnimationFrame;
-  } else {
-    reqAniFrame = null;
-  }
+  var reqAniFrame = (function () {
+    if (win.requestAnimationFrame) {
+      return win.requestAnimationFrame;
+    } else if (win.webkitRequestAnimationFrame) {
+      return win.webkitRequestAnimationFrame;
+    } else if (win.msRequestAnimationFrame) {
+      return win.msRequestAnimationFrame;
+    } else if (win.mozRequestAnimationFrame) {
+      return win.mozRequestAnimationFrame;
+    } else if (win.oRequestAnimationFrame) {
+      return win.oRequestAnimationFrame;
+    } else {
+      return null;
+    }
+  })();
 
   var aniTaskId = 0;
   var aniTaskList = [];
   var aniLoopId = 0;
   var aniLoopRun = false;
 
-  function reqAniLoop() {
+  var reqAniLoop = function () {
     aniTaskListUpdate();
     reqAniFrame(reqAniLoop);
   }
-  
-  function intervalAniLoop() {
+
+  var intervalAniLoop = function () {
     aniLoopId = win.setInterval(aniTaskListUpdate, 16);
   }
 
-  function aniTaskListUpdate() {
+  var aniTaskListUpdate = function () {
     var len = aniTaskList.length;
     var i, task;
     for (i = 0; i < len; ++i) {
@@ -44,34 +45,34 @@ export default (function () {
     }
   }
 
-  var util = {};
-  util.addAnimationTask = function (fn, target) {
-    aniTaskList.push({
-      id: ++aniTaskId,
-      fn: fn,
-      target: target
-    });
-    if (!aniLoopRun) {
-      if (reqAniFrame === null) {
-        intervalAniLoop();
-      } else {
-        reqAniLoop();
+  var util = {
+    addAnimationTask: function (fn, target) {
+      aniTaskList.push({
+        id: ++aniTaskId,
+        fn: fn,
+        target: target
+      });
+      if (!aniLoopRun) {
+        if (reqAniFrame === null) {
+          intervalAniLoop();
+        } else {
+          reqAniLoop();
+        }
+        aniLoopRun = true;
       }
-      aniLoopRun = true;
-    }
-    return aniTaskId;
-  }
-
-  util.removeAnimationTaskById = function (id) {
-    for (var i = 0, len = aniTaskList.length; i < len; ++i) {
-      var task = aniTaskList[i];
-      if (task.id == id) {
-        aniTaskList.splice(i, 1);
-        i--;
-        len--;
+      return aniTaskId;
+    },
+    removeAnimationTaskById: function (id) {
+      for (var i = 0, len = aniTaskList.length; i < len; ++i) {
+        var task = aniTaskList[i];
+        if (task.id == id) {
+          aniTaskList.splice(i, 1);
+          i--;
+          len--;
+        }
       }
     }
-  }
+  };
 
   return util;
 })();

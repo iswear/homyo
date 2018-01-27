@@ -8,14 +8,15 @@ import Notifier from '../notifier';
 /**
  * 配置参数: 无
  */
-export default (
-  function () {
+export default (function () {
+    var BaseAnimation = (function () {
+      var InnerBaseAnimation = LangUtil.extend(Notifier);
 
-    var BaseAnimation = LangUtil.extend(Notifier);
+      InnerBaseAnimation.prototype.execute = function (binder, deltaTime) {}
 
-    BaseAnimation.prototype.execute = function (binder, deltaTime) {}
+      return InnerBaseAnimation;
+    })();
 
     return BaseAnimation;
-
   }
 )();
