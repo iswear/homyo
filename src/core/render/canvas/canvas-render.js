@@ -15,6 +15,7 @@ export default (
       this.super('init', [ conf ]);
       this.$canvas = LangUtil.checkAndGet(conf.canvas, null);
       this.$context = this.$canvas.getContext('2d');
+      this._saveStack = [];
 
       this.defineCanvasProperty('width', LangUtil.checkAndGet(conf.width, this.$canvas.width), false);
       this.defineCanvasProperty('height', LangUtil.checkAndGet(conf.height, this.$canvas.width), false);
@@ -35,8 +36,6 @@ export default (
       this.defineContextProperty('textBaseline');
       this.defineContextProperty('globalAlpha');
       this.defineContextProperty('globalCompositeOperation');
-
-      
     }
 
     CanvasRender.prototype.getCanvas = function () {
@@ -176,6 +175,7 @@ export default (
     }
 
     CanvasRender.prototype.clip = function () {
+      this.$context.save();
       this.$context.clip();
     }
 
@@ -189,10 +189,15 @@ export default (
 
     CanvasRender.prototype.save = function () {
       this.$context.save();
+      this._saveStack.push(this.$context.globalAlpha)
     }
 
     CanvasRender.prototype.restore = function () {
-      this.$context.restore();
+      var globalAlpha = this._saveStack.pop()
+      if (globalAlpha !== undefined) {
+        this.$context.restore();
+        this.$context.globalAlpha = globalAlpha;
+      }
     }
 
     CanvasRender.prototype.toDataURL = function () {

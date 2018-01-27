@@ -55,35 +55,6 @@ export default (
     }
 
     Application.prototype.loop = function () {
-      check_renderSize.call(this);
-      if (this._needUpdateTranform) {
-        var render = this._render;
-        var width = render.width, height = render.height;
-        var clientWidth = render.clientWidth, clientHeight = render.clientHeight;
-        switch (this.scaleMode) {
-          case 1: {
-            render.height = width * this._clientHeight / this._clientWidth;
-            this.postNotification('resize', this, [width, render.height]);
-            break;
-          }
-          case 2: {
-            render.width = height * this._clientWidth / this._clientHeight;
-            this.postNotification('resize', this, [render.width, height]);
-            break;
-          }
-          case 3: {
-            break;
-          }
-          default: {
-            render.width = clientWidth;
-            render.height = clientHeight;
-            this.postNotification('resize', this, [clientWidth, clientHeight]);
-            break;
-          }
-        }
-        this._transform[0] = render.width / render.clientWidth;
-        this._transform[4] = render.height / render.clientHeight;
-      }
       var now = (new Date()).getTime(), deltaTime = 0;
       if (this._prevLoopTime != 0) {
         deltaTime = now - this._prevLoopTime;
@@ -92,12 +63,45 @@ export default (
       } else {
         this._prevLoopTime = now;
       }
-      if (this._refresh) {
-        this._refresh = false;
-        this._render.clear();
-        this.root._dispatchRender(this._render, this._transform, this._transform, this._needUpdateTranform);
+      // 每半秒钟检测是否需要变换
+      if (deltaTime > 500) {
+        check_renderSize.call(this);
+        if (this._needUpdateTranform) {
+          var render = this._render;
+          var width = render.width, height = render.height;
+          var clientWidth = render.clientWidth, clientHeight = render.clientHeight;
+          switch (this.scaleMode) {
+            case 1: {
+              render.height = width * this._clientHeight / this._clientWidth;
+              this.postNotification('resize', this, [width, render.height]);
+              break;
+            }
+            case 2: {
+              render.width = height * this._clientWidth / this._clientHeight;
+              this.postNotification('resize', this, [render.width, height]);
+              break;
+            }
+            case 3: {
+              break;
+            }
+            default: {
+              render.width = clientWidth;
+              render.height = clientHeight;
+              this.postNotification('resize', this, [clientWidth, clientHeight]);
+              break;
+            }
+          }
+          this._transform[0] = render.width / render.clientWidth;
+          this._transform[4] = render.height / render.clientHeight;
+          this._needUpdateTranform = false;
+        }
       }
-      this._needUpdateTranform = false;
+      if (this._refresh) {
+        this._render.clear();
+        this._render.globalAlpha = 1;
+        this.root._dispatchRender(this._render, 1, this._transform, this._transform, this._needUpdateTranform);
+        this._refresh = false;
+      }
     }
 
     Application.prototype.run = function (fn) {

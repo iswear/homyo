@@ -237,10 +237,9 @@ export default (
       return MatrixUtil.mulMat2dAndVect2d(this._transform.lReverseTransform, vector);
     }
 
-    Node.prototype.checkRender = function () {
+    Node.prototype.needRender = function () {
       var renders = this.getObserverByName('render');
-      var childCount = this._childNodes.count;
-      return (renders && renders.length > 0) || (childCount > 0);
+      return renders && renders.length > 0;
     }
 
     Node.prototype.checkEventInteractZone = function (name, e, x, y) {
@@ -289,8 +288,9 @@ export default (
       this.super('destroy');
     }
 
-    Node.prototype._dispatchRender = function (render, parentGTransform, parentGReverseTransform, parentUpdateTransform) {
-      if (this.visible) {
+    Node.prototype._dispatchRender = function (render, parentAlpha, parentGTransform, parentGReverseTransform, parentUpdateTransform) {
+      var alpha = this.alpha * parentAlpha
+      if (this.visible && alpha > 0) {
         var transform = this._transform, rectInSelf = this._rectInSelf;
         if (rectInSelf.needUpdateRectInSelf) {
           rectInSelf.width = Math.round(this.width);
@@ -301,8 +301,8 @@ export default (
           rectInSelf.right = Math.round(rectInSelf.width + rectInSelf.left);
           rectInSelf.needUpdateRectInSelf = false;
         }
-        var needUpdateTranform = transform.needUpdateTransform;
-        if (needUpdateTranform) {
+        var needUpdateTransform = transform.needUpdateTransform;
+        if (needUpdateTransform) {
           transform.lTransform =
             MatrixUtil.incline2d(
               MatrixUtil.scale2d(
@@ -312,35 +312,44 @@ export default (
           transform.needTransform = !MatrixUtil.isIdentityMat2d(transform.lTransform);
           transform.needUpdateTransform = false;
         }
-        if (parentUpdateTransform || needUpdateTranform) {
+        if (parentUpdateTransform || needUpdateTransform) {
           transform.gTransform = MatrixUtil.mulMat2d(parentGTransform, transform.lTransform);
           transform.gReverseTransform = MatrixUtil.mulMat2d(transform.lReverseTransform, parentGReverseTransform);
         }
 
-        if (transform.needTransform) {
-          render.save();
-          render.transform(
-            transform.lTransform[0], transform.lTransform[3],
-            transform.lTransform[1], transform.lTransform[4],
-            transform.lTransform[2], transform.lTransform[5]);
-          render.globalAlpha = this.alpha;
+        var needRender = this.needRender()
+        if (this.needRender()) {
+          // 设置矩阵
+          if (transform.needTransform) {
+            var gTransform = transform.gTransform
+            render.setTransform(gTransform[0], gTransform[3], gTransform[1], gTransform[4], gTransform[2], gTransform[5]);
+          }
+          // 设置透明度
+          if (this.alpha !== 1) {
+            render.globalAlpha = alpha
+          }
+          // 开始绘制
           this.postNotification('render', this, [ render ]);
           var layers = this._childNodes.nodeLayers;
           for (var i = 0, len = layers.length; i < len; ++i) {
             var layer = layers[i];
             for (var j = 0, len2 = layer.length; j < len2; ++j ) {
-              layer[j]._dispatchRender(render, transform.gTransform, transform.gReverseTransform, parentUpdateTransform || needUpdateTranform);
+              layer[j]._dispatchRender(render, alpha, transform.gTransform, transform.gReverseTransform, parentUpdateTransform || needUpdateTranform);
             }
           }
-          render.restore();
+          render.restore()
         } else {
-          render.globalAlpha = this.alpha;
+          // 设置透明度
+          if (this.alpha !== 1) {
+            render.globalAlpha = alpha
+          }
+          // 开始绘制
           this.postNotification('render', this, [ render ]);
           var layers = this._childNodes.nodeLayers;
           for (var i = 0, len = layers.length; i < len; ++i) {
             var layer = layers[i];
             for (var j = 0, len2 = layer.length; j < len2; ++j ) {
-              layer[j]._dispatchRender(render, transform.gTransform, transform.gReverseTransform, parentUpdateTransform || needUpdateTranform);
+              layer[j]._dispatchRender(render, alpha, transform.gTransform, transform.gReverseTransform, parentUpdateTransform || needUpdateTranform);
             }
           }
         }
