@@ -61,12 +61,7 @@ export default (
             this._needUpdateMapContainerZone = false;
           }
         }
-      },
-      renderClip: function (sender, render) {
-        var rect = this.getRectInSelf();
-        render.rect(rect.left, rect.top, rect.width, rect.height);
-        render.clip();
-      },
+      }
     };
 
 
@@ -90,8 +85,6 @@ export default (
         this.addObserver('heightChanged', functions.syncContainerZone, this, this);
         this.addObserver('anchorXChanged', functions.syncContainerZone, this, this);
         this.addObserver('anchorYChanged', functions.syncContainerZone, this, this);
-
-        this.addObserver('render', functions.renderClip, this, this, -Infinity);
       }
 
       return InnerGScene;

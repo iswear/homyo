@@ -22,7 +22,7 @@ export default (
       eventInit: function () {
         var canvas = this._render.getCanvas();
         var doc = document;
-        if (PlatformUtil.isMobile()) {
+        if (PlatformUtil.isMobile) {
           EventUtil.addEventListener(doc, 'touchstart', this, functions.eventTouchStartDoc);
           EventUtil.addEventListener(doc, 'touchmove', this, functions.eventTouchMoveDoc);
           EventUtil.addEventListener(doc, 'touchend', this, functions.eventTouchEndDoc);
@@ -59,7 +59,7 @@ export default (
         } else {
           this.move = false;
         }
-        eArg.id = 0;
+        eArg.id = 1;
         eArg.event = e;
         eArg.target = null;
         eArg.wheelDelta = e.wheelDelta ? e.wheelDelta : e.detail;
@@ -252,7 +252,7 @@ export default (
           this._clientWidth = render.clientWidth;
           this._clientHeight = render.clientHeight;
           this.refresh();
-          sync_transform.call(this);
+          functions.syncTransform.call(this);
         }
       },
       syncTransform: function () {
@@ -290,7 +290,7 @@ export default (
       }
 
       return InnerEvent;
-    });
+    })();
 
     var Application = (function () {
       var InnerApplication = LangUtil.extend(Notifier);
@@ -317,7 +317,7 @@ export default (
         functions.eventInit.call(this);
         functions.syncTransform.call(this);
 
-        this.addObserver('scaleModeChanged', sync_transform, this, this);
+        this.addObserver('scaleModeChanged', functions.syncTransform, this, this);
       }
 
       InnerApplication.prototype.getAnimationManager = function () {
@@ -406,7 +406,7 @@ export default (
       }
 
       return InnerApplication;
-    });
+    })();
 
     return Application;
   }

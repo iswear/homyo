@@ -29,7 +29,7 @@ export default (
       InnerNode.prototype.defHeight = 0;
       InnerNode.prototype.defAnchorX = 0;
       InnerNode.prototype.defAnchorY = 0;
-      InnerNode.prototype.defAlpha = 1.0;
+      InnerNode.prototype.defAlpha = 1;
       InnerNode.prototype.defRotateZ = 0;
       InnerNode.prototype.defScaleX = 1;
       InnerNode.prototype.defScaleY = 1;
@@ -67,8 +67,8 @@ export default (
           needUpdateTransform: false,
           lTransform: [0, 0, 0, 0, 0, 0],
           lReverseTransform: [0, 0, 0, 0, 0, 0],
-          gTransform: [0, 0, 0, 0, 0, 0],
-          gReverseTransform: [0, 0, 0, 0, 0, 0]
+          wTransform: [0, 0, 0, 0, 0, 0],
+          wReverseTransform: [0, 0, 0, 0, 0, 0]
         };
 
         this._rectInSelf = {
@@ -249,12 +249,12 @@ export default (
         }
       }
 
-      InnerNode.prototype.transformLVectorToG = function (vector) {
-        return MatrixUtil.mulMat2dAndVect2d(this._transform.gTransform, vector);
+      InnerNode.prototype.transformLVectorToW = function (vector) {
+        return MatrixUtil.mulMat2dAndVect2d(this._transform.wTransform, vector);
       }
 
-      InnerNode.prototype.transformGVectorToL = function (vector) {
-        return MatrixUtil.mulMat2dAndVect2d(this._transform.gReverseTransform, vector);
+      InnerNode.prototype.transformWVectorToL = function (vector) {
+        return MatrixUtil.mulMat2dAndVect2d(this._transform.wReverseTransform, vector);
       }
 
       InnerNode.prototype.transformLVectorToP = function (vector) {
@@ -263,6 +263,22 @@ export default (
 
       InnerNode.prototype.transformPVectorToL = function (vector) {
         return MatrixUtil.mulMat2dAndVect2d(this._transform.lReverseTransform, vector);
+      }
+
+      InnerNode.prototype.getTransformInParent = function () {
+        return LangUtil.clone(this._transform.lTransform);
+      }
+
+      InnerNode.prototype.getReverseTransformInParent = function () {
+        return LangUtil.clone(this._transform.lReverseTransform);
+      }
+
+      InnerNode.prototype.getTransformInWorld = function () {
+        return LangUtil.clone(this._transform.wTransform);
+      }
+
+      InnerNode.prototype.getReverseTransformInWorld = function() {
+        return LangUtil.clone(this._transform.wReverseTransform);
       }
 
       InnerNode.prototype.needRender = function () {
@@ -318,7 +334,7 @@ export default (
         this.super('destroy');
       }
 
-      InnerNode.prototype._dispatchRender = function (render, parentAlpha, parentGTransform, parentGReverseTransform, parentUpdateTransform) {
+      InnerNode.prototype._dispatchRender = function (render, parentAlpha, parentWTransform, parentWReverseTransform, parentUpdateTransform) {
         var alpha = this.alpha * parentAlpha
         if (this.visible && alpha > 0) {
           var transform = this._transform, rectInSelf = this._rectInSelf;
@@ -343,14 +359,14 @@ export default (
             transform.needUpdateTransform = false;
           }
           if (parentUpdateTransform || needUpdateTransform) {
-            transform.gTransform = MatrixUtil.mulMat2d(parentGTransform, transform.lTransform);
-            transform.gReverseTransform = MatrixUtil.mulMat2d(transform.lReverseTransform, parentGReverseTransform);
+            transform.wTransform = MatrixUtil.mulMat2d(parentWTransform, transform.lTransform);
+            transform.wReverseTransform = MatrixUtil.mulMat2d(transform.lReverseTransform, parentWReverseTransform);
           }
           if (this.needRender()) {
             // 设置矩阵
             if (transform.needTransform) {
-              var gTransform = transform.gTransform
-              render.setTransform(gTransform[0], gTransform[3], gTransform[1], gTransform[4], gTransform[2], gTransform[5]);
+              var wTransform = transform.wTransform
+              render.setTransform(wTransform[0], wTransform[3], wTransform[1], wTransform[4], wTransform[2], wTransform[5]);
             }
             // 设置透明度
             render.alpha = alpha;
@@ -362,7 +378,7 @@ export default (
               var layer = layers[i];
               if (layer) {
                 for (var j = 0, len2 = layer.length; j < len2; ++j ) {
-                  layer[j]._dispatchRender(render, alpha, transform.gTransform, transform.gReverseTransform, parentUpdateTransform || needUpdateTransform);
+                  layer[j]._dispatchRender(render, alpha, transform.wTransform, transform.wReverseTransform, parentUpdateTransform || needUpdateTransform);
                 }
               }
             }
@@ -375,7 +391,9 @@ export default (
             for (var i = 0, len = layers.length; i < len; ++i) {
               var layer = layers[i];
               if (layer) {
-
+                for (var j = 0, len2 = layer.length; j < len2; ++j ) {
+                  layer[j]._dispatchRender(render, alpha, transform.wTransform, transform.wReverseTransform, parentUpdateTransform || needUpdateTransform);
+                }
               }
             }
           }
@@ -384,9 +402,8 @@ export default (
 
       InnerNode.prototype._dispatchMouseTouchEvent = function (name, e) {
         if (this.visible) {
-          var lPoint = this.transformGVectorToL([e.offsetX, e.offsetY]);
+          var lPoint = this.transformWVectorToL([e.offsetX, e.offsetY]);
           var result = this.checkEventInteractZone(name, e, lPoint[0], lPoint[1]);
-
 
           var targetInChildren = false;
           if (e.skip) {

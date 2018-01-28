@@ -37,7 +37,6 @@ export default (
   function () {
 
     var homyo = {
-
       core: {
         Application: Core_Application,
         Node: Core_Node,
@@ -85,10 +84,8 @@ export default (
         TextUtil: Util_TextUtil,
         TimerUtil: Util_TimerUtil
       }
-
     };
 
     return homyo;
-
   }
 )();
