@@ -27,7 +27,7 @@ export default (
         }
         return {
           root: node,
-          map: nodeMap
+          nodeMap: nodeMap
         };
       }
 
@@ -89,8 +89,8 @@ export default (
         this._actionLoop = false;
       }
 
-      InnerGModel.prototype.getNodeByNodeId = function (nodeId) {
-        return this._nodes.map[nodeId];
+      InnerGModel.prototype.getRootNode = function () {
+        return this._nodes.root
       }
 
       InnerGModel.prototype.runAction = function (name, loop) {
