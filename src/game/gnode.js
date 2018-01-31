@@ -16,7 +16,7 @@ export default (
       InnerGNode.prototype.defLayer = 1;
       InnerGNode.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('actId', LangUtil.checkAndGet(conf.actId, null));
+        this.defineNotifyProperty('nodeId', LangUtil.checkAndGet(conf.nodeId, null));
         this.defineNotifyProperty('model', LangUtil.checkAndGet(conf.model, null));
 
         this._texture = new GTexture(LangUtil.checkAndGet(conf.texture, {}));
