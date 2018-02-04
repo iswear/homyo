@@ -21,7 +21,7 @@ export default (
           var children = conf.children;
           for (var i = 0, len = children.length; i < len; ++i) {
             var childNode = createNode(model, children[i], nodeMap);
-            node.addChildNode(childNode.root);
+            node.addChildNode(childNode);
           }
         }
         return node;
@@ -173,6 +173,10 @@ export default (
         } else {
           this._node;
         }
+      }
+
+      InnerGModel.prototype.getNodeMap = function () {
+        return this._nodeMap;
       }
 
       InnerGModel.prototype.removeNode = function (nodeId, destroy) {
