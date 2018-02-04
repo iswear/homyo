@@ -12,15 +12,16 @@ import GNode from './gnode';
 export default (
   function () {
     var functions = (function () {
-      function createNode(conf, nodeMap) {
+      function createNode(conf) {
         var node = new this.nodeConstructor(conf[this.nodeConf]);
         if (conf.id) {
-          nodeMap[conf.id] = node;
+          node.id = id;
+          this.nodeMap[conf.id] = node;
         }
         if (conf.children) {
           var children = conf.children;
           for (var i = 0, len = children.length; i < len; ++i) {
-            var childNode = createNode(model, children[i], nodeMap);
+            var childNode = createNode(model, children[i]);
             node.addChildNode(childNode);
           }
         }
@@ -29,7 +30,7 @@ export default (
       function createNodes (modelRoot) {
         if (modelRoot) {
           this._nodeMap = {};
-          this._node = createNode.call(this, modelRoot, this._nodeMap);
+          this._node = createNode.call(this, modelRoot);
         }
       }
       function compileActions (modelActions) {
@@ -123,8 +124,7 @@ export default (
       InnerGModel.prototype.defNodeConstructor = GNode;
       InnerGModel.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('nodeKey', LangUtil.checkAndGet(conf.nodeConf, this.defNodeConf))
-        this.defineNotifyProperty('nodeConstructor', LangUtil.checkAndGet(conf.nodeConstructor, this.defNodeConstructor))
+        this.super('')
 
         this._node = null;
         this._nodeMap = null;
@@ -140,7 +140,7 @@ export default (
         functions.compileActions.call(this, LangUtil.checkAndGet(conf.actions, null));
       }
 
-      InnerGModel.prototype.addNode = function (nodeId, node, parentNodeId, prevNodeId) {
+      InnerGModel.prototype.addNode = function (nodeConf, parentNodeId, prevNodeId) {
         if (node && parentNodeId) {
           const parentNode = this._nodeMap[parentNodeId];
           if (parentNode) {
@@ -149,8 +149,10 @@ export default (
               if (prevNode) {
                 const location = parentNode.getChildNodeLocation(prevNode);
                 if (location) {
+                  const node = new this.nodeConstructor(nodeConf[this.nodeConf])
                   parentNode.addChildNodeToLayer(node, location.layerIndex, location.nodeIndex + 1);
                   this._nodeMap[nodeId] = node;
+                  node.id = nodeConf.id
                 } else {
                   throw new Error('can not find prevNode:' + prevNodeId + ' in parentNode:' + parentNodeId);
                 }
@@ -158,8 +160,10 @@ export default (
                 throw new Error('can not find previous node, please check the previousId:' + prevNodeId);
               }
             } else {
-              parentNode.addChildNode(new GNode(nodeConf), 0);
+              const node = new this.nodeConstructor(nodeConf[this.nodeConf]);
+              parentNode.addChildNode(node, 0);
               this._nodeMap[nodeId] = node;
+              node.id = nodeConf.id
             }
           } else {
             throw new Error('can not find parent node, please check the parentId:' + parentNodeId);
