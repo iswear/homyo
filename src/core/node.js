@@ -115,13 +115,17 @@ export default (
         return this._rectInSelf;
       }
 
-      InnerNode.prototype.getChildNodeAt = function (layerIndex, nodeIndex) {
+      InnerNode.prototype.getChildNode = function (layerIndex, nodeIndex) {
         var layer = this._childNodes.nodeLayers[layerIndex];
         if (layer) {
           return layer[nodeIndex];
         } else {
           return null;
         }
+      }
+
+      InnerNode.prototype.getChildNodeLayers = function () {
+        return this._childNodes.nodeLayers;
       }
 
       InnerNode.prototype.getChildNodeLocation = function (node) {
@@ -138,44 +142,34 @@ export default (
         return null;
       }
 
-      InnerNode.prototype.getChildNodeLayers = function () {
-        return this._childNodes.nodeLayers;
+      InnerNode.prototype.addChildNode = function (node, nodeIndex) {
+        node.removeFromParent(false);
+        if (arguments.length > 1) {
+          this.addChildNodeToLayer(node, this._childNodes.defLayer, nodeIndex)
+        } else {
+          this.addChildNodeToLayer(node, this._childNodes.defLayer);
+        }
       }
 
-      InnerNode.prototype.getChildNodeLayerAt = function (layerIndex) {
-        return this._childNodes.nodeLayers[layerIndex];
-      }
-
-      InnerNode.prototype.addChildNode = function (node) {
-        this.addChildNodeToLayer(node, this._childNodes.defLayer);
-      }
-
-      InnerNode.prototype.addChildNodeToLayer = function (node, layerIndex) {
-        if (node.parent === null) {
-          var childNodes = this._childNodes;
-          var nodeLayers = childNodes.nodeLayers;
-          if (!nodeLayers[layerIndex]) {
-            nodeLayers[layerIndex] = [];
-          }
-          node.parent = this;
+      InnerNode.prototype.addChildNodeToLayer = function (node, layerIndex, nodeIndex) {
+        node.removeFromParent(false);
+        var childNodes = this._childNodes;
+        var nodeLayers = childNodes.nodeLayers;
+        if (!nodeLayers[layerIndex]) {
+          nodeLayers[layerIndex] = [];
+        }
+        childNodes.count ++;
+        node.parent = this;
+        if (arguments.length > 2) {
           nodeLayers[layerIndex].push(node);
-          childNodes.count ++;
-          this.refresh();
-        }
-      }
-
-      InnerNode.prototype.addChildNodeToLocation = function (node, layerIndex, nodeIndex) {
-        if (node.parent === null) {
-          var childNodes = this._childNodes;
-          var nodeLayers = childNodes.nodeLayers;
-          if (!nodeLayers[layerIndex]) {
-            nodeLayers[layerIndex] = [];
+        } else {
+          if (nodeIndex < nodeLayers[layerIndex].length) {
+            nodeLayers[layerIndex].splice(nodeIndex, 0, node);
+          } else {
+            nodeLayers[layerIndex].push(node);
           }
-          node.parent = this;
-          nodeLayers[layerIndex].splice(nodeIndex, 0, node);
-          childNodes.count ++;
-          this.refresh();
         }
+        this.refresh();
       }
 
       InnerNode.prototype.removeChildNode = function (node, destroy) {
@@ -205,7 +199,9 @@ export default (
 
       InnerNode.prototype.removeFromParent = function (destroy) {
         var parent = this.parent;
-        parent.removeChildNode(this, destroy);
+        if (parent) {
+          parent.removeChildNode(this, destroy);
+        }
       }
 
       InnerNode.prototype.runAnimation = function (animation, fn, target, loop) {
