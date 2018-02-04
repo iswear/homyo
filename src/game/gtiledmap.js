@@ -77,10 +77,10 @@ export default (
             for (var i = topRow, tiledY = 0; i <= bottomRow; ++i, tiledY += gridHeight) {
               for (var j = leftCol, tiledX = 0; j <= rightCol; ++j, tiledX += gridHeight) {
                 if (i < clipTopRow || i > clipBottomRow || j < clipLeftCol || j > clipRightCol) {
-                  var tileds = this.tileds[i+":"+j];
-                  if (tileds && tileds.length > 0) {
-                    for (var m = 0, len = tileds.length; m < len; ++m) {
-                      var tiled = tileds[m];
+                  var tiles = this.tiles[i+":"+j];
+                  if (tiles && tiles.length > 0) {
+                    for (var m = 0, len = tiles.length; m < len; ++m) {
+                      var tiled = tiles[m];
                       var image = fileLoader.loadImageAsync(
                         tiled.url,
                         functions.loadImageFinished,
@@ -122,10 +122,10 @@ export default (
           var fileLoader = this.findApplication().getFileLoader();
           for (var i = topRow, tiledY = 0; i <= bottomRow; ++i, tiledY += gridHeight) {
             for (var j = leftCol, tiledX = 0; j <= rightCol; ++j, tiledX += gridWidth) {
-              var tileds = this.tileds[i + ":" + j];
-              if (tileds && tileds.length > 0) {
-                for (var m = 0, len = tileds.length; m < len; ++m) {
-                  var tiled = tileds[m];
+              var tiles = this.tiles[i + ":" + j];
+              if (tiles && tiles.length > 0) {
+                for (var m = 0, len = tiles.length; m < len; ++m) {
+                  var tiled = tiles[m];
                   var image = fileLoader.loadImageAsync(
                     tiled.url,
                     functions.loadImageFinished,
@@ -162,7 +162,7 @@ export default (
         this.defineNotifyProperty('row', LangUtil.checkAndGet(conf.row, 50));
         this.defineNotifyProperty('col', LangUtil.checkAndGet(conf.col, 50));
         this.defineNotifyProperty('brush', LangUtil.checkAndGet(conf.brush, null));
-        this.defineNotifyProperty('tileds', LangUtil.checkAndGet(conf.tileds, {}));
+        this.defineNotifyProperty('tiles', LangUtil.checkAndGet(conf.tiles, {}));
 
         this._mapRenderCache = {
           leftCol: -1,

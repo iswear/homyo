@@ -194,30 +194,12 @@ export default (
             }
           }
         }
-        node.application = null;
-        node.parent = null;
         if (destroy) {
           node.destroy();
-        }
-      }
-
-      InnerNode.prototype.removeChildNodeAtLayer = function (node, layerIndex, destroy) {
-        var layer = this._childNodes.nodeLayers[layerIndex];
-        if (layer) {
-          for (var i = 0, len = layer.length; i < len; ++i) {
-            if (node === layer[i]) {
-              layer.splice(i, 1);
-              len--;
-              i--;
-              this._childNodes.count--;
-              this.refresh();
-            }
-          }
-        }
-        node.application = null;
-        node.parent = null;
-        if (destroy) {
-          node.destroy();
+        } else {
+          node.stopAllAnimation(true);
+          node.application = null;
+          node.parent = null;
         }
       }
 
@@ -319,6 +301,7 @@ export default (
       }
 
       InnerNode.prototype.destroy = function () {
+        this.stopAllAnimation(false);
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
           var layer = layers[i];
@@ -328,9 +311,9 @@ export default (
             }
           }
         }
+        this._childNodes.nodeLayers = null;
         this.parent = null;
         this.application = null;
-        this._childNodes.nodeLayers = null;
         this.super('destroy');
       }
 

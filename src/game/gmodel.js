@@ -80,17 +80,14 @@ export default (
 
       InnerGModel.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('modelId', LangUtil.checkAndGet(conf.bizId, null));
+        this.defineNotifyProperty('id', LangUtil.checkAndGet(conf.id, null));
 
         this._nodes = functions.createModelNodes(this, LangUtil.checkAndGet(conf.nodes, {}), {});
         this._actions = functions.compileModelActions(conf.actions);
+
         this._actionRunning = null;
         this._actionProgress = 0;
         this._actionLoop = false;
-      }
-
-      InnerGModel.prototype.getRootNode = function () {
-        return this._nodes.root
       }
 
       InnerGModel.prototype.runAction = function (name, loop) {

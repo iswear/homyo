@@ -55,6 +55,11 @@ export default (
         }
       }
 
+      InnerQueueAnimation.prototype.destroy = function () {
+        this.animations = null;
+        this.super('destroy');
+      }
+
       return InnerQueueAnimation;
     })();
 

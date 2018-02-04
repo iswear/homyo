@@ -161,6 +161,16 @@ export default (
         }
       }
 
+      InnerFileLoader.prototype.destroy = function () {
+        this._loadingImages = null;
+        this._loadedImages = null;
+        this._loadingAudios = null;
+        this._loadedAudios = null;
+        this._loadingVideos = null;
+        this._loadedVideos = null;
+        this.super('destroy')
+      }
+
       return InnerFileLoader;
     })();
 

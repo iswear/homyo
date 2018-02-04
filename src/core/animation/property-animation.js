@@ -44,6 +44,13 @@ export default (
         }
       }
 
+      InnerPropertyAnimation.prototype.destroy = function () {
+        this.property = null;
+        this.targetOffset = null;
+        this.offsetFn = null;
+        this.super('destroy');
+      }
+
       return InnerPropertyAnimation;
     })();
 

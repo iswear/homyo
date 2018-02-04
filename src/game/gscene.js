@@ -87,6 +87,11 @@ export default (
         this.addObserver('anchorYChanged', functions.syncContainerZone, this, this);
       }
 
+      InnerGScene.prototype.destroy = function () {
+        this.map = null;
+        this.super('destroy');
+      }
+
       return InnerGScene;
     })();
 

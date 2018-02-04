@@ -405,6 +405,26 @@ export default (
         this._timerTaskId = 0;
       }
 
+      InnerApplication.prototype.destroy = function () {
+        if (this.root) {
+          this.root.destroy();
+          this.root = null;
+        }
+        if (this._render) {
+          this._render.destroy();
+          this._render = null;
+        }
+        if (this._animationManager) {
+          this._animationManager.destroy();
+          this._animationManager = null;
+        }
+        if (this._fileLoader) {
+          this._fileLoader.destroy();
+          this._fileLoader = null;
+        }
+        this.super('destroy');
+      }
+
       return InnerApplication;
     })();
 

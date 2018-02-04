@@ -50,6 +50,13 @@ export default (
         }
       }
 
+      InnerSchedulerAnimation.prototype.destroy = function () {
+        this.fn = null;
+        this.target = null;
+        this.param = null;
+        this.super('destroy')
+      }
+
       return InnerSchedulerAnimation;
     })();
 
