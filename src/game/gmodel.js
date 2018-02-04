@@ -138,30 +138,48 @@ export default (
         functions.compileActions.call(this, LangUtil.checkAndGet(conf.actions, null));
       }
 
-      InnerGModel.prototype.addNode = function (nodeConf, parentNodeId, prevNodeId) {
-        if (parentNodeId) {
+      InnerGModel.prototype.addNode = function (node, parentNodeId, prevNodeId) {
+        if (node && parentNodeId) {
           const parentNode = this._nodeMap[parentNodeId];
-          if (prevNodeId) {
-
+          if (parentNode) {
+            if (arguments.length > 2) {
+              const prevNode = this._nodeMap[prevNodeId];
+              if (prevNode) {
+                const location = parentNode.getChildNodeLocation(prevNode);
+                if (location) {
+                  parentNode.addChildNodeToLayer(node, location.layerIndex, location.nodeIndex + 1);
+                  this._nodeMap[node.id] = node;
+                  node.model = node;
+                } else {
+                  throw new Error('can not find prevNode:' + prevNodeId + ' in parentNode:' + parentNodeId);
+                }
+              } else {
+                throw new Error('can not find previous node, please check the previousId:' + prevNodeId);
+              }
+            } else {
+              parentNode.addChildNode(new GNode(nodeConf), 0);
+              this._nodeMap[node.id] = node;
+              node.model = node;
+            }
+          } else {
+            throw new Error('can not find parent node, please check the parentId:' + parentNodeId);
           }
         }
-        const parentNode = this._nodeMap[parentNodeId]
-        if (parentNode) {
-          const prevNode = this._nodeMap[prevNodeId]
-
-        }
-      }
-
-      InnerGModel.prototype.getRoot = function () {
-        return this._node;
       }
 
       InnerGModel.prototype.getNode = function (nodeId) {
-        return this._nodeMap[nodeId];
+        if (arguments.length > 0) {
+          return this._nodeMap[nodeId];
+        } else {
+          this._node;
+        }
       }
 
-      InnerGModel.prototype.moveNode = function (srcNodeId, desParentNodeId, desPrevNodeId) {
-        const srcNode = this._nodeMap[srcNodeId];
+      InnerGModel.prototype.moveNode = function (nodeId, desParentNodeId, desPrevNodeId) {
+        const node = this.removeNode(nodeId, false);
+        if (node) {
+          this.addNode(node, desParentNodeId, desPrevNodeId);
+        }
       }
 
       InnerGModel.prototype.removeNode = function (nodeId, destroy) {
@@ -169,6 +187,10 @@ export default (
         if (node) {
           delete this._nodeMap[nodeId];
           node.removeFromParent(destroy);
+          node.model = null;
+          return node;
+        } else {
+          return null;
         }
       }
 
