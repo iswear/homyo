@@ -16,8 +16,6 @@ export default (
       InnerGNode.prototype.defLayer = 1;
       InnerGNode.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('id', LangUtil.checkAndGet(conf.nodeId, null));
-        this.defineNotifyProperty('model', LangUtil.checkAndGet(conf.model, null));
 
         this._texture = new GTexture(LangUtil.checkAndGet(conf.texture, {}));
 
@@ -26,11 +24,6 @@ export default (
 
       InnerGNode.prototype.getTexture = function (conf) {
         return this._texture;
-      }
-
-      InnerGNode.prototype.destroy = function () {
-        this.model = null;
-        this.super('destroy');
       }
 
       return InnerGNode;

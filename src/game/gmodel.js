@@ -12,9 +12,11 @@ import GNode from './gnode';
 export default (
   function () {
     var functions = (function () {
-      function createNode(model, conf, nodeMap) {
-        var node = new GNode(conf.node);
-        node.model = model;
+      function createNode(conf, nodeMap) {
+        var node = new this.nodeConstructor(conf[this.nodeConf]);
+        if (conf.id) {
+          nodeMap[conf.id] = node;
+        }
         if (conf.children) {
           var children = conf.children;
           for (var i = 0, len = children.length; i < len; ++i) {
@@ -22,15 +24,12 @@ export default (
             node.addChildNode(childNode.root);
           }
         }
-        if (conf.id) {
-          nodeMap[conf.id] = node;
-        }
         return node;
       }
       function createNodes (modelRoot) {
         if (modelRoot) {
           this._nodeMap = {};
-          this._node = createNode(this, modelRoot, this._nodeMap);
+          this._node = createNode.call(this, modelRoot, this._nodeMap);
         }
       }
       function compileActions (modelActions) {
@@ -86,8 +85,8 @@ export default (
      *   id: '模型id',
      *   name: '模型名称',
      *   root: {
+     *     id: '',
      *     node: {
-     *       id: '模型节点'
      *       x: '',
      *       y: '' ...
      *     },
@@ -120,9 +119,12 @@ export default (
     var GModel = (function () {
       var InnerGModel = LangUtil.extend(Notifier);
 
+      InnerGModel.prototype.defNodeConf = 'node';
+      InnerGModel.prototype.defNodeConstructor = GNode;
       InnerGModel.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('id', LangUtil.checkAndGet(conf.id, ''))
+        this.defineNotifyProperty('nodeKey', LangUtil.checkAndGet(conf.nodeConf, this.defNodeConf))
+        this.defineNotifyProperty('nodeConstructor', LangUtil.checkAndGet(conf.nodeConstructor, this.defNodeConstructor))
 
         this._node = null;
         this._nodeMap = null;
@@ -138,7 +140,7 @@ export default (
         functions.compileActions.call(this, LangUtil.checkAndGet(conf.actions, null));
       }
 
-      InnerGModel.prototype.addNode = function (node, parentNodeId, prevNodeId) {
+      InnerGModel.prototype.addNode = function (nodeId, node, parentNodeId, prevNodeId) {
         if (node && parentNodeId) {
           const parentNode = this._nodeMap[parentNodeId];
           if (parentNode) {
@@ -148,8 +150,7 @@ export default (
                 const location = parentNode.getChildNodeLocation(prevNode);
                 if (location) {
                   parentNode.addChildNodeToLayer(node, location.layerIndex, location.nodeIndex + 1);
-                  this._nodeMap[node.id] = node;
-                  node.model = node;
+                  this._nodeMap[nodeId] = node;
                 } else {
                   throw new Error('can not find prevNode:' + prevNodeId + ' in parentNode:' + parentNodeId);
                 }
@@ -158,8 +159,7 @@ export default (
               }
             } else {
               parentNode.addChildNode(new GNode(nodeConf), 0);
-              this._nodeMap[node.id] = node;
-              node.model = node;
+              this._nodeMap[nodeId] = node;
             }
           } else {
             throw new Error('can not find parent node, please check the parentId:' + parentNodeId);
@@ -175,19 +175,11 @@ export default (
         }
       }
 
-      InnerGModel.prototype.moveNode = function (nodeId, desParentNodeId, desPrevNodeId) {
-        const node = this.removeNode(nodeId, false);
-        if (node) {
-          this.addNode(node, desParentNodeId, desPrevNodeId);
-        }
-      }
-
       InnerGModel.prototype.removeNode = function (nodeId, destroy) {
         const node = this._nodeMap[nodeId];
         if (node) {
           delete this._nodeMap[nodeId];
           node.removeFromParent(destroy);
-          node.model = null;
           return node;
         } else {
           return null;
@@ -247,7 +239,7 @@ export default (
 
       InnerGModel.prototype.stopAction = function () {
         var context = this._actionsContext;
-        if (context.runningActId!= null) {
+        if (context.runningActId != null) {
           this._nodeRoot.stopAnimation(true);
         }
         context.runningActId = null;
