@@ -13,15 +13,14 @@ export default (
   function () {
     var functions = (function () {
       function createNode(conf) {
-        var node = new this.nodeConstructor(conf[this.nodeConf]);
+        var node = new GNode(conf.node);
         if (conf.id) {
-          node.id = id;
-          this.nodeMap[conf.id] = node;
+          this._nodeMap[conf.id] = node;
         }
         if (conf.children) {
           var children = conf.children;
           for (var i = 0, len = children.length; i < len; ++i) {
-            var childNode = createNode(model, children[i]);
+            var childNode = createNode(children[i]);
             node.addChildNode(childNode);
           }
         }
@@ -120,11 +119,8 @@ export default (
     var GModel = (function () {
       var InnerGModel = LangUtil.extend(Notifier);
 
-      InnerGModel.prototype.defNodeConf = 'node';
-      InnerGModel.prototype.defNodeConstructor = GNode;
       InnerGModel.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.super('')
 
         this._node = null;
         this._nodeMap = null;
@@ -138,60 +134,6 @@ export default (
 
         functions.createNodes.call(this, LangUtil.checkAndGet(conf.root, null));
         functions.compileActions.call(this, LangUtil.checkAndGet(conf.actions, null));
-      }
-
-      InnerGModel.prototype.addNode = function (nodeConf, parentNodeId, prevNodeId) {
-        if (node && parentNodeId) {
-          const parentNode = this._nodeMap[parentNodeId];
-          if (parentNode) {
-            if (arguments.length > 2) {
-              const prevNode = this._nodeMap[prevNodeId];
-              if (prevNode) {
-                const location = parentNode.getChildNodeLocation(prevNode);
-                if (location) {
-                  const node = new this.nodeConstructor(nodeConf[this.nodeConf])
-                  parentNode.addChildNodeToLayer(node, location.layerIndex, location.nodeIndex + 1);
-                  this._nodeMap[nodeId] = node;
-                  node.id = nodeConf.id
-                } else {
-                  throw new Error('can not find prevNode:' + prevNodeId + ' in parentNode:' + parentNodeId);
-                }
-              } else {
-                throw new Error('can not find previous node, please check the previousId:' + prevNodeId);
-              }
-            } else {
-              const node = new this.nodeConstructor(nodeConf[this.nodeConf]);
-              parentNode.addChildNode(node, 0);
-              this._nodeMap[nodeId] = node;
-              node.id = nodeConf.id
-            }
-          } else {
-            throw new Error('can not find parent node, please check the parentId:' + parentNodeId);
-          }
-        }
-      }
-
-      InnerGModel.prototype.getNode = function (nodeId) {
-        if (arguments.length > 0) {
-          return this._nodeMap[nodeId];
-        } else {
-          this._node;
-        }
-      }
-
-      InnerGModel.prototype.getNodeMap = function () {
-        return this._nodeMap;
-      }
-
-      InnerGModel.prototype.removeNode = function (nodeId, destroy) {
-        const node = this._nodeMap[nodeId];
-        if (node) {
-          delete this._nodeMap[nodeId];
-          node.removeFromParent(destroy);
-          return node;
-        } else {
-          return null;
-        }
       }
 
       InnerGModel.prototype.addAction = function (actId) {
@@ -208,7 +150,7 @@ export default (
         for (var nodeId in modelActFrames) {
           var node = this._nodeMap[nodeId];
           var nodeActFrames = modelActFrames[nodeId];
-          if (node && nodeAction) {
+          if (node && nodeActFrames) {
             var animation = GUtil.compileFrames(node, nodeActFrames, false);
             if (animation) {
               nodeActions.push({
@@ -248,14 +190,14 @@ export default (
       InnerGModel.prototype.stopAction = function () {
         var context = this._actionsContext;
         if (context.runningActId != null) {
-          this._nodeRoot.stopAnimation(true);
+          this._node.stopAnimation(true);
         }
         context.runningActId = null;
         context.progress = 0;
         context.loop = false;
       }
 
-      InnerGModel.prototype.destroy = function (conf) {
+      InnerGModel.prototype.destroy = function () {
         this.super('destroy');
       }
 

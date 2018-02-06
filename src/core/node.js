@@ -42,7 +42,6 @@ export default (
 
       InnerNode.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('id', LangUtil.checkAndGet(conf.id, null));
         this.defineNotifyProperty('x', LangUtil.checkAndGet(conf.x, this.defX));
         this.defineNotifyProperty('y', LangUtil.checkAndGet(conf.y, this.defY));
         this.defineNotifyProperty('width', LangUtil.checkAndGet(conf.width, this.defWidth));
