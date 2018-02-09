@@ -8,7 +8,6 @@ import Notifier from '../core/notifier';
 import GUtil from './gutil';
 import GNode from './gnode';
 
-
 export default (
   function () {
     var functions = (function () {
@@ -146,19 +145,16 @@ export default (
               if (location) {
                 parentNode.addChildNodeToLayer(node, location.layerIndex, location.nodeIndex + 1);
                 this._nodeMap[nodeId] = node;
-              } else {
-                throw new Error('can not find prevNode:' + prevNodeId + ' in parentNode:' + parentNodeId);
+                return;
               }
-            } else {
-              throw new Error('can not find previous node, please check the previousId:' + prevNodeId);
             }
           } else {
             parentNode.addChildNode(node, 0);
             this._nodeMap[nodeId] = node;
+            return;
           }
-        } else {
-          throw new Error('can not find parent node, please check the parentId:' + parentNodeId)
         }
+        console.log('Add node failed parentNodeId:' + parentNodeId + ' prevNodeId:' + prevNodeId);
       }
 
       InnerGModel.prototype.getNode = function (nodeId) {
