@@ -180,20 +180,19 @@ export default (
             for (var j = 0, len2 = layer.length; j < len2; ++j) {
               if (node === layer[j]) {
                 layer.splice(j, 1);
-                len2--;
-                j--;
+                node.parent = null;
+                node.application = null;
+                if (destroy) {
+                  node.destroy();
+                } else {
+                  node.stopAllAnimation(true);
+                }
                 this._childNodes.count--;
                 this.refresh();
+                return
               }
             }
           }
-        }
-        if (destroy) {
-          node.destroy();
-        } else {
-          node.stopAllAnimation(true);
-          node.application = null;
-          node.parent = null;
         }
       }
 
@@ -297,20 +296,24 @@ export default (
       }
 
       InnerNode.prototype.destroy = function () {
-        this.stopAllAnimation(false);
-        var layers = this._childNodes.nodeLayers;
-        for (var i = 0, len = layers.length; i < len; ++i) {
-          var layer = layers[i];
-          if (layer) {
-            for (var j = 0, len2 = layer.length; j < len2; ++j) {
-              layer[j].destroy();
+        if (this.parent) {
+          this.removeFromParent(true)
+        } else {
+          this.stopAllAnimation(true);
+          var layers = this._childNodes.nodeLayers;
+          for (var i = 0, len = layers.length; i < len; ++i) {
+            var layer = layers[i];
+            if (layer) {
+              for (var j = 0, len2 = layer.length; j < len2; ++j) {
+                layer[j].destroy();
+              }
             }
           }
+          this._childNodes.nodeLayers = null;
+          this.parent = null;
+          this.application = null;
+          this.super('destroy');
         }
-        this._childNodes.nodeLayers = null;
-        this.parent = null;
-        this.application = null;
-        this.super('destroy');
       }
 
       InnerNode.prototype._dispatchRender = function (render, parentAlpha, parentWTransform, parentWReverseTransform, parentUpdateTransform) {

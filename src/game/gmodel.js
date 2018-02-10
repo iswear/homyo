@@ -19,16 +19,15 @@ export default (
         if (conf.children) {
           var children = conf.children;
           for (var i = 0, len = children.length; i < len; ++i) {
-            var childNode = createNode.call(this, children[i]);
-            node.addChildNode(childNode);
+            node.addChildNode(createNode.call(this, children[i]));
           }
         }
         return node;
       }
-      function createNodes (modelRoot) {
-        if (modelRoot) {
+      function createNodes (conf) {
+        if (conf) {
           this._nodeMap = {};
-          this._node = createNode.call(this, modelRoot);
+          this._node = createNode.call(this, conf);
         }
       }
       function compileActions (modelActions) {
@@ -142,21 +141,27 @@ export default (
           return;
         }
         if (arguments.length > 3) {
-          var prevNode = this._nodeMap[prevNodeId];
-          if (!prevNode) {
-            console.log('Can not find prev node:' + prevNodeId)
+          if (prevNodeId === null) {
+            parentNode.addChildNode(node, 0);
+            this._nameMap[nodeId] = node;
+            return;
+          } else {
+            var prevNode = this._nodeMap[prevNodeId];
+            if (!prevNode) {
+              console.log('Can not find prev node:' + prevNodeId)
+              return;
+            }
+            var location = parentNode.getChildNodeLocation(prevNode);
+            if (!location) {
+              console.log('Can not find prev node:' + prevNodeId + ' in parent node:' + parentNodeId)
+              return;
+            }
+            parentNode.addChildNodeToLayer(node, location.layerIndex, location.nodeIndex + 1);
+            this._nodeMap[nodeId] = node;
             return;
           }
-          var location = parentNode.getChildNodeLocation(prevNode);
-          if (!location) {
-            console.log('Can not find prevNode:' + prevNodeId + ' in parent node:' + parentNodeId)
-            return;
-          }
-          parentNode.addChildNodeToLayer(node, location.layerIndex, location.nodeIndex + 1);
-          this._nodeMap[nodeId] = node;
-          return;
         } else {
-          parentNode.addChildNode(node, 0);
+          parentNode.addChildNode(node);
           this._nodeMap[nodeId] = node;
           return;
         }
