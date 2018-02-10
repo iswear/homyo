@@ -136,25 +136,30 @@ export default (
       }
 
       InnerGModel.prototype.addNode = function (node, nodeId, parentNodeId, prevNodeId) {
-        const parentNode = this._nodeMap[parentNodeId];
-        if (parentNode) {
-          if (arguments.length > 3) {
-            const prevNode = this._nodeMap[prevNodeId];
-            if (prevNode) {
-              const location = parentNode.getChildNodeLocation(prevNode);
-              if (location) {
-                parentNode.addChildNodeToLayer(node, location.layerIndex, location.nodeIndex + 1);
-                this._nodeMap[nodeId] = node;
-                return;
-              }
-            }
-          } else {
-            parentNode.addChildNode(node, 0);
-            this._nodeMap[nodeId] = node;
+        var parentNode = this._nodeMap[parentNodeId];
+        if (!parentNode) {
+          console.log('Can not find parent node:' + prevNodeId);
+          return;
+        }
+        if (arguments.length > 3) {
+          var prevNode = this._nodeMap[prevNodeId];
+          if (!prevNode) {
+            console.log('Can not find prev node:' + prevNodeId)
             return;
           }
+          var location = parentNode.getChildNodeLocation(prevNode);
+          if (!location) {
+            console.log('Can not find prevNode:' + prevNodeId + ' in parent node:' + parentNodeId)
+            return;
+          }
+          parentNode.addChildNodeToLayer(node, location.layerIndex, location.nodeIndex + 1);
+          this._nodeMap[nodeId] = node;
+          return;
+        } else {
+          parentNode.addChildNode(node, 0);
+          this._nodeMap[nodeId] = node;
+          return;
         }
-        console.log('Add node failed parentNodeId:' + parentNodeId + ' prevNodeId:' + prevNodeId);
       }
 
       InnerGModel.prototype.getNode = function (nodeId) {
@@ -163,12 +168,12 @@ export default (
 
       InnerGModel.prototype.removeNode = function (nodeId, destroy) {
         var node = this._nodeMap[nodeId];
-        if (node) {
-          node.removeFromParent(destroy);
-          delete this._nodeMap[nodeId];
-          return node;
+        if (!node) {
+          return null;
         }
-        return null;
+        node.removeFromParent(destroy);
+        delete this._nodeMap[nodeId];
+        return node;
       }
 
       InnerGModel.prototype.compileAndSetAction = function (actConf) {
