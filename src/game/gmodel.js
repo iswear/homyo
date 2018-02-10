@@ -61,7 +61,7 @@ export default (
           this._actions = compiledActions;
         }
       }
-      function actionRunProgress(binder, deltaTime, finish) {
+      function runActionProgress(binder, deltaTime, finish) {
         if (finish) {
           var context = this._actionsContext;
           context.progress -= 1;
@@ -73,7 +73,7 @@ export default (
       return {
         createNodes: createNodes,
         compileActions: compileActions,
-        actionRunProgress: actionRunProgress
+        runActionProgress: runActionProgress
       }
     })();
 
@@ -218,7 +218,7 @@ export default (
             for (var i = 0, len = actions.length; i < len; ++i) {
               var action = actions[i];
               context.progress += 1;
-              action.node.runAnimation(action.animation, functions.actionRunProgress, this, false);
+              action.node.runAnimation(action.animation, functions.runActionProgress, this, false);
             }
           }
         }
