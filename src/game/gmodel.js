@@ -166,7 +166,9 @@ export default (
         if (node) {
           node.removeFromParent(destroy);
           delete this._nodeMap[nodeId];
+          return node;
         }
+        return null;
       }
 
       InnerGModel.prototype.compileAndSetAction = function (actConf) {
