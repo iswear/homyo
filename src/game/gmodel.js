@@ -30,35 +30,32 @@ export default (
           this._node = createNode.call(this, conf);
         }
       }
-      function compileActions (modelActions) {
-        if (modelActions) {
-          var compiledActions = {};
-          if (modelActions) {
-            for (var i = 0, len = modelActions.length; i < len; ++i) {
-              var modelAct = modelActions[i];
-              if (modelAct) {
-                var nodeActions = []
-                var modelActFrames = modelAct.frames;
-                for (var nodeId in modelActFrames) {
-                  var node = this._nodeMap[nodeId];
-                  var nodeActFrames = modelActFrames[nodeId];
-                  if (node && nodeActFrames) {
-                    var animation = GUtil.compileFrames(node, nodeActFrames, false);
-                    if (animation) {
-                      nodeActions.push({
-                        node: node,
-                        animation: animation
-                      })
-                    }
+      function compileActions (actions) {
+        this._actions = {};
+        if (actions) {
+          for (var i = 0, len = actions.length; i < len; ++i) {
+            var modelAction = actions[i];
+            var modelActionFrames = modelAction.frames;
+            if (modelActionFrames) {
+              var nodeCompiledActions = [];
+              for (var nodeId in modelActionFrames) {
+                var node = this._nodeMap[nodeId];
+                var nodeFrames = modelActionFrames[nodeId];
+                if (node && nodeFrames) {
+                  var animation = GUtil.compileFrames(node, nodeFrames, false);
+                  if (animation) {
+                    nodeCompiledActions.push({
+                      node: node,
+                      animation: animation
+                    });
                   }
                 }
-                if (nodeActions.length > 0) {
-                  compiledActions[modelAct.id] = nodeActions;
-                }
+              }
+              if (nodeCompiledActions.length > 0) {
+                this._actions[modelAction.id] = nodeCompiledActions;
               }
             }
           }
-          this._actions = compiledActions;
         }
       }
       function runActionProgress(binder, deltaTime, finish) {
