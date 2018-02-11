@@ -387,13 +387,10 @@ export default (
         }
       }
 
-      InnerApplication.prototype.run = function (fn) {
+      InnerApplication.prototype.run = function () {
         if (this._timerTaskId === 0) {
           if (this.root !== null) {
             this._timerTaskId = TimerUtil.addAnimationTask(this.loop, this);
-            if (fn) {
-              fn.call(this);
-            }
             this.postNotification('resize', this, [this._render.width, this._render.height]);
           }
         }
