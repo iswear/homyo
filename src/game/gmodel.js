@@ -232,6 +232,8 @@ export default (
           this._node.stopAnimation(true);
         }
         context.runningActId = null;
+        context.runningAct = null;
+        context.progress = 0;
         context.loop = false;
       }
 
