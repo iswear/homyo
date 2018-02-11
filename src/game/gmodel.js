@@ -178,7 +178,11 @@ export default (
       }
 
       InnerGModel.prototype.getNode = function (nodeId) {
-        return this._nodeMap[nodeId]
+        if (arguments.length === 0) {
+          return this._node;
+        } else {
+          return this._nodeMap[nodeId]
+        }
       }
 
       InnerGModel.prototype.removeNode = function (nodeId, destroy) {
