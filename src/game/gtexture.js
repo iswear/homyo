@@ -23,7 +23,7 @@ export default (
             this.width = this.img.width;
             this.height = this.img.height;
           }
-          if (this.getObserverByAllParams('render', render_img, this, this) === null) {
+          if (this.getObserverByAllParams('render', functions.renderImg, this, this) === null) {
             this.addObserver('render', functions.renderImg, this, this);
           }
         } else {
