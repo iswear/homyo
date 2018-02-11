@@ -58,12 +58,24 @@ export default (
           }
         }
       }
+      function runAction () {
+        var context = this._actionsContext;
+        if (context.runningAct) {
+          var actions = context.runningAct;
+          context.progress = 0;
+          for (var i = 0, len = actions.length; i < len; ++i) {
+            var action = actions[i];
+            context.progress += 1;
+            action.node.runAnimation(action.animation, functions.runActionProgress, this, false);
+          }
+        }
+      }
       function runActionProgress(binder, deltaTime, finish) {
         if (finish) {
           var context = this._actionsContext;
           context.progress -= 1;
           if (context.progress === 0 && context.loop) {
-            this.runAction(context.runningActId);
+            functions.runAction.call(this);
           }
         }
       }
@@ -123,6 +135,7 @@ export default (
         this._actions = null;
         this._actionsContext = {
           runningActId: null,
+          runningAct: null,
           progress: 0,
           loop: false
         };
@@ -207,18 +220,10 @@ export default (
           return;
         }
         this.stopAction();
-        var actions = this._actions[actId];
-        if (actions) {
-          if (actions.length > 0) {
-            context.runningActId = actId;
-            context.loop = loop;
-            for (var i = 0, len = actions.length; i < len; ++i) {
-              var action = actions[i];
-              context.progress += 1;
-              action.node.runAnimation(action.animation, functions.runActionProgress, this, false);
-            }
-          }
-        }
+        context.runningActId = actId;
+        context.runningAct = this._actions[actId];
+        context.loop = loop;
+        functions.runAction.call(this);
       }
 
       InnerGModel.prototype.stopAction = function () {
@@ -227,7 +232,6 @@ export default (
           this._node.stopAnimation(true);
         }
         context.runningActId = null;
-        context.progress = 0;
         context.loop = false;
       }
 
