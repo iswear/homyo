@@ -299,6 +299,7 @@ export default (
         this.super('init', [conf]);
         this.defineNotifyProperty('root', LangUtil.checkAndGet(conf.root, null));
         this.defineNotifyProperty('scaleMode', LangUtil.checkAndGet(conf.scaleMode, 0));
+        this.root.parent = this;
         this._render = new CanvasRender({canvas: conf.canvas, width: LangUtil.checkAndGet(conf.width, undefined), height: LangUtil.checkAndGet(conf.height, undefined)});
 
         this._prevLoopTime = 0;
@@ -389,8 +390,6 @@ export default (
       InnerApplication.prototype.run = function (fn) {
         if (this._timerTaskId === 0) {
           if (this.root !== null) {
-            var root = this.root;
-            root.application = this;
             this._timerTaskId = TimerUtil.addAnimationTask(this.loop, this);
             if (fn) {
               fn.call(this);
