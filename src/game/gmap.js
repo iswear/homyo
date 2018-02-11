@@ -50,7 +50,7 @@ export default (
     var GMap = (function () {
       var InnerGMap = LangUtil.extend(Node);
 
-      InnerGMap.prototype.defGridVisible = true;
+      InnerGMap.prototype.defGridVisible = false;
       InnerGMap.prototype.defGridColor = '#000';
       InnerGMap.prototype.defGridWidth = 50;
       InnerGMap.prototype.defGridHeight = 50;
