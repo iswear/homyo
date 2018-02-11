@@ -30,7 +30,7 @@ export default (
           this.removeObserver('render', functions.renderImg, this, this);
         }
       },
-      renderImg: function () {
+      renderImg: function (sender, render) {
         var img = this._img;
         var image = this.findApplication().getFileLoader().loadImageAsync(
           img.url,
@@ -47,13 +47,12 @@ export default (
             this.height = img.height;
             this._needUpdateImgSize = false;
           }
+          var rect = this.getRectInSelf();
           if (LangUtil.isString(this.img)) {
-            var rect = this.getRectInSelf();
             render.drawImage(image, img.x, img.y, img.width, img.height, rect.left, rect.top, img.width, img.height);
           } else {
-            render.drawImage(image, img.x, img.y);
+            render.drawImage(image, rect.left, rect.top);
           }
-          render.drawImage();
         }
       },
       loadImageFinished: function (url, success) {
