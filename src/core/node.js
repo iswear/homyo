@@ -161,13 +161,13 @@ export default (
         childNodes.count ++;
         node.parent = this;
         if (arguments.length > 2) {
-          nodeLayers[layerIndex].push(node);
-        } else {
           if (nodeIndex < nodeLayers[layerIndex].length) {
             nodeLayers[layerIndex].splice(nodeIndex, 0, node);
           } else {
             nodeLayers[layerIndex].push(node);
           }
+        } else {
+          nodeLayers[layerIndex].push(node);
         }
         this.refresh();
       }
@@ -265,8 +265,8 @@ export default (
 
       InnerNode.prototype.checkEventInteractZone = function (name, e, x, y) {
         var rect = this.getRectInSelf();
-        if (x >= rect.left && x <= rect.right
-          && y >= rect.top && y <= rect.bottom) {
+        if (x >= rect.left && x <= rect.right &&
+          y >= rect.top && y <= rect.bottom) {
           return true;
         } else {
           return false;
@@ -416,7 +416,7 @@ export default (
           } else {
             if (result) {
               if (this.interactable) {
-                this.postNotification(name, this, [e]);
+                this.postNotification(name, this, [ e ]);
               }
               return true;
             } else {
