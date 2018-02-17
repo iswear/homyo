@@ -142,13 +142,9 @@ export default (
         return null;
       }
 
-      InnerNode.prototype.addChildNode = function (node, nodeIndex) {
+      InnerNode.prototype.addChildNode = function (node) {
         node.removeFromParent(false);
-        if (arguments.length > 1) {
-          this.addChildNodeToLayer(node, this._childNodes.defLayer, nodeIndex)
-        } else {
-          this.addChildNodeToLayer(node, this._childNodes.defLayer);
-        }
+        this.addChildNodeToLayer(node, this._childNodes.defLayer);
       }
 
       InnerNode.prototype.addChildNodeToLayer = function (node, layerIndex, nodeIndex) {
@@ -160,35 +156,50 @@ export default (
         }
         childNodes.count ++;
         node.parent = this;
-        if (arguments.length > 2) {
-          if (nodeIndex < nodeLayers[layerIndex].length) {
-            nodeLayers[layerIndex].splice(nodeIndex, 0, node);
-          } else {
-            nodeLayers[layerIndex].push(node);
-          }
-        } else {
-          nodeLayers[layerIndex].push(node);
-        }
+        nodeLayers[layerIndex].push(node);
         this.refresh();
       }
 
+      InnerNode.prototype.insertChildNode = function (node, layerIndex) {
+        this.insertChildNodeToLayer(node, this._childNodes.defLayer, layerIndex);
+      }
+
+      InnerNode.prototype.insertChildNodeToLayer = function (node, layerIndex, nodeIndex) {
+        node.removeFromParent(false);
+        var childNodes = this._childNodes;
+        var nodeLayers = childNodes.nodeLayers;
+        if (!nodeLayers[layerIndex]) {
+          nodeLayers[layerIndex] = [];
+        }
+        childNodes.count ++;
+        node.parent = this;
+        nodeLayers[layerIndex].push(node);
+        if (nodeIndex < nodeLayers[layerIndex].length) {
+          nodeLayers[layerIndex].splice(nodeIndex, 0, node);
+        } else {
+          nodeLayers[layerIndex].push(node);
+        }
+        this.refresh()
+      }
+
       InnerNode.prototype.removeChildNode = function (node, destroy) {
-        var layers = this._childNodes.nodeLayers;
-        for (var i = 0, len = layers.length; i < len; ++i) {
-          var layer = layers[i];
-          if (layer) {
-            for (var j = 0, len2 = layer.length; j < len2; ++j) {
-              if (node === layer[j]) {
-                layer.splice(j, 1);
-                if (destroy) {
-                  node.destroy();
+        if (destroy) {
+          node.destroy();
+        } else {
+          var layers = this._childNodes.nodeLayers;
+          for (var i = 0, len = layers.length; i < len; ++i) {
+            var layer = layers[i];
+            if (layer) {
+              for (var j = 0, len2 = layer.length; j < len2; ++j) {
+                if (node === layer[j]) {
+                  layer.splice(j, 1);
+                  node.stopAllAnimation(true);
+                  node.parent = null;
+                  node.application = null;
+                  this._childNodes.count--;
+                  this.refresh();
+                  return;
                 }
-                node.stopAllAnimation(true);
-                node.parent = null;
-                node.application = null;
-                this._childNodes.count--;
-                this.refresh();
-                return
               }
             }
           }
@@ -309,14 +320,18 @@ export default (
         for (var i = 0, len = layers.length; i < len; ++i) {
           var layer = layers[i];
           if (layer) {
-            for (var j = 0, len2 = layer.length; j < len2; ++j) {
-              layer[j].destroy();
+            while (true) {
+              var node = layer.pop();
+              if (node === undefined) {
+                break;
+              } else {
+                node.destroy();
+              }
             }
           }
         }
         // 最后清理自己
         this.removeFromParent(false);
-        this._childNodes.nodeLayers = null;
         this.super('destroy');
       }
 

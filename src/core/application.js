@@ -380,10 +380,10 @@ export default (
           this._preCheckTime += deltaTime;
         }
         if (this._refresh) {
+          this._refresh = false;
           this._render.setTransform(1, 0, 0, 1, 0, 0);
           this._render.clear();
           this.root._dispatchRender(this._render, 1, this._transform, this._transform, this._needUpdateTranform);
-          this._refresh = false;
         }
       }
 
