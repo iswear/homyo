@@ -182,10 +182,9 @@ export default (
                 layer.splice(j, 1);
                 if (destroy) {
                   node.destroy();
-                } else {
-                  node.stopAllAnimation(true);
-                  node.parent = null;
                 }
+                node.stopAllAnimation(true);
+                node.parent = null;
                 node.application = null;
                 this._childNodes.count--;
                 this.refresh();
@@ -199,31 +198,39 @@ export default (
       InnerNode.prototype.removeFromParent = function (destroy) {
         var parent = this.parent;
         if (parent) {
-          this.parent = null;
           parent.removeChildNode(this, destroy);
         }
       }
 
       InnerNode.prototype.runAnimation = function (animation, fn, target, loop) {
-        this.findApplication().getAnimationManager().addAnimationBinder(this, animation, fn, target, loop);
+        const application = this.findApplication()
+        if (application) {
+          application.getAnimationManager().addAnimationBinder(this, animation, fn, target, loop);
+        }
       }
 
       InnerNode.prototype.stopAnimation = function (animation) {
-        this.findApplication().getAnimationManager().removeAnimationBinderByNodeAndAnimation(this, animation);
+        const application = this.findApplication()
+        if (application) {
+          application.getAnimationManager().removeAnimationBinderByNodeAndAnimation(this, animation);
+        }
       }
 
       InnerNode.prototype.stopAllAnimation = function (children) {
-        this.findApplication().getAnimationManager().removeAnimationBinderByNode(this);
-        if (children) {
-          var layers = this._childNodes.nodeLayers;
-          for (var i = 0, len = layers.length; i < len; ++i) {
-            var layer = layers[i];
-            if (layer) {
-              for (var j = 0, len2 = layer.length; j < len2; ++j ) {
-                layer[j].stopAllAnimation(children);
+        const application = this.findApplication()
+        if (application) {
+          if (children) {
+            var layers = this._childNodes.nodeLayers;
+            for (var i = 0, len = layers.length; i < len; ++i) {
+              var layer = layers[i];
+              if (layer) {
+                for (var j = 0, len2 = layer.length; j < len2; ++j ) {
+                  layer[j].stopAllAnimation(children);
+                }
               }
             }
           }
+          application.getAnimationManager().removeAnimationBinderByNode(this);
         }
       }
 
@@ -297,23 +304,20 @@ export default (
       }
 
       InnerNode.prototype.destroy = function () {
-        if (this.parent) {
-          this.removeFromParent(true)
-        } else {
-          this.stopAllAnimation(true);
-          var layers = this._childNodes.nodeLayers;
-          for (var i = 0, len = layers.length; i < len; ++i) {
-            var layer = layers[i];
-            if (layer) {
-              for (var j = 0, len2 = layer.length; j < len2; ++j) {
-                layer[j].destroy();
-              }
+        // 清理所有的子对象
+        var layers = this._childNodes.nodeLayers;
+        for (var i = 0, len = layers.length; i < len; ++i) {
+          var layer = layers[i];
+          if (layer) {
+            for (var j = 0, len2 = layer.length; j < len2; ++j) {
+              layer[j].destroy();
             }
           }
-          this._childNodes.nodeLayers = null;
-          this.application = null;
-          this.super('destroy');
         }
+        // 最后清理自己
+        this.removeFromParent(false);
+        this._childNodes.nodeLayers = null;
+        this.super('destroy');
       }
 
       InnerNode.prototype._dispatchRender = function (render, parentAlpha, parentWTransform, parentWReverseTransform, parentUpdateTransform) {
