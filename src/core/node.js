@@ -180,13 +180,13 @@ export default (
             for (var j = 0, len2 = layer.length; j < len2; ++j) {
               if (node === layer[j]) {
                 layer.splice(j, 1);
-                node.parent = null;
-                node.application = null;
                 if (destroy) {
                   node.destroy();
                 } else {
                   node.stopAllAnimation(true);
+                  node.parent = null;
                 }
+                node.application = null;
                 this._childNodes.count--;
                 this.refresh();
                 return
@@ -199,6 +199,7 @@ export default (
       InnerNode.prototype.removeFromParent = function (destroy) {
         var parent = this.parent;
         if (parent) {
+          this.parent = null;
           parent.removeChildNode(this, destroy);
         }
       }
@@ -310,7 +311,6 @@ export default (
             }
           }
           this._childNodes.nodeLayers = null;
-          this.parent = null;
           this.application = null;
           this.super('destroy');
         }
