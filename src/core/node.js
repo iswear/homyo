@@ -27,14 +27,12 @@ export default (
       InnerNode.prototype.defY = 0;
       InnerNode.prototype.defWidth = 0;
       InnerNode.prototype.defHeight = 0;
-      InnerNode.prototype.defAnchorX = 0;
-      InnerNode.prototype.defAnchorY = 0;
-      InnerNode.prototype.defAlpha = 1;
       InnerNode.prototype.defRotateZ = 0;
       InnerNode.prototype.defScaleX = 1;
       InnerNode.prototype.defScaleY = 1;
       InnerNode.prototype.defInclineX = 0;
       InnerNode.prototype.defInclineY = 0;
+      InnerNode.prototype.defAlpha = 1;
       InnerNode.prototype.defVisible = true;
       InnerNode.prototype.defCursor = 'default';
       InnerNode.prototype.defInteractable = true;
@@ -46,19 +44,17 @@ export default (
         this.defineNotifyProperty('y', LangUtil.checkAndGet(conf.y, this.defY));
         this.defineNotifyProperty('width', LangUtil.checkAndGet(conf.width, this.defWidth));
         this.defineNotifyProperty('height', LangUtil.checkAndGet(conf.height, this.defHeight));
-        this.defineNotifyProperty('anchorX', LangUtil.checkAndGet(conf.anchorX, this.defAnchorX));
-        this.defineNotifyProperty('anchorY', LangUtil.checkAndGet(conf.anchorY, this.defAnchorY));
-        this.defineNotifyProperty('alpha', LangUtil.checkAndGet(conf.alpha, this.defAlpha));
         this.defineNotifyProperty('rotateZ', LangUtil.checkAndGet(conf.rotateZ, this.defRotateZ));
         this.defineNotifyProperty('scaleX', LangUtil.checkAndGet(conf.scaleX, this.defScaleX));
         this.defineNotifyProperty('scaleY', LangUtil.checkAndGet(conf.scaleY, this.defScaleY));
         this.defineNotifyProperty('inclineX', LangUtil.checkAndGet(conf.inclineX, this.defInclineX));
         this.defineNotifyProperty('inclineY', LangUtil.checkAndGet(conf.inclineY, this.defInclineY));
+        this.defineNotifyProperty('alpha', LangUtil.checkAndGet(conf.alpha, this.defAlpha));
         this.defineNotifyProperty('visible', LangUtil.checkAndGet(conf.visible, this.defVisible));
         this.defineNotifyProperty('cursor', LangUtil.checkAndGet(conf.cursor, this.defCursor));
         this.defineNotifyProperty('interactable', LangUtil.checkAndGet(conf.interactable, this.defInteractable));
-        this.defineNotifyProperty('application', LangUtil.checkAndGet(conf.application, null));
         this.defineNotifyProperty('parent', LangUtil.checkAndGet(conf.parent, null));
+        this.defineNotifyProperty('application', LangUtil.checkAndGet(conf.application, null));
 
         this._childNodes =  {count: 0, defLayer: LangUtil.checkAndGet(conf.defLayer, this.defLayer), nodeLayers: []};
 
@@ -88,14 +84,12 @@ export default (
         this.addObserver('yChanged', this.refresh, this, this);
         this.addObserver('widthChanged', this.refresh, this, this);
         this.addObserver('heightChanged', this.refresh, this, this);
-        this.addObserver('anchorXChanged', this.refresh, this, this);
-        this.addObserver('anchorYChanged', this.refresh, this, this);
-        this.addObserver('alphaChanged', this.refresh, this, this);
         this.addObserver('rotateZChanged', this.refresh, this, this);
         this.addObserver('scaleXChanged', this.refresh, this, this);
         this.addObserver('scaleYChanged', this.refresh, this, this);
         this.addObserver('inclineXChanged', this.refresh, this, this);
         this.addObserver('inclineYChanged', this.refresh, this, this);
+        this.addObserver('alphaChanged', this.refresh, this, this);
         this.addObserver('visibleChanged', this.refresh, this, this);
 
         this.addObserver('xChanged', functions.syncTransform, this, this);
@@ -105,10 +99,10 @@ export default (
         this.addObserver('scaleYChanged', functions.syncTransform, this, this);
         this.addObserver('inclineXChanged', functions.syncTransform, this, this);
         this.addObserver('inclineYChanged', functions.syncTransform, this, this);
+        this.addObserver('parentChanged', functions.syncTransform, this, this);
+
         this.addObserver('widthChanged', functions.syncRenderZone, this, this);
         this.addObserver('heightChanged', functions.syncRenderZone, this, this);
-        this.addObserver('anchorXChanged', functions.syncRenderZone, this, this);
-        this.addObserver('anchorYChanged', functions.syncRenderZone, this, this);
       }
 
       InnerNode.prototype.getRectInSelf = function () {
@@ -147,7 +141,7 @@ export default (
         this.addChildNodeToLayer(node, this._childNodes.defLayer);
       }
 
-      InnerNode.prototype.addChildNodeToLayer = function (node, layerIndex, nodeIndex) {
+      InnerNode.prototype.addChildNodeToLayer = function (node, layerIndex) {
         node.removeFromParent(false);
         var childNodes = this._childNodes;
         var nodeLayers = childNodes.nodeLayers;
@@ -160,8 +154,8 @@ export default (
         this.refresh();
       }
 
-      InnerNode.prototype.insertChildNode = function (node, layerIndex) {
-        this.insertChildNodeToLayer(node, this._childNodes.defLayer, layerIndex);
+      InnerNode.prototype.insertChildNode = function (node, nodeIndex) {
+        this.insertChildNodeToLayer(node, this._childNodes.defLayer, nodeIndex);
       }
 
       InnerNode.prototype.insertChildNodeToLayer = function (node, layerIndex, nodeIndex) {
@@ -173,7 +167,6 @@ export default (
         }
         childNodes.count ++;
         node.parent = this;
-        nodeLayers[layerIndex].push(node);
         if (nodeIndex < nodeLayers[layerIndex].length) {
           nodeLayers[layerIndex].splice(nodeIndex, 0, node);
         } else {
@@ -336,33 +329,34 @@ export default (
       }
 
       InnerNode.prototype._dispatchRender = function (render, parentAlpha, parentWTransform, parentWReverseTransform, parentUpdateTransform) {
+        var transform = this._transform, rectInSelf = this._rectInSelf;
+        if (rectInSelf.needUpdateRectInSelf) {
+          rectInSelf.width = Math.round(this.width);
+          rectInSelf.height = Math.round(this.height);
+          rectInSelf.top = Math.round(rectInSelf.height * -0.5);
+          rectInSelf.bottom = Math.round(rectInSelf.height + rectInSelf.top);
+          rectInSelf.left = Math.round(rectInSelf.width * -0.5);
+          rectInSelf.right = Math.round(rectInSelf.width + rectInSelf.left);
+          rectInSelf.needUpdateRectInSelf = false;
+        }
+        var needUpdateTransform = transform.needUpdateTransform;
+        if (needUpdateTransform) {
+          transform.lTransform =
+            MatrixUtil.incline2d(
+              MatrixUtil.scale2d(
+                MatrixUtil.rotate2d(
+                  MatrixUtil.translate2d(MatrixUtil.createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
+          transform.lReverseTransform = MatrixUtil.reverse2d(transform.lTransform);
+          transform.needTransform = !MatrixUtil.isIdentityMat2d(transform.lTransform);
+          transform.needUpdateTransform = false;
+        }
+        if (parentUpdateTransform || needUpdateTransform) {
+          transform.wTransform = MatrixUtil.mulMat2d(parentWTransform, transform.lTransform);
+          transform.wReverseTransform = MatrixUtil.mulMat2d(transform.lReverseTransform, parentWReverseTransform);
+        }
+
         var alpha = this.alpha * parentAlpha
         if (this.visible && alpha > 0) {
-          var transform = this._transform, rectInSelf = this._rectInSelf;
-          if (rectInSelf.needUpdateRectInSelf) {
-            rectInSelf.width = Math.round(this.width);
-            rectInSelf.height = Math.round(this.height);
-            rectInSelf.top = Math.round(rectInSelf.height * (-this.anchorY));
-            rectInSelf.bottom = Math.round(rectInSelf.height + rectInSelf.top);
-            rectInSelf.left = Math.round(rectInSelf.width * (-this.anchorX));
-            rectInSelf.right = Math.round(rectInSelf.width + rectInSelf.left);
-            rectInSelf.needUpdateRectInSelf = false;
-          }
-          var needUpdateTransform = transform.needUpdateTransform;
-          if (needUpdateTransform) {
-            transform.lTransform =
-              MatrixUtil.incline2d(
-                MatrixUtil.scale2d(
-                  MatrixUtil.rotate2d(
-                    MatrixUtil.translate2d(MatrixUtil.createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
-            transform.lReverseTransform = MatrixUtil.reverse2d(transform.lTransform);
-            transform.needTransform = !MatrixUtil.isIdentityMat2d(transform.lTransform);
-            transform.needUpdateTransform = false;
-          }
-          if (parentUpdateTransform || needUpdateTransform) {
-            transform.wTransform = MatrixUtil.mulMat2d(parentWTransform, transform.lTransform);
-            transform.wReverseTransform = MatrixUtil.mulMat2d(transform.lReverseTransform, parentWReverseTransform);
-          }
           if (this.needRender()) {
             // 设置矩阵
             if (transform.needTransform) {

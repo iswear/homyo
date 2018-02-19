@@ -78,7 +78,7 @@ export default (
           for (var i = 0, len = observers.length; i < len; ++i) {
             observer = observers[i];
             if (observer.fn === fn && observer.target === target && observer.sender === sender) {
-              observers.splice(1, 0);
+              observers.splice(i, 1);
               i--;
               len--;
             }

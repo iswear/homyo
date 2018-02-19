@@ -83,8 +83,6 @@ export default (
 
         this.addObserver('widthChanged', functions.syncContainerZone, this, this);
         this.addObserver('heightChanged', functions.syncContainerZone, this, this);
-        this.addObserver('anchorXChanged', functions.syncContainerZone, this, this);
-        this.addObserver('anchorYChanged', functions.syncContainerZone, this, this);
       }
 
       InnerGScene.prototype.destroy = function () {

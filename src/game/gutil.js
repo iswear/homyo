@@ -18,15 +18,6 @@ export default (
         name: 'height',
         tween: true
       }, {
-        name: 'anchorX',
-        tween: true
-      }, {
-        name: 'anchorY',
-        tween: true
-      }, {
-        name: 'alpha',
-        tween: true
-      }, {
         name: 'rotateZ',
         tween: true
       }, {
@@ -40,6 +31,9 @@ export default (
         tween: true
       }, {
         name: 'inclineY',
+        tween: true
+      }, {
+        name: 'alpha',
         tween: true
       }, {
         name: 'visible',
@@ -64,15 +58,6 @@ export default (
         name: 'height',
         tween: true
       }, {
-        name: 'anchorX',
-        tween: true
-      }, {
-        name: 'anchorY',
-        tween: true
-      }, {
-        name: 'alpha',
-        tween: true
-      }, {
         name: 'rotateZ',
         tween: true
       }, {
@@ -86,6 +71,9 @@ export default (
         tween: true
       }, {
         name: 'inclineY',
+        tween: true
+      }, {
+        name: 'alpha',
         tween: true
       }, {
         name: 'visible',

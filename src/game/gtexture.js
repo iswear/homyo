@@ -91,8 +91,6 @@ export default (
       var InnerGTexture = LangUtil.extend(Node);
 
       InnerGTexture.prototype.defImg = null;
-      InnerGTexture.prototype.defAnchorX = 0.5;
-      InnerGTexture.prototype.defAnchorY = 0.5;
       InnerGTexture.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.defineNotifyProperty('img', LangUtil.checkAndGet(conf.img, this.defImg));
