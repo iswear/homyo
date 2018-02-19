@@ -12,12 +12,6 @@ export default (
   function () {
     var modelProperties = [
       {
-        name: 'width',
-        tween: true
-      }, {
-        name: 'height',
-        tween: true
-      }, {
         name: 'rotateZ',
         tween: true
       }, {
@@ -31,6 +25,18 @@ export default (
         tween: true
       }, {
         name: 'inclineY',
+        tween: true
+      }, {
+        name: 'width',
+        tween: true
+      }, {
+        name: 'height',
+        tween: true
+      }, {
+        name: 'anchorX',
+        tween: true
+      }, {
+        name: 'anchorY',
         tween: true
       }, {
         name: 'alpha',
@@ -52,12 +58,6 @@ export default (
         name: 'y',
         tween: true
       }, {
-        name: 'width',
-        tween: true
-      }, {
-        name: 'height',
-        tween: true
-      }, {
         name: 'rotateZ',
         tween: true
       }, {
@@ -71,6 +71,18 @@ export default (
         tween: true
       }, {
         name: 'inclineY',
+        tween: true
+      }, {
+        name: 'width',
+        tween: true
+      }, {
+        name: 'height',
+        tween: true
+      }, {
+        name: 'anchorX',
+        tween: true
+      }, {
+        name: 'anchorY',
         tween: true
       }, {
         name: 'alpha',

@@ -69,6 +69,8 @@ export default (
       var InnerGScene = LangUtil.extend(Node);
 
       InnerGScene.prototype.defLayer = 1;
+      InnerGScene.prototype.defAnchorX = 0;
+      InnerGScene.prototype.defAnchorY = 0;
       InnerGScene.prototype.init = function (conf) {
         this.super('init', [ conf ]);
         this.defineNotifyProperty('map', LangUtil.checkAndGet(conf.map, null));
@@ -83,6 +85,8 @@ export default (
 
         this.addObserver('widthChanged', functions.syncContainerZone, this, this);
         this.addObserver('heightChanged', functions.syncContainerZone, this, this);
+        this.addObserver('anchorXChanged', functions.syncContainerZone, this, this);
+        this.addObserver('anchorYChanged', functions.syncContainerZone, this, this);
       }
 
       InnerGScene.prototype.destroy = function () {

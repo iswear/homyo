@@ -25,13 +25,15 @@ export default (
 
       InnerNode.prototype.defX = 0;
       InnerNode.prototype.defY = 0;
-      InnerNode.prototype.defWidth = 0;
-      InnerNode.prototype.defHeight = 0;
       InnerNode.prototype.defRotateZ = 0;
       InnerNode.prototype.defScaleX = 1;
       InnerNode.prototype.defScaleY = 1;
       InnerNode.prototype.defInclineX = 0;
       InnerNode.prototype.defInclineY = 0;
+      InnerNode.prototype.defWidth = 0;
+      InnerNode.prototype.defHeight = 0;
+      InnerNode.prototype.defAnchorX = 0;
+      InnerNode.prototype.defAnchorY = 0;
       InnerNode.prototype.defAlpha = 1;
       InnerNode.prototype.defVisible = true;
       InnerNode.prototype.defCursor = 'default';
@@ -42,13 +44,15 @@ export default (
         this.super('init', [conf]);
         this.defineNotifyProperty('x', LangUtil.checkAndGet(conf.x, this.defX));
         this.defineNotifyProperty('y', LangUtil.checkAndGet(conf.y, this.defY));
-        this.defineNotifyProperty('width', LangUtil.checkAndGet(conf.width, this.defWidth));
-        this.defineNotifyProperty('height', LangUtil.checkAndGet(conf.height, this.defHeight));
         this.defineNotifyProperty('rotateZ', LangUtil.checkAndGet(conf.rotateZ, this.defRotateZ));
         this.defineNotifyProperty('scaleX', LangUtil.checkAndGet(conf.scaleX, this.defScaleX));
         this.defineNotifyProperty('scaleY', LangUtil.checkAndGet(conf.scaleY, this.defScaleY));
         this.defineNotifyProperty('inclineX', LangUtil.checkAndGet(conf.inclineX, this.defInclineX));
         this.defineNotifyProperty('inclineY', LangUtil.checkAndGet(conf.inclineY, this.defInclineY));
+        this.defineNotifyProperty('width', LangUtil.checkAndGet(conf.width, this.defWidth));
+        this.defineNotifyProperty('height', LangUtil.checkAndGet(conf.height, this.defHeight));
+        this.defineNotifyProperty('anchorX', LangUtil.checkAndGet(conf.anchorX, this.defAnchorX));
+        this.defineNotifyProperty('anchorY', LangUtil.checkAndGet(conf.anchorY, this.defAnchorY));
         this.defineNotifyProperty('alpha', LangUtil.checkAndGet(conf.alpha, this.defAlpha));
         this.defineNotifyProperty('visible', LangUtil.checkAndGet(conf.visible, this.defVisible));
         this.defineNotifyProperty('cursor', LangUtil.checkAndGet(conf.cursor, this.defCursor));
@@ -82,13 +86,15 @@ export default (
 
         this.addObserver('xChanged', this.refresh, this, this);
         this.addObserver('yChanged', this.refresh, this, this);
-        this.addObserver('widthChanged', this.refresh, this, this);
-        this.addObserver('heightChanged', this.refresh, this, this);
         this.addObserver('rotateZChanged', this.refresh, this, this);
         this.addObserver('scaleXChanged', this.refresh, this, this);
         this.addObserver('scaleYChanged', this.refresh, this, this);
         this.addObserver('inclineXChanged', this.refresh, this, this);
         this.addObserver('inclineYChanged', this.refresh, this, this);
+        this.addObserver('widthChanged', this.refresh, this, this);
+        this.addObserver('heightChanged', this.refresh, this, this);
+        this.addObserver('anchorXChanged', this.refresh, this, this);
+        this.addObserver('anchorYChanged', this.refresh, this, this);
         this.addObserver('alphaChanged', this.refresh, this, this);
         this.addObserver('visibleChanged', this.refresh, this, this);
 
@@ -103,6 +109,8 @@ export default (
 
         this.addObserver('widthChanged', functions.syncRenderZone, this, this);
         this.addObserver('heightChanged', functions.syncRenderZone, this, this);
+        this.addObserver('anchorXChanged', functions.syncRenderZone, this, this);
+        this.addObserver('anchorYChanged', functions.syncRenderZone, this, this);
       }
 
       InnerNode.prototype.getRectInSelf = function () {
@@ -333,9 +341,9 @@ export default (
         if (rectInSelf.needUpdateRectInSelf) {
           rectInSelf.width = Math.round(this.width);
           rectInSelf.height = Math.round(this.height);
-          rectInSelf.top = Math.round(rectInSelf.height * -0.5);
+          rectInSelf.top = Math.round(rectInSelf.height * (-this.anchorY));
           rectInSelf.bottom = Math.round(rectInSelf.height + rectInSelf.top);
-          rectInSelf.left = Math.round(rectInSelf.width * -0.5);
+          rectInSelf.left = Math.round(rectInSelf.width * (-this.anchorX));
           rectInSelf.right = Math.round(rectInSelf.width + rectInSelf.left);
           rectInSelf.needUpdateRectInSelf = false;
         }

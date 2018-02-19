@@ -14,6 +14,8 @@ export default (
       var InnerGNode = LangUtil.extend(Node);
 
       InnerGNode.prototype.defLayer = 1;
+      InnerGNode.prototype.defAnchorX = 0.5;
+      InnerGNode.prototype.defAnchorY = 0.5;
       InnerGNode.prototype.init = function (conf) {
         this.super('init', [conf]);
 
