@@ -9,6 +9,11 @@ import GTexture from './gtexture';
 
 export default (
   function () {
+    var functions = {
+      syncImg: function (sender, newVal, oldVal) {
+        this._texture.img = newVal;
+      }
+    }
 
     var GNode = (function () {
       var InnerGNode = LangUtil.extend(Node);
@@ -18,10 +23,14 @@ export default (
       InnerGNode.prototype.defAnchorY = 0.5;
       InnerGNode.prototype.init = function (conf) {
         this.super('init', [conf]);
+        this.defineNotifyProperty('img', LangUtil.checkAndGet(conf.img, null));
 
         this._texture = new GTexture(LangUtil.checkAndGet(conf.texture, {}));
-
         this.addChildNodeToLayer(this._texture, 0);
+
+        functions.syncImg.call(this, this, this.img, null)
+
+        this.addObserver('imgChanged', functions.syncImg, this, this);
       }
 
       InnerGNode.prototype.getTexture = function (conf) {

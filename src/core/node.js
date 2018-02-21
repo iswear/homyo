@@ -37,7 +37,7 @@ export default (
       InnerNode.prototype.defAlpha = 1;
       InnerNode.prototype.defVisible = true;
       InnerNode.prototype.defCursor = 'default';
-      InnerNode.prototype.defInteractable = true;
+      InnerNode.prototype.defInteractive = true;
       InnerNode.prototype.defLayer = 0;
 
       InnerNode.prototype.init = function (conf) {
@@ -56,7 +56,7 @@ export default (
         this.defineNotifyProperty('alpha', LangUtil.checkAndGet(conf.alpha, this.defAlpha));
         this.defineNotifyProperty('visible', LangUtil.checkAndGet(conf.visible, this.defVisible));
         this.defineNotifyProperty('cursor', LangUtil.checkAndGet(conf.cursor, this.defCursor));
-        this.defineNotifyProperty('interactable', LangUtil.checkAndGet(conf.interactable, this.defInteractable));
+        this.defineNotifyProperty('interactive', LangUtil.checkAndGet(conf.interactive, this.defInteractive));
         this.defineNotifyProperty('parent', LangUtil.checkAndGet(conf.parent, null));
         this.defineNotifyProperty('application', LangUtil.checkAndGet(conf.application, null));
 
@@ -374,7 +374,7 @@ export default (
             // 设置透明度
             render.alpha = alpha;
             // 绘制自生
-            this.postNotification('render', this, [ render ]);
+            this.postNotification('render', this, [render]);
             // 绘制子元素
             var layers = this._childNodes.nodeLayers;
             for (var i = 0, len = layers.length; i < len; ++i) {
@@ -431,13 +431,13 @@ export default (
 
           if (targetInChildren) {
             if (e.bubble) {
-              this.postNotification(name, this, [ e ]);
+              this.postNotification(name, this, [e]);
             }
             return true;
           } else {
             if (result) {
-              if (this.interactable) {
-                this.postNotification(name, this, [ e ]);
+              if (this.interactive) {
+                this.postNotification(name, this, [e]);
               }
               return true;
             } else {

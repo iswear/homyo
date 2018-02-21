@@ -10,91 +10,26 @@ import QueueAnimation from '../core/animation/queue-animation';
 
 export default (
   function () {
-    var modelProperties = [
-      {
-        name: 'rotateZ',
-        tween: true
-      }, {
-        name: 'scaleX',
-        tween: true
-      }, {
-        name: 'scaleY',
-        tween: true
-      }, {
-        name: 'inclineX',
-        tween: true
-      }, {
-        name: 'inclineY',
-        tween: true
-      }, {
-        name: 'width',
-        tween: true
-      }, {
-        name: 'height',
-        tween: true
-      }, {
-        name: 'anchorX',
-        tween: true
-      }, {
-        name: 'anchorY',
-        tween: true
-      }, {
-        name: 'alpha',
-        tween: true
-      }, {
-        name: 'visible',
-        tween: false
-      }, {
-        name: 'img',
-        tween: false
-      }
+    var rootNodeProps = [
+      'rotateZ', 'scaleX', 'scaleY', 'inclineX', 'inclineY', 'alpha', 'visible', 'img'
     ];
 
-    var otherProperties = [
-      {
-        name: 'x',
-        tween: true
-      }, {
-        name: 'y',
-        tween: true
-      }, {
-        name: 'rotateZ',
-        tween: true
-      }, {
-        name: 'scaleX',
-        tween: true
-      }, {
-        name: 'scaleY',
-        tween: true
-      }, {
-        name: 'inclineX',
-        tween: true
-      }, {
-        name: 'inclineY',
-        tween: true
-      }, {
-        name: 'width',
-        tween: true
-      }, {
-        name: 'height',
-        tween: true
-      }, {
-        name: 'anchorX',
-        tween: true
-      }, {
-        name: 'anchorY',
-        tween: true
-      }, {
-        name: 'alpha',
-        tween: true
-      }, {
-        name: 'visible',
-        tween: false
-      }, {
-        name: 'img',
-        tween: false
-      }
+    var normalNodeProps = [
+      'x', 'y', 'rotateZ', 'scaleX', 'scaleY', 'inclineX', 'inclineY', 'alpha', 'visible', 'img'
     ];
+
+    var tweenableNodeProps = {
+      x: true,
+      y: true,
+      rotateZ: true,
+      scaleX: true,
+      scaleY: true,
+      inclineX: true,
+      inclineY: true,
+      alpha: true,
+      visible: false,
+      img: false
+    };
 
     var propertyUnTweenUpdate = function (binder, param) {
       binder.node[param.property] = param.value;
@@ -143,131 +78,110 @@ export default (
     }
 
     var GUtil = {
-      compileFrames: function (node, frames, model) {
-        var preStatus = {time: 0, tween: false}, properties = model ? modelProperties : otherProperties;
-        for (var i = 0, len = properties.length; i < len; ++i) {
-          var property = properties[i];
-          preStatus[property] = node[property];
-        }
+      compileModelFrames: function (node, frames, isRoot) {
         if (frames && frames.length > 0) {
+          var prevTime = 0;
+          var prevProps;
           var syncQueue = [];
           for (var i = 0, len = frames.length; i < len; ++i) {
             var asyncQueue = [];
             var frame = frames[i];
+            // 第一帧校验，关键帧必须为0
             if (i === 0) {
               if (frame.time !== 0) {
-                throw 'first frame time should be zero';
+                console.error('First frame time should be zero');
+                return null;
               } else {
-                for (var j = 0, len2 = properties.length; j < len2; ++j) {
-                  var property = properties[j];
-                  var value = frame[property.name];
-                  if (!LangUtil.isUndefined(value) && value !== preStatus[property.name]) {
-                    asyncQueue.push(
-                      new SchedulerAnimation({
-                        fn: propertyUnTweenUpdate,
-                        target: undefined,
-                        interval: 0,
-                        repeats: 1,
-                        param: {
-                          property: property.name,
-                          value: value
-                        }
-                      })
-                    );
-                    preStatus[property.name] = value;
+                prevProps = LangUtil.clone(frame.data.props);
+              }
+            }
+            // 校验完毕开始编译动画
+            var asyncQueue = [];
+            var props = isRoot ? rootNodeProps : normalNodeProps;
+
+            if (frame.tween && i !== 0) {
+              // 渐变动画
+              for (var i2 = 0, len2 = props.length; i2 < len2; ++i2) {
+                var prevProp = prevProps[props[i2]];
+                var currProp = frame.data.props[props[i2]];
+                if (!LangUtil.isUndefined(currProp) && prevProp !== currProp) {
+                  var deltaProp = currProp - prevProp;
+                  var deltaTime = frame.time - prevTime;
+                  if (tweenableNodeProps[props[i2]]) {
+                    if (frame.data.curves && frame.data.curves[props[i2]] && frame.data.curves[props[i2]].length === 8) {
+                      var curve = frame.curves[props[i2]];
+                      var params = [];
+                      var width = curve[6] - curve[0];
+                      var height = curve[7] -  curve[1];
+                      params[0] = 0;
+                      params[2] = (curve[2] - curve[0]) / width * deltaTime;
+                      params[4] = (curve[4] - curve[0]) / width * deltaTime;
+                      params[6] = deltaTime;
+                      params[1] = 0;
+                      params[3] = (curve[3] - curve[1]) / height * deltaProp;
+                      params[5] = (curve[5] - curve[1]) / height * deltaProp;
+                      params[7] = deltaProp;
+                      syncQueue.push(new PropertyAnimation({
+                        property: props[i2],
+                        targetOffset: deltaProp,
+                        offsetFn: propertyCurveTweenUpdate(params)
+                      }));
+                    } else {
+                      asyncQueue.push(new PropertyAnimation({
+                        property: props[i2],
+                        targetOffset: deltaProp,
+                        offsetFn: propertyLineTweenUpdate(deltaProp, deltaTime)
+                      }));
+                    }
+                  } else {
+                    asyncQueue.push(new SchedulerAnimation({
+                      fn: propertyUnTweenUpdate,
+                      target: undefined,
+                      interval: deltaTime,
+                      repeats: 1,
+                      param: {property: props[i2], value: currProp}
+                    }));
                   }
+                  prevProps[props[i2]] = currProp;
                 }
               }
             } else {
-              if (frame.tween) {
-                for (var j = 0, len2 = properties.length; j < len2; ++j) {
-                  var property = properties[j];
-                  var value = frame[property.name];
-                  if (!LangUtil.isUndefined(value) && value !== preStatus[property.name]) {
-                    if (property.tween) {
-                      var curve = frame[property.name + 'Curve'];
-                      var targetOffset = value - preStatus[property.name];
-                      var deltaTime = frame.time - preStatus.time;
-                      if (curve) {
-                        var params = [];
-                        var xWidth = curve[6] - curve[0];
-                        var yHeight = curve[7] - curve[1];
-                        params[0] = 0;
-                        params[2] = (curve[2] - curve[0]) / xWidth * deltaTime;
-                        params[4] = (curve[4] - curve[0]) / xWidth * deltaTime;
-                        params[6] = deltaTime;
-                        params[1] = 0;
-                        params[3] = (curve[3] - curve[1]) / yHeight * targetOffset;
-                        params[5] = (curve[5] - curve[1]) / yHeight * targetOffset;
-                        params[7] = targetOffset;
-                        asyncQueue.push(
-                          new PropertyAnimation({
-                            property: property.name,
-                            targetOffset: targetOffset,
-                            offsetFn: propertyCurveTweenUpdate(params)
-                          })
-                        );
-                      } else {
-                        asyncQueue.push(
-                          new PropertyAnimation({
-                            property: property.name,
-                            targetOffset: targetOffset,
-                            offsetFn: propertyLineTweenUpdate(targetOffset, deltaTime)
-                          })
-                        );
-                      }
-                    } else {
-                      var deltaTime = frame.time - preStatus.time;
-                      asyncQueue.push(
-                        new SchedulerAnimation({
-                          fn: propertyUnTweenUpdate,
-                          target: undefined,
-                          interval: deltaTime,
-                          repeats: 1,
-                          param: {
-                            property: property.name,
-                            value: value
-                          }
-                        })
-                      );
-                    }
-                    preStatus[property.name] = value;
-                  }
+              // 逐帧动画
+              for (var i2 = 0, len2 = props.length; i2 < len2; ++i2) {
+                var prevProp = prevProps[props[i2]];
+                var currProp = frame.data.props[props[i2]];
+                if (LangUtil.isUndefined(prevProp)) {
+                  console.error('First frame has some required node property:' + props[i2]);
+                  return null;
                 }
-              } else {
-                for (var j = 0, len2 = properties.length; j < len2; ++j) {
-                  var property = properties[j];
-                  var value = frame[property.name];
-                  if (!LangUtil.isUndefined(value) && value !== preStatus[property.name]) {
-                    var deltaTime = frame.time - preStatus.time;
-                    asyncQueue.push(
-                      new SchedulerAnimation({
-                        fn: propertyUnTweenUpdate,
-                        target: undefined,
-                        interval: deltaTime,
-                        repeats: 1,
-                        param: {
-                          property: property.name,
-                          value: value
-                        }
-                      })
-                    );
-                    preStatus[property.name] = value;
-                  }
+                if (i === 0 || (!LangUtil.isUndefined(currProp) && prevProp !== currProp)) {
+                  asyncQueue.push(new SchedulerAnimation({
+                    fn: propertyUnTweenUpdate,
+                    target: undefined,
+                    interval: frame.time - prevTime,
+                    repeats: 1,
+                    param: {property: props[i2], value: currProp}
+                  }));
+                  prevProps[props[i2]] = currProp;
                 }
               }
             }
-            syncQueue.push(new QueueAnimation({
-              animations: asyncQueue,
-              sync: false
-            }));
-            preStatus.time = frame.time;
-            preStatus.tween = frame.tween;
+            prevTime = frame.time;
+            if (asyncQueue.length > 0) {
+              syncQueue.push(new QueueAnimation({
+                animations: asyncQueue,
+                sync: false
+              }));
+            }
           }
-          return new QueueAnimation({
-            animations: syncQueue,
-            sync: true
-          });
+          if (syncQueue.length > 0) {
+            return new QueueAnimation({
+              animations: syncQueue,
+              sync: true
+            });
+          } else {
+            return null;
+          }
         } else {
           return null;
         }

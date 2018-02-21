@@ -96,7 +96,7 @@ export default (
             rArr.push(util.clone(val[i]));
           }
           return rArr;
-        } else if (util.isObject()) {
+        } else if (util.isObject(val)) {
           var rObj = {};
           for (var item in val) {
             if (val.hasOwnProperty(item)) {

@@ -32,7 +32,7 @@ export default (
       }
       function compileActions (actions) {
         this._actions = {};
-        if (actions) {
+        if (actions) {R
           for (var i = 0, len = actions.length; i < len; ++i) {
             var modelAction = actions[i];
             var modelActionFrames = modelAction.frames;
@@ -42,7 +42,7 @@ export default (
                 var node = this._nodeMap[nodeId];
                 var nodeFrames = modelActionFrames[nodeId];
                 if (node && nodeFrames) {
-                  var animation = GUtil.compileFrames(node, nodeFrames, false);
+                  var animation = GUtil.compileModelFrames(node, nodeFrames, node === this._node);
                   if (animation) {
                     nodeCompiledActions.push({
                       node: node,
@@ -93,12 +93,10 @@ export default (
      *   name: '模型名称',
      *   root: {
      *     id: '',
+     *     name: '',
      *     node: {
      *       x: '',
      *       y: '' ...
-     *     },
-     *     info: {
-     *       name: '模型名称'
      *     },
      *     ctrl: {
      *       height: ''
@@ -202,12 +200,12 @@ export default (
           var node = this._nodeMap[nodeId];
           var nodeActFrames = modelActFrames[nodeId];
           if (node && nodeActFrames) {
-            var animation = GUtil.compileFrames(node, nodeActFrames, false);
+            var animation = GUtil.compileModelFrames(node, nodeActFrames, node === this._node);
             if (animation) {
               nodeActions.push({
                 node: node,
                 animation: animation
-              })
+              });
             }
           }
         }
