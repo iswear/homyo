@@ -45,7 +45,7 @@ export default (
             i--;
             len--;
             if (binder.fn) {
-              binder.fn.call(binder, 0, true);
+              binder.fn.call(binder.target, binder, 0, true);
             }
           }
         }
@@ -60,7 +60,7 @@ export default (
             i--;
             len--;
             if (binder.fn) {
-              binder.fn.call(binder, 0, true);
+              binder.fn.call(binder.target, binder, 0, true);
             }
           }
         }
@@ -76,11 +76,11 @@ export default (
               i--;
               len--;
               if (binder.fn) {
-                binder.fn.call(binder, deltaTime, true);
+                binder.fn.call(binder.target, binder, deltaTime, true);
               }
             } else {
               if (binder.fn) {
-                binder.fn.call(binder, deltaTime, false);
+                binder.fn.call(binder.target, binder, deltaTime, false);
               }
             }
           }
