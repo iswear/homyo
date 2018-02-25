@@ -44,9 +44,6 @@ export default (
             binders.splice(i, 1);
             i--;
             len--;
-            if (binder.fn) {
-              binder.fn.call(binder.target, binder, 0, true);
-            }
           }
         }
       }
@@ -59,9 +56,6 @@ export default (
             binders.splice(i, 1);
             i--;
             len--;
-            if (binder.fn) {
-              binder.fn.call(binder.target, binder, 0, true);
-            }
           }
         }
       }

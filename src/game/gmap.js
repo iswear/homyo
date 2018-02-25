@@ -9,17 +9,17 @@ import Node from '../core/node';
 
 export default (
   function () {
-    var functions = {
-      syncGridVisible: function () {
+    var functions = (function () {
+      function syncGridVisible () {
         if (this.gridVisible) {
-          if (this.getObserverByAllParams('render', functions.renderGrid, this, this) === null) {
-            this.addObserver('render', functions.renderGrid, this, this, 1);
+          if (this.getObserverByAllParams('render', renderGrid, this, this) === null) {
+            this.addObserver('render', renderGrid, this, this, 1);
           }
         } else {
-          this.removeObserver('render', functions.renderGrid, this, this);
+          this.removeObserver('render', renderGrid, this, this);
         }
-      },
-      renderGrid: function (sender, render) {
+      }
+      function renderGrid (sender, render) {
         var rect = this.getRectInSelf();
         var left = rect.left;
         var top = rect.top;
@@ -45,7 +45,12 @@ export default (
         render.strokeStyle = this.gridColor;
         render.stroke();
       }
-    };
+
+      return {
+        syncGridVisible: syncGridVisible,
+        renderGrid: renderGrid
+      }
+    })();
 
     var GMap = (function () {
       var InnerGMap = LangUtil.extend(Node);
@@ -67,13 +72,24 @@ export default (
         this.defineNotifyProperty('containerTop', LangUtil.checkAndGet(conf.containerTop, Infinity));
         this.defineNotifyProperty('containerBottom', LangUtil.checkAndGet(conf.containerBottom, Infinity));
 
+        this._models = [];
+
         functions.syncGridVisible.call(this);
 
         this.addObserver('gridVisibleChanged', this.refresh, this, this);
         this.addObserver('gridColorChanged', this.refresh, this, this);
         this.addObserver('gridWidthChanged', this.refresh, this, this);
         this.addObserver('gridHeightChanged', this.refresh, this, this);
+
         this.addObserver('gridVisibleChanged', functions.syncGridVisible, this, this);
+      }
+
+      InnerGMap.prototype.addModel = function (model) {
+        
+      }
+
+      InnerGMap.prototype.removeModel = function (model) {
+
       }
 
       return InnerGMap;

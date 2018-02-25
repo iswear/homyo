@@ -7,5 +7,5 @@ public class GNodeConfig extends NodeConfig {
 }
 ```
 ## 二、依赖类
-1. [NodeConfig](../core/Node.MD)
+1. [NodeConfig](../../core/Node.MD)
 1. [GTextureConfig](./GTexture.MD)

@@ -11,18 +11,18 @@ export default (
   function () {
     var doc = document;
 
-    var functions = {
-      syncRenderSize: function () {
+    var functions = (function () {
+      function syncRenderSize () {
         this.width = this.gridWidth * this.col;
         this.height = this.gridHeight * this.row;
-      },
-      refreshRenderCache: function () {
+      }
+      function refreshRenderCache () {
         this._mapRenderCache.cacheInvalid = true;
-      },
-      renderTiledMap: function (sender, render) {
+      }
+      function renderTiledMap (sender, render) {
         var mapCache = this._mapRenderCache;
         if (mapCache.cacheInvalid) {
-          functions.renderTiledMapCache.call(this);
+          renderTiledMapCache.call(this);
           mapCache.cacheInvalid = false;
         }
         var rect = this.getRectInSelf();
@@ -37,8 +37,8 @@ export default (
             mapCache.cacheFore.getCanvas(), x, y, width, height, left, top, width, height
           );
         }
-      },
-      renderTiledMapCache: function () {
+      }
+      function renderTiledMapCache () {
         var rect = this.getRectInSelf();
         var left = rect.left < this.containerLeft ? this.containerLeft : rect.left;
         var top = rect.top < this.containerTop ? this.containerTop : rect.top;
@@ -83,7 +83,7 @@ export default (
                       var tiled = tiles[m];
                       var image = fileLoader.loadImageAsync(
                         tiled.url,
-                        functions.loadImageFinished,
+                        loadImageFinished,
                         this
                       );
                       if (image !== null) {
@@ -128,7 +128,7 @@ export default (
                   var tiled = tiles[m];
                   var image = fileLoader.loadImageAsync(
                     tiled.url,
-                    functions.loadImageFinished,
+                    loadImageFinished,
                     this
                   );
                   if (image !== null) {
@@ -146,13 +146,21 @@ export default (
           mapRenderCache.topRow = topRow;
           mapRenderCache.bottomRow = bottomRow;
         }
-      },
-      loadImageFinished () {
+      }
+      function loadImageFinished () {
         this._mapRenderCache.cacheInvalid = true;
         this._mapRenderCache.cacheInit = false;
         this.refresh();
       }
-    }
+
+      return {
+        syncRenderSize: syncRenderSize,
+        refreshRenderCache: refreshRenderCache,
+        renderTiledMap: renderTiledMap,
+        renderTiledMapCache: renderTiledMapCache,
+        loadImageFinished: loadImageFinished
+      }
+    })();
 
     var GTiledMap = (function () {
       var InnerGTiledMap = LangUtil.extend(GMap);

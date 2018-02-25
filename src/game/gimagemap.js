@@ -8,8 +8,8 @@ import GMap from './gmap';
 
 export default (
   function () {
-    var functions = {
-      syncImg: function () {
+    var functions = (function () {
+      function syncImg () {
         if (this.img !== null && this.img !== '') {
           var img = this._img;
           img.url = this.img;
@@ -21,12 +21,12 @@ export default (
           this.removeObserver('render', render_img, this, this);
         }
         this.render();
-      },
-      renderImg: function (sender, render) {
+      }
+      function renderImg (sender, render) {
         var img = this._img;
         var image = this.findApplication().getFileLoader().loadImageAsync(
           img.url,
-          functions.imageLoadFinished,
+          imageLoadFinished,
           this
         );
         if (image !== null) {
@@ -42,11 +42,17 @@ export default (
           var height = (rect.bottom < this.containerBottom ? rect.bottom : this.containerBottom) - top;
           render.drawImageExt(image, left, top, width, height, left, top, width, height);
         }
-      },
-      imageLoadFinished: function (url, success) {
-        this.refresh()
       }
-    }
+      function imageLoadFinished (url, success) {
+        this.refresh();
+      }
+      
+      return {
+        syncImg: syncImg,
+        renderImg: renderImg,
+        imageLoadFinished: imageLoadFinished
+      }
+    })();
 
     var GImageMap = (function () {
       var InnerGImageMap = LangUtil.extend(GMap);

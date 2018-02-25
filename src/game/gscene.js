@@ -8,44 +8,44 @@ import Node from '../core/node';
 
 export default (
   function () {
-    var functions = {
-      syncMap: function (sender, newVal, oldVal) {
+    var functions = (function () {
+      function syncMap (sender, newVal, oldVal) {
         if (oldVal) {
           this.removeChildNode(oldVal, true);
         }
         var map = this.map;
         if (map) {
           this.addChildNode(map, 0);
-          if (map.getObserverByAllParams('xChanged', functions.syncContainerZone, this, map) === null) {
-            map.addObserver('xChanged', functions.syncContainerZone, this, map);
+          if (map.getObserverByAllParams('xChanged', syncContainerZone, this, map) === null) {
+            map.addObserver('xChanged', syncContainerZone, this, map);
           }
-          if (map.getObserverByAllParams('yChanged', functions.syncContainerZone, this, map) === null) {
-            map.addObserver('yChanged', functions.syncContainerZone, this, map);
+          if (map.getObserverByAllParams('yChanged', syncContainerZone, this, map) === null) {
+            map.addObserver('yChanged', syncContainerZone, this, map);
           }
-          if (map.getObserverByAllParams('rotateZChanged', functions.syncContainerZone, this, map) === null) {
-            map.addObserver('rotateZChanged', functions.syncContainerZone, this, map);
+          if (map.getObserverByAllParams('rotateZChanged', syncContainerZone, this, map) === null) {
+            map.addObserver('rotateZChanged', syncContainerZone, this, map);
           }
-          if (map.getObserverByAllParams('scaleXChanged', functions.syncContainerZone, this, map) === null) {
-            map.addObserver('scaleXChanged', functions.syncContainerZone, this, map);
+          if (map.getObserverByAllParams('scaleXChanged', syncContainerZone, this, map) === null) {
+            map.addObserver('scaleXChanged', syncContainerZone, this, map);
           }
-          if (map.getObserverByAllParams('scaleYChanged', functions.syncContainerZone, this, map) === null) {
-            map.addObserver('scaleYChanged', functions.syncContainerZone, this, map);
+          if (map.getObserverByAllParams('scaleYChanged', syncContainerZone, this, map) === null) {
+            map.addObserver('scaleYChanged', syncContainerZone, this, map);
           }
-          if (map.getObserverByAllParams('inclineX', functions.syncContainerZone, this, map) === null) {
-            map.addObserver('inclineX', functions.syncContainerZone, this, map);
+          if (map.getObserverByAllParams('inclineX', syncContainerZone, this, map) === null) {
+            map.addObserver('inclineX', syncContainerZone, this, map);
           }
-          if (map.getObserverByAllParams('inclineY', functions.syncContainerZone, this, map) === null) {
-            map.addObserver('inclineY', functions.syncContainerZone, this, map);
+          if (map.getObserverByAllParams('inclineY', syncContainerZone, this, map) === null) {
+            map.addObserver('inclineY', syncContainerZone, this, map);
           }
-          if (map.getObserverByAllParams('render', functions.syncContainerZoneListener, this, map) === null) {
-            map.addObserver('render', functions.syncContainerZoneListener, this, map, -1);
+          if (map.getObserverByAllParams('render', syncContainerZoneListener, this, map) === null) {
+            map.addObserver('render', syncContainerZoneListener, this, map, -1);
           }
         }
-      },
-      syncContainerZone: function (sender) {
+      }
+      function syncContainerZone (sender) {
         this._needUpdateMapContainerZone = true;
-      },
-      syncContainerZoneListener: function () {
+      }
+      function syncContainerZoneListener () {
         if (this._needUpdateMapContainerZone) {
           var map = this.map;
           if (map) {
@@ -62,8 +62,13 @@ export default (
           }
         }
       }
-    };
 
+      return {
+        syncMap: syncMap,
+        syncContainerZone: syncContainerZone,
+        syncContainerZoneListener: syncContainerZoneListener
+      }
+    })();
 
     var GScene = (function () {
       var InnerGScene = LangUtil.extend(Node);

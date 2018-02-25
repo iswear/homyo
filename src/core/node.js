@@ -10,15 +10,19 @@ import MatrixUtil from '../utils/matrix-util';
 
 export default (
   function () {
-
-    var functions = {
-      syncTransform: function () {
+    var functions = (function () {
+      function syncTransform () {
         this._transform.needUpdateTransform = true;
-      },
-      syncRenderZone: function () {
+      }
+      function syncRenderZone () {
         this._rectInSelf.needUpdateRectInSelf = true;
       }
-    }
+
+      return {
+        syncTransform: syncTransform,
+        syncRenderZone: syncRenderZone
+      }
+    })();
 
     var Node = (function () {
       var InnerNode = LangUtil.extend(Notifier);

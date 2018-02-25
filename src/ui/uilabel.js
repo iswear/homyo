@@ -13,26 +13,26 @@ export default (
   function () {
     var doc = document;
 
-    var functions = {
-      syncFont: function () {
+    var functions = (function () {
+      function syncFont () {
         this._font = this.fontSize + 'px ' + this.fontFamily;
-      },
-      syncLabelText: function () {
+      }
+      function syncLabelText () {
         if (this.text !== null && this.text.length > 0) {
           if (this.getObserverByAllParams('render', render_labelText, this, this) === null) {
-            this.addObserver('render', functions.renderLabelText, this, this);
+            this.addObserver('render', renderLabelText, this, this);
           }
         } else {
-          this.removeObserver('render', functions.renderLabelText, this, this);
+          this.removeObserver('render', renderLabelText, this, this);
         }
-      },
-      refreshTextRenderLayout: function () {
+      }
+      function refreshTextRenderLayout () {
         this._textRenderCache.layoutInvalid = true;
-      },
-      refreshTextRenderCache: function () {
+      }
+      function refreshTextRenderCache () {
         this._textRenderCache.cacheInvalid = true;
-      },
-      renderLabelText: function (sender, render) {
+      }
+      function renderLabelText (sender, render) {
         var rect = this.getRectInSelf();
         var left = rect.left;
         var top = rect.top;
@@ -41,11 +41,11 @@ export default (
 
         var renderCache = this._textRenderCache;
         if (renderCache.layoutInvalid) {
-          functions.renderLabelTextLayout.call(this)
+          renderLabelTextLayout.call(this)
           renderCache.layoutInvalid = false;
         }
         if (renderCache.cacheInvalid) {
-          functions.renderLabelTextCache.call(this);
+          renderLabelTextCache.call(this);
           renderCache.cacheInvalid = false;
         }
         var cacheRender = renderCache.cache;
@@ -74,8 +74,8 @@ export default (
           }
           render.drawImageExt(cacheRender.getCanvas(), 0, 0, srcWidth, srcHeight, desX, desY, srcWidth, srcHeight);
         }
-      },
-      renderLabelTextLayout: function () {
+      }
+      function renderLabelTextLayout () {
         var renderCache = this._textRenderCache;
         if (this.textLineNum != 1) {
           var rect = this.getRectInSelf();
@@ -87,8 +87,8 @@ export default (
             lines: [this.text]
           };
         }
-      },
-      renderLabelTextCache: function () {
+      }
+      function renderLabelTextCache () {
         var rect = this.getRectInSelf();
         var renderCache = this._textRenderCache;
         var layoutInfo = renderCache.layout;
@@ -119,7 +119,17 @@ export default (
           ty += lineHeight;
         }
       }
-    };
+
+      return {
+        syncFont: syncFont,
+        syncLabelText: syncLabelText,
+        refreshTextRenderLayout: refreshTextRenderLayout,
+        refreshTextRenderCache: refreshTextRenderCache,
+        renderLabelText: renderLabelText,
+        renderLabelTextLayout: renderLabelTextLayout,
+        renderLabelTextCache: renderLabelTextCache
+      }
+    })();
 
     var UILabel = (function () {
       var InnerUILabel = LangUtil.extend(UINode);

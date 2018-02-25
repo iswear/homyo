@@ -9,30 +9,30 @@ import Node from '../core/node';
 
 export default (
   function () {
-    var functions = {
-      syncClipOrBackground: function () {
+    var functions = (function () {
+      function syncClipOrBackground () {
         if (this.clipable || this.backgroundColor != null) {
-          if (this.getObserverByAllParams('render', functions.renderClipAndBackground, this, this) === null) {
-            this.addObserver('render', functions.renderClipAndBackground, this, this, -Infinity);
+          if (this.getObserverByAllParams('render', renderClipAndBackground, this, this) === null) {
+            this.addObserver('render', renderClipAndBackground, this, this, -Infinity);
           }
         } else {
-          this.removeObserver('render', functions.renderClipAndBackground, this, this);
+          this.removeObserver('render', renderClipAndBackground, this, this);
         }
-      },
-      syncBorder: function () {
+      }
+      function syncBorder () {
         if (this.borderWidth !== 0 && this.borderColor !== null) {
-          if (this.getObserverByAllParams('render', functions.renderBorder, this, this) === null) {
-            this.addObserver('render', functions.renderBorder, this, this, Infinity);
+          if (this.getObserverByAllParams('render', renderBorder, this, this) === null) {
+            this.addObserver('render', renderBorder, this, this, Infinity);
           }
         } else {
-          this.removeObserver('render', functions.renderBorder, this, this);
+          this.removeObserver('render', renderBorder, this, this);
         }
-      },
-      syncBorderRadius: function () {
+      }
+      function syncBorderRadius () {
         this._clipBorderRadius = Math.ceil(this.borderRadius + this.borderWidth / 2);
         if (this._renderBorderRadius < 0) { this._renderBorderRadius = 0; }
-      },
-      renderClipAndBackground: function (sender, render) {
+      }
+      function renderClipAndBackground (sender, render) {
         var rect = this.getRectInSelf();
         var left = rect.left;
         var right = rect.right;
@@ -84,8 +84,8 @@ export default (
             render.fill();
           }
         }
-      },
-      renderBorder: function (sender, render) {
+      }
+      function renderBorder (sender, render) {
         var rect = this.getRectInSelf();
         var left = rect.left;
         var right = rect.height;
@@ -116,7 +116,15 @@ export default (
         render.strokeStyle = this.borderColor;
         render.stroke();
       }
-    }
+
+      return {
+        syncClipOrBackground: syncClipOrBackground,
+        syncBorder: syncBorder,
+        syncBorderRadius: syncBorderRadius,
+        renderClipAndBackground: renderClipAndBackground,
+        renderBorder: renderBorder
+      }
+    })();
 
     var UINode = (function () {
       var InnerUINode = LangUtil.extend(Node);

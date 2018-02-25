@@ -8,32 +8,39 @@ import Notifier from '../../notifier';
 
 export default (
   function () {
-    var functions = {
-      contextPropertyGetter: function (name) {
+    var functions = (function () {
+      function contextPropertyGetter (name) {
         return function () {
           return this.$context[name];
         }
-      },
-      contextPropertySetter: function (name) {
+      }
+      function contextPropertySetter (name) {
         return function (val) {
           if (this.$context[name] !== val) {
             this.$context[name] = val;
           }
         }
-      },
-      canvasPropertyGetter: function (name) {
+      }
+      function canvasPropertyGetter (name) {
         return function () {
           return this.$canvas[name];
         }
-      },
-      canvasPropertySetter: function (name) {
+      }
+      function canvasPropertySetter (name) {
         return function (val) {
           if (this.$canvas[name] !== val) {
             this.$canvas[name] = val;
           }
         }
       }
-    }
+
+      return {
+        contextPropertyGetter: contextPropertyGetter,
+        contextPropertySetter: contextPropertySetter,
+        canvasPropertyGetter: canvasPropertyGetter,
+        canvasPropertySetter: canvasPropertySetter
+      }
+    });
     
     var CanvasRender = (function () {
       var InnerCanvasRender = LangUtil.extend(Notifier);
@@ -185,7 +192,7 @@ export default (
       }
 
       InnerCanvasRender.prototype.getImageData = function (x, y, width, height) {
-        return this.$content.getImageData(x, y, width, height);
+        return this.$context.getImageData(x, y, width, height);
       }
 
       InnerCanvasRender.prototype.putImageData = function (data, x, y) {

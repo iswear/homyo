@@ -8,11 +8,15 @@ import Notifier from '../../notifier';
 
 export default (
   function () {
-    var functions = {
-      syncViewPort: function () {
+    var functions = (function () {
+      function syncViewPort () {
         this.$context.viewport(this.viewPortX, this.viewPortY, this.viewPortWidth, this.viewPortHeight)
       }
-    }
+      
+      return {
+        syncViewPort: syncViewPort
+      }
+    })();
 
     var WebglRender = (function () {
       var InnerWebglRender = LangUtil.extend(Notifier);

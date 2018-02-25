@@ -14,4 +14,4 @@ public class ImageConfig {
 }
 ```
 ## 二、依赖类
-1. [NodeConfig](../core/Node.MD)
+1. [NodeConfig](../../core/Node.MD)

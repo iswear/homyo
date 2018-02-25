@@ -7,13 +7,13 @@ import LangUtil from '../utils/lang-util';
 
 export default (
   function () {
-    var functions = {
-      notifyPropertyGetter: function (name) {
+    var functions = (function () {
+      function notifyPropertyGetter (name) {
         return function () {
           return this.$properties[name];
         }
-      },
-      notifyPropertySetter: function (name, eventName) {
+      }
+      function notifyPropertySetter (name) {
         return function (val) {
           var oldVal = this.$properties[name];
           if (oldVal !== val) {
@@ -22,7 +22,12 @@ export default (
           }
         }
       }
-    };
+
+      return {
+        notifyPropertyGetter: notifyPropertyGetter,
+        notifyPropertySetter: notifyPropertySetter
+      }
+    })();
 
     var Notifier = (function () {
       var InnerNotifier = LangUtil.extend(null);

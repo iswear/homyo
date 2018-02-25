@@ -11,7 +11,7 @@ import GNode from './gnode';
 export default (
   function () {
     var functions = (function () {
-      function createNode(conf) {
+      function createNode (conf) {
         var node = new GNode(conf.node);
         if (conf.id) {
           this._nodeMap[conf.id] = node;
@@ -66,26 +66,26 @@ export default (
           for (var i = 0, len = actions.length; i < len; ++i) {
             var action = actions[i];
             context.progress += 1;
-            action.node.runAnimation(action.animation, functions.runActionProgress, this, false);
+            action.node.runAnimation(action.animation, runActionProgress, this, false);
           }
         }
       }
-      function runActionProgress(binder, deltaTime, finish) {
+      function runActionProgress (binder, deltaTime, finish) {
         if (finish) {
           var context = this._actionsContext;
           context.progress -= 1;
           if (context.progress === 0 && context.loop) {
-            functions.runAction.call(this);
+            runAction.call(this);
           }
         }
       }
+
       return {
         createNodes: createNodes,
         compileActions: compileActions,
         runActionProgress: runActionProgress
       }
     })();
-
 
     /**
      * var exampleConf = {

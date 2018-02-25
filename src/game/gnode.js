@@ -9,11 +9,15 @@ import GTexture from './gtexture';
 
 export default (
   function () {
-    var functions = {
-      syncImg: function (sender, newVal, oldVal) {
+    var functions = (function () {
+      function syncImg (sender, newVal, oldVal) {
         this._texture.img = newVal;
       }
-    }
+
+      return {
+        syncImg: syncImg
+      }
+    })();
 
     var GNode = (function () {
       var InnerGNode = LangUtil.extend(Node);

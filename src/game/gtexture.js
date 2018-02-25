@@ -8,25 +8,25 @@ import Node from '../core/node';
 
 export default (
   function () {
-    var functions = {
-      syncImg: function () {
-        this.removeObserver('render', functions.renderImg, this, this);
-        this.removeObserver('render', functions.renderImgClip, this, this);
+    var functions = (function () {
+      function syncImg () {
+        this.removeObserver('render', renderImg, this, this);
+        this.removeObserver('render', renderImgClip, this, this);
         if (this.img !== null && this.img !== '') {
           if (LangUtil.isString(this.img)) {
             this._img.url = this.img;
             this._img.image = null;
             this._img.progress = 0;
-            this.addObserver('render', functions.renderImg, this, this);
+            this.addObserver('render', renderImg, this, this);
           } else {
             this._img.url = this.img.url;
             this._img.image = null;
             this._img.progress = 0;
-            this.addObserver('render', functions.renderImgClip, this, this);
+            this.addObserver('render', renderImgClip, this, this);
           }
         }
-      },
-      syncImgRender: function (image) {
+      }
+      function syncImgRender (image) {
         if (LangUtil.isString(this.img)) {
           this.width = image.width;
           this.height = image.height;
@@ -41,42 +41,42 @@ export default (
           this._img.height = this.img.height;
         }
         this.refresh();
-      },
-      renderImg: function (sender, render) {
+      }
+      function renderImg (sender, render) {
         var img = this._img;
         if (!img.image) {
-          functions.loadImage.call(this, img.url);
+          loadImage.call(this, img.url);
         } else {
           var rect = this.getRectInSelf();
           render.drawImage(img.image, rect.left, rect.top);
         }
-      },
-      renderImgClip: function (sender, render) {
+      }
+      function renderImgClip (sender, render) {
         var img = this._img;
         if (!img.image) {
-          functions.loadImage.call(this, img.url);
+          loadImage.call(this, img.url);
         } else {
           var rect = this.getRectInSelf();
           render.drawImageExt(img.image, img.x, img.y, img.width, img.height, rect.left, rect.top, img.width, img.height);
         }
-      },
-      loadImage: function (url) {
+      }
+      function loadImage (url) {
         var fileLoader = this.findApplication().getFileLoader();
         var image = fileLoader.loadImageAsync(url);
         if (image !== null) {
-          functions.syncImgRender.call(this, image);
+          syncImgRender.call(this, image);
         } else {
           if (this._img.progress === 0) {
-            fileLoader.loadImageAsync(url, functions.loadImageFinished, this);
+            fileLoader.loadImageAsync(url, loadImageFinished, this);
             this._img.progress = 1;
           }
         }
-      },
-      loadImageFinished: function (url, success) {
+      }
+      function loadImageFinished (url, success) {
         if (success) {
           var image = this.findApplication().getFileLoader().loadImageAsync(url);
           if (image !== null) {
-            functions.syncImgRender.call(this, image);
+            syncImgRender.call(this, image);
             this._img.progress = 2;
           } else {
             this._img.progress = 3;
@@ -85,7 +85,16 @@ export default (
           this._img.progress = 3;
         }
       }
-    };
+
+      return {
+        syncImg: syncImg,
+        syncImgRender: syncImgRender,
+        renderImg: renderImg,
+        renderImgClip: renderImgClip,
+        loadImage: loadImage,
+        loadImageFinished: loadImageFinished
+      }
+    })();
 
     var GTexture = (function () {
       var InnerGTexture = LangUtil.extend(Node);
