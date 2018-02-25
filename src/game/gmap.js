@@ -84,11 +84,11 @@ export default (
         this.addObserver('gridVisibleChanged', functions.syncGridVisible, this, this);
       }
 
-      InnerGMap.prototype.addModel = function (model) {
-        
+      InnerGMap.prototype.addModel = function (model, x, y, layerIndex) {
+
       }
 
-      InnerGMap.prototype.removeModel = function (model) {
+      InnerGMap.prototype.removeModel = function (model, x, y, layerIndex) {
 
       }
 

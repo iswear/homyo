@@ -3,9 +3,12 @@
 ```java
 public class NodeConfig {
     /**
-     * x轴便宜
+     * x坐标
      */
     private Integer x;
+    /**
+     * y坐标
+     */
     private Integer y;
     private Double rotateZ;
     private Double scaleX;

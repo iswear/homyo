@@ -412,24 +412,25 @@ export default (
           var lPoint = this.transformWVectorToL([e.offsetX, e.offsetY]);
           var result = this.checkEventInteractZone(name, e, lPoint[0], lPoint[1]);
 
-          var targetInChildren = false;
           if (e.skip) {
             e.skip = false;
-          } else {
-            var layers = this._childNodes.nodeLayers;
-            for (var  i = layers.length - 1; i >= 0; --i) {
-              var layer = layers[i];
-              if (layer) {
-                for (var j = layer.length - 1; j >= 0; --j) {
-                  if (layer[j]._dispatchMouseTouchEvent(name, e)) {
-                    targetInChildren = true;
-                    break;
-                  }
+            return false;
+          }
+
+          var targetInChildren = false;
+          var layers = this._childNodes.nodeLayers;
+          for (var  i = layers.length - 1; i >= 0; --i) {
+            var layer = layers[i];
+            if (layer) {
+              for (var j = layer.length - 1; j >= 0; --j) {
+                if (layer[j]._dispatchMouseTouchEvent(name, e)) {
+                  targetInChildren = true;
+                  break;
                 }
               }
-              if (targetInChildren) {
-                break;
-              }
+            }
+            if (targetInChildren) {
+              break;
             }
           }
 
