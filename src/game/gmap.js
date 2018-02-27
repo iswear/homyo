@@ -74,7 +74,7 @@ export default (
 
         this._models = [];
 
-        functions.syncGridVisible.call(this);
+        // functions.syncGridVisible.call(this);
 
         // this.addObserver('gridVisibleChanged', this.refresh, this, this);
         // this.addObserver('gridColorChanged', this.refresh, this, this);
