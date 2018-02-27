@@ -157,7 +157,6 @@ export default (
         syncRenderSize: syncRenderSize,
         refreshRenderCache: refreshRenderCache,
         renderTiledMap: renderTiledMap,
-        renderTiledMapCache: renderTiledMapCache,
         loadImageFinished: loadImageFinished
       }
     })();
@@ -167,6 +166,12 @@ export default (
 
       InnerGTiledMap.prototype.init = function (conf) {
         this.super('init', [conf]);
+        this.defineNotifyProperty('tileWidth', LangUtil.checkAndGet(conf.tileWidth, 50));
+        this.defineNotifyProperty('tileHeight', LangUtil.checkAndGet(conf.tileHeight, 50));
+        this.defineNotifyProperty('tileInclineX', LangUtil.checkAndGet(conf.tileInclineX, 0));
+        this.defineNotifyProperty('tileInclineY', LangUtil.checkAndGet(conf.tileInclineY, 0));
+
+
         this.defineNotifyProperty('row', LangUtil.checkAndGet(conf.row, 50));
         this.defineNotifyProperty('col', LangUtil.checkAndGet(conf.col, 50));
         this.defineNotifyProperty('brush', LangUtil.checkAndGet(conf.brush, null));
@@ -195,19 +200,15 @@ export default (
         this.addObserver('containerRightChanged', functions.refreshRenderCache, this, this);
         this.addObserver('containerTopChanged', functions.refreshRenderCache, this, this);
         this.addObserver('containerBottomChanged', functions.refreshRenderCache, this, this);
-        this.addObserver('containerLeftChanged', this.refresh, this, this);
-        this.addObserver('containerRightChanged', this.refresh, this, this);
-        this.addObserver('containerTopChanged', this.refresh, this, this);
-        this.addObserver('containerBottomChanged', this.refresh, this, this);
 
         this.addObserver('render', functions.renderTiledMap, this, this);
       }
 
-      InnerGTiledMap.prototype.invalidRenderCache = function () {
-        this._mapRenderCache.cacheInvalid = true;
-        this._mapRenderCache.cacheInit = false;
-        this.refresh();
-      }
+      // InnerGTiledMap.prototype.invalidRenderCache = function () {
+      //   this._mapRenderCache.cacheInvalid = true;
+      //   this._mapRenderCache.cacheInit = false;
+      //   this.refresh();
+      // }
 
       return InnerGTiledMap;
     })();
