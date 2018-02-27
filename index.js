@@ -26,7 +26,6 @@ import G_Model from './src/game/gmodel';
 import G_Node from './src/game/gnode';
 import G_Texture from './src/game/gtexture';
 import G_Util from './src/game/gutil';
-import G_Factory from './src/game/gfactory';
 
 import Util_EventUtil from './src/utils/event-util';
 import Util_LangUtil from './src/utils/lang-util';
@@ -76,8 +75,7 @@ export default (
         Model: G_Model,
         Node: G_Node,
         Texture: G_Texture,
-        Util: G_Util,
-        Factory: G_Factory
+        Util: G_Util
       },
 
       utils: {
