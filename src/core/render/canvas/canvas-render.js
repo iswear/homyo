@@ -40,7 +40,7 @@ export default (
         canvasPropertyGetter: canvasPropertyGetter,
         canvasPropertySetter: canvasPropertySetter
       }
-    });
+    })();
     
     var CanvasRender = (function () {
       var InnerCanvasRender = LangUtil.extend(Notifier);
