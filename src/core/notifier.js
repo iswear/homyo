@@ -13,7 +13,7 @@ export default (
           return this.$properties[name];
         }
       }
-      function notifyPropertySetter (name) {
+      function notifyPropertySetter (name, eventName) {
         return function (val) {
           var oldVal = this.$properties[name];
           if (oldVal !== val) {
