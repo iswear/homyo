@@ -7,47 +7,47 @@
 export default (
   function () {
 
-    /**
-     * 缺省初始化函数
-     * @param config 配置
-     */
-    var defaultInitFn = function (config) {}
-
-    /**
-     * 缺省销毁函数
-     */
-    var defaultDestroyFn = function () {}
-
-    /**
-     * 继承父级调用解决方案
-     * @param fnName 函数名
-     * @param args 参数
-     * @returns {undefined}
-     */
-    var superCallFn = function (fnName, args) {
-      if (arguments.length == 1 || !args) {
-        args = [];
+    var util = (function() {
+      /**
+       * 缺省初始化函数
+       * @param config 配置
+       */
+      function defaultInitFn (conf) {
+        
       }
-      var that = this.__super_ ? this.__super_ : this;
-      var prototype = that._super_;
-      var ret = undefined;
-      while (typeof prototype[fnName] === 'function') {
-        if (that[fnName] === prototype[fnName]) {
-          prototype = prototype._super_;
-          continue;
-        } else {
-          this.__super_ = prototype;
-          ret = prototype[fnName].apply(this, args);
-          break;
+      /**
+       * 缺省销毁函数
+       */
+      function defaultDestroyFn() {
+        
+      }
+      /**
+       * 继承父级调用解决方案
+       * @param fnName 函数名
+       * @param args 参数
+       * @returns {undefined}
+       */
+      function superCallFn (fnName, args) {
+        if (arguments.length == 1 || !args) {
+          args = [];
         }
+        var that = this.__super_ ? this.__super_ : this;
+        var prototype = that._super_;
+        var ret = undefined;
+        while (typeof prototype[fnName] === 'function') {
+          if (that[fnName] === prototype[fnName]) {
+            prototype = prototype._super_;
+            continue;
+          } else {
+            this.__super_ = prototype;
+            ret = prototype[fnName].apply(this, args);
+            break;
+          }
+        }
+        this.__super_ = null;
+        return ret;
       }
-      this.__super_ = null;
-      return ret;
-    }
-
-
-    var util = {
-      extend: function (base) {
+      function extend (base) {
         var obj = function (conf) {
           this.init(conf)
         }
@@ -67,29 +67,50 @@ export default (
           obj.prototype.super = superCallFn;
         }
         return obj;
-      },
-      isUndefined: function (val) {
+      }
+      function isUndefined (val) {
         return val === undefined;
-      },
-      isBoolean: function (val) {
+      }
+      function isNotUndefined (val) {
+        return !isUndefined(val);
+      }
+      function isBoolean (val) {
         return typeof val === 'boolean';
-      },
-      isNumber: function (val) {
+      }
+      function isNotBoolean (val) {
+        return !isBoolean(val);
+      }
+      function isNumber (val) {
         return typeof val === 'number' && !isNaN(val);
-      },
-      isString: function (val) {
+      }
+      function isNotNumber (val) {
+        return !isNumber(val);
+      }
+      function isString (val) {
         return typeof val === 'string';
-      },
-      isArray: function (val) {
+      }
+      function isNotString (val) {
+        return !isNotString(val);
+      }
+      function isArray (val) {
         return val instanceof Array;
-      },
-      isObject: function (val) {
+      }
+      function isNotArray (val) {
+        return !isArray(val);
+      }
+      function isObject (val) {
         return typeof val === 'object';
-      },
-      isFunction: function (val) {
+      }
+      function isNotObject (val) {
+        return !isObject(val);
+      }
+      function isFunction (val) {
         return typeof val === 'function';
-      },
-      clone: function (val) {
+      }
+      function isNotFunction (val) {
+        return !isFunction(val);
+      }
+      function clone (val) {
         if (util.isArray(val)) {
           var rArr = [];
           for (var i = 0, size = val.length; i < size; ++i) {
@@ -107,11 +128,31 @@ export default (
         } else {
           return val;
         }
-      },
-      checkAndGet: function (val, defVal) {
-        return util.isUndefined(val) ? defVal : val;
       }
-    };
+      function checkAndGet (val, defVal) {
+        return isUndefined(val) ? defVal : val;
+      }
+
+      return {
+        extend: extend,
+        isUndefined: isUndefined,
+        isNotUndefined: isNotUndefined,
+        isBoolean: isBoolean,
+        isNotBoolean: isNotBoolean,
+        isNumber: isNumber,
+        isNotNumber: isNotNumber,
+        isString: isString,
+        isNotString: isNotString,
+        isArray: isArray,
+        isNotArray: isNotArray,
+        isObject: isObject,
+        isNotObject: isNotObject,
+        isFunction: isFunction,
+        isNotFunction: isNotFunction,
+        clone: clone,
+        checkAndGet: checkAndGet,
+      }
+    })();
 
     return util;
   }

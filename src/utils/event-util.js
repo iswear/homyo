@@ -112,11 +112,6 @@ export default (
         NUM_LOCK: 136,
         SCROLL_LOCK: 137
       },
-      EVENT_NAME: {
-        node: {
-          'render': '渲染',
-        }
-      },
       addEventListener: function (node, type, target, listener) {
         var fn = listener.bind(target);
         registerEvents.push({
@@ -135,7 +130,7 @@ export default (
             event.type === type &&
             event.target === target &&
             event.listener === listener) {
-            node.removeEventListener(type,event.fn,false);
+            node.removeEventListener(type,event.fn, false);
             registerEvents.splice(i, 1);
             i--;
             len--;

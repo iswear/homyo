@@ -248,11 +248,42 @@ export default (
       }
       function checkRenderSize () {
         var render = this._render;
-        if (render.clientWidth !== this._clientWidth || render.clientHeight !== this._clientHeight) {
-          this._clientWidth = render.clientWidth;
-          this._clientHeight = render.clientHeight;
+        if (this._needUpdateTranform) {
+          var width = render.width, height = render.height;
+          var clientWidth = render.clientWidth, clientHeight = render.clientHeight;
+          switch (this.scaleMode) {
+            case 1: {
+              render.height = width * clientHeight / clientWidth;
+              this.postNotification('resize', this, [width, height]);
+              break;
+            }
+            case 2: {
+              render.width = height * clientWidth / clientHeight;
+              this.postNotification('resize', this, [width, height]);
+              break;
+            }
+            case 3: {
+              break;
+            }
+            default: {
+              render.width = clientWidth;
+              render.height = clientHeight;
+              this.postNotification('resize', this, [width, height]);
+              break;
+            }
+          }
+          this._renderCache.width = render.width
+          this._renderCache.height = render.height
+          this._transform[0] = width / clientWidth;
+          this._transform[4] = height / clientHeight;
+          this._needUpdateTranform = false;
           this.refresh();
-          syncTransform.call(this);
+        } else {
+          if (render.clientWidth !== this._clientWidth || render.clientHeight !== this._clientHeight) {
+            this._clientWidth = render.clientWidth;
+            this._clientHeight = render.clientHeight;
+            this._needUpdateTranform = true;
+          }
         }
       }
       function syncTransform () {
@@ -261,31 +292,8 @@ export default (
 
       return {
         eventInit: eventInit,
-        eventPreProcessDesktop: eventPreProcessDesktop,
-        eventPreProcessMobile: eventPreProcessMobile,
-        eventTouchStartDoc: eventTouchStartDoc,
-        eventTouchMoveDoc: eventTouchMoveDoc,
-        eventTouchEndDoc: eventTouchEndDoc,
-        eventTouchCancelDoc: eventTouchCancelDoc,
-        eventTouchStartCanvas: eventTouchStartCanvas,
-        eventTouchMoveCanvas: eventTouchMoveCanvas,
-        eventTouchEndCanvas: eventTouchEndCanvas,
-        eventTouchCancelCanvas: eventTouchCancelCanvas,
-        eventKeyDownDoc: eventKeyDownDoc,
-        eventKeyPressDoc: eventKeyPressDoc,
-        eventKeyUpDoc: eventKeyUpDoc,
-        eventMouseDownDoc: eventMouseDownDoc,
-        eventMouseMoveDoc: eventMouseMoveDoc,
-        eventMouseUpDoc: eventMouseUpDoc,
-        eventClickCanvas: eventClickCanvas,
-        eventDblClickCanvas: eventDblClickCanvas,
-        eventContextMenuCanvas: eventContextMenuCanvas,
-        eventMouseDownCanvas: eventMouseDownCanvas,
-        eventMouseMoveCanvas: eventMouseMoveCanvas,
-        eventMouseUpCanvas: eventMouseUpCanvas,
-        eventMouseWheelCanvas: eventMouseWheelCanvas,
-        checkRenderSize: checkRenderSize,
-        syncTransform: syncTransform
+        syncTransform: syncTransform,
+        checkRenderSize: checkRenderSize
       }
     })();
 
@@ -330,6 +338,7 @@ export default (
         this.defineNotifyProperty('scaleMode', LangUtil.checkAndGet(conf.scaleMode, 0));
         this.root.application = this;
         this._render = new CanvasRender({canvas: conf.canvas, width: LangUtil.checkAndGet(conf.width, undefined), height: LangUtil.checkAndGet(conf.height, undefined)});
+        this._renderCache = new CanvasRender({canvas: document.createElement('canvas')});
 
         this._prevLoopTime = 0;
         this._preCheckTime = 0;
@@ -376,43 +385,16 @@ export default (
         if (this._preCheckTime > 500) {
           this._preCheckTime = 0;
           functions.checkRenderSize.call(this);
-          if (this._needUpdateTranform) {
-            var render = this._render;
-            var width = render.width, height = render.height;
-            var clientWidth = render.clientWidth, clientHeight = render.clientHeight;
-            switch (this.scaleMode) {
-              case 1: {
-                render.height = width * this._clientHeight / this._clientWidth;
-                this.postNotification('resize', this, [width, render.height]);
-                break;
-              }
-              case 2: {
-                render.width = height * this._clientWidth / this._clientHeight;
-                this.postNotification('resize', this, [render.width, height]);
-                break;
-              }
-              case 3: {
-                break;
-              }
-              default: {
-                render.width = clientWidth;
-                render.height = clientHeight;
-                this.postNotification('resize', this, [clientWidth, clientHeight]);
-                break;
-              }
-            }
-            this._transform[0] = render.width / render.clientWidth;
-            this._transform[4] = render.height / render.clientHeight;
-            this._needUpdateTranform = false;
-          }
         } else {
           this._preCheckTime += deltaTime;
         }
         if (this._refresh) {
           this._refresh = false;
-          this._render.setTransform(1, 0, 0, 1, 0, 0);
+          this._renderCache.setTransform(1, 0, 0, 1, 0, 0);
+          this._renderCache.clear()
+          this.root._dispatchRender(this._renderCache, 1, this._transform, this._transform, this._needUpdateTranform);
           this._render.clear();
-          this.root._dispatchRender(this._render, 1, this._transform, this._transform, this._needUpdateTranform);
+          this._render.drawImage(this._renderCache.getCanvas(), 0, 0);
         }
       }
 
@@ -438,6 +420,10 @@ export default (
         if (this._render) {
           this._render.destroy();
           this._render = null;
+        }
+        if (his._renderCache) {
+          this._renderCache.destroy();
+          this._renderCache = null;
         }
         if (this._animationManager) {
           this._animationManager.destroy();

@@ -51,8 +51,8 @@ export default (
         this.$context = this.$canvas.getContext('2d');
         this._saveStack = [];
 
-        this.defineCanvasProperty('width', LangUtil.checkAndGet(conf.width, this.$canvas.clientWidth), false);
-        this.defineCanvasProperty('height', LangUtil.checkAndGet(conf.height, this.$canvas.clientHeight), false);
+        this.defineCanvasProperty('width', LangUtil.checkAndGet(conf.width, undefined), false);
+        this.defineCanvasProperty('height', LangUtil.checkAndGet(conf.height, undefined), false);
         this.defineCanvasProperty('clientWidth', undefined, true);
         this.defineCanvasProperty('clientHeight', undefined, true);
         this.defineContextProperty('fillStyle');
