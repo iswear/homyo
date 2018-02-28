@@ -248,17 +248,24 @@ export default (
       }
       function checkRenderSize () {
         var render = this._render;
+        if (!this._needUpdateTranform) {
+          if (render.clientWidth !== this._clientWidth || render.clientHeight !== this._clientHeight) {
+            this._clientWidth = render.clientWidth;
+            this._clientHeight = render.clientHeight;
+            this._needUpdateTranform = true;
+          }
+        }
         if (this._needUpdateTranform) {
           var width = render.width, height = render.height;
           var clientWidth = render.clientWidth, clientHeight = render.clientHeight;
           switch (this.scaleMode) {
             case 1: {
-              render.height = width * clientHeight / clientWidth;
+              height = width * clientHeight / clientWidth;
               this.postNotification('resize', this, [width, height]);
               break;
             }
             case 2: {
-              render.width = height * clientWidth / clientHeight;
+              width = height * clientWidth / clientHeight;
               this.postNotification('resize', this, [width, height]);
               break;
             }
@@ -266,24 +273,20 @@ export default (
               break;
             }
             default: {
-              render.width = clientWidth;
-              render.height = clientHeight;
+              width = clientWidth;
+              height = clientHeight;
               this.postNotification('resize', this, [width, height]);
               break;
             }
           }
-          this._renderCache.width = render.width
-          this._renderCache.height = render.height
+          this._render.width = width
+          this._render.height = height
+          this._renderCache.width = width
+          this._renderCache.height = height
           this._transform[0] = width / clientWidth;
           this._transform[4] = height / clientHeight;
           this._needUpdateTranform = false;
           this.refresh();
-        } else {
-          if (render.clientWidth !== this._clientWidth || render.clientHeight !== this._clientHeight) {
-            this._clientWidth = render.clientWidth;
-            this._clientHeight = render.clientHeight;
-            this._needUpdateTranform = true;
-          }
         }
       }
       function syncTransform () {
@@ -390,11 +393,11 @@ export default (
         }
         if (this._refresh) {
           this._refresh = false;
-          this._renderCache.setTransform(1, 0, 0, 1, 0, 0);
-          this._renderCache.clear()
-          this.root._dispatchRender(this._renderCache, 1, this._transform, this._transform, this._needUpdateTranform);
-          this._render.clear();
-          this._render.drawImage(this._renderCache.getCanvas(), 0, 0);
+          this._render.setTransform(1, 0, 0, 1, 0, 0);
+          this._render.clear()
+          this.root._dispatchRender(this._render, 1, this._transform, this._transform, this._needUpdateTranform);
+          // this._render.clear();
+          // this._render.drawImage(this._renderCache.getCanvas(), 0, 0);
         }
       }
 
