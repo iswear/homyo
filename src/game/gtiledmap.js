@@ -12,19 +12,6 @@ export default (
     var doc = document;
 
     var functions = (function () {
-      function syncTileType () {
-        if (this.tileType === 1) {
-          this.addObserver('tileWidthChanged', syncSinCosValid, this, this);
-          this.addObserver('tileHeightChanged', syncSinCosValid, this, this);
-        } else {
-          this.removeObserver('tileWidthChanged', syncSinCosValid, this, this);
-          this.removeObserver('tileHeightChanged', syncSinCosValid, this, this);
-        }
-        syncSinCosValid.call(this);
-      }
-      function syncSinCosValid () {
-        this._renderContext.sinCosValid = false;
-      }
       function syncVertexValid () {
         this._renderContext.vertexValid = false;
       }
@@ -41,8 +28,8 @@ export default (
           renderContext.cacheValid = true;
         }
         if (this.tileType === 1) {
-          var x = this.containerLeft - (Math.floor(this.containerLeft / this.tileWidth)) * this.tileWidth;
-          var y = this.containerTop - (Math.floor(this.containerTop / this.tileHeight)) * this.tileHeight;
+          var x = this.containerLeft - renderContext.x;
+          var y = this.containerTop - renderContext.y;
           var width = this.containerRight - this.containerLeft;
           var height = this.containerBottom - this.containerTop;
           render.drawImageExt(renderContext.cacheFore.getCanvas(), x, y, width, height,
@@ -50,11 +37,10 @@ export default (
           render.fillStyle = '#f00';
           render.fillRect(-5, -5, 10, 10);
         } else {
-          var x = this.containerLeft - (Math.floor(this.containerLeft / this.tileWidth)) * this.tileWidth;
-          var y = this.containerTop - (Math.floor(this.containerTop / this.tileHeight)) * this.tileHeight;
+          var x = this.containerLeft - renderContext.x;
+          var y = this.containerTop - renderContext.y;
           var width = this.containerRight - this.containerLeft;
           var height = this.containerBottom - this.containerTop;
-          console.warn(x, y, width, height);
           render.drawImageExt(renderContext.cacheFore.getCanvas(), x, y, width, height,
             this.containerLeft, this.containerTop, width, height);
           render.fillStyle = '#f00';
@@ -63,16 +49,6 @@ export default (
       }
       function renderTiledMapCache () {
         var renderContext = this._renderContext;
-        if (!renderContext.sinCosValid) {
-          if (this.tileType === 1) {
-            renderContext.sin = 0;
-            renderContext.cos = 0;
-          } else {
-            renderContext.sin = this.tileHeight / Math.sqrt(Math.pow(this.tileWidth, 2) + Math.pow(this.tileHeight, 2));
-            renderContext.cos = this.tileWidth / Math.sqrt(Math.pow(this.tileWidth, 2) + Math.pow(this.tileHeight, 2));
-          }
-          renderContext.sinCosValid = true;
-        }
         if (this.tileType === 1) {
           renderTiledMapCacheType1.call(this, renderContext);
         } else {
@@ -217,7 +193,7 @@ export default (
         var newHeight = oldHeight;
         if (!renderContext.vertexValid){
           newX = Math.floor(this.containerLeft / this.tileWidth) * this.tileWidth;
-          newY = (Math.floor(this.containerLeft / this.tileHeight) - 0.5) * this.tileHeight;
+          newY = (Math.floor(this.containerTop / this.tileHeight) - 0.5) * this.tileHeight;
           renderContext.x = newX;
           renderContext.y = newY;
           renderContext.vertexValid = true;
@@ -232,6 +208,7 @@ export default (
 
         const sRow = Math.floor(this.containerTop / this.tileHeight - this.containerLeft / this.tileWidth);
         const sCol = Math.floor(this.containerLeft / this.tileWidth + this.containerTop / this.tileHeight);
+        console.warn(sRow, sCol);
         if (renderContext.cacheInit) {
           if (newWidth !== oldWidth || newHeight !== oldHeight || newX !== oldX || newY !== oldY) {
             var clipWidth = Math.min(newWidth + newX, oldWidth + oldX) - Math.max(newX, oldX);
@@ -241,7 +218,7 @@ export default (
             var cacheFore = renderContext.cacheFore;
             var cacheBack = renderContext.cacheBack;
             cacheBack.width = newWidth;
-            cacheFore.height = newHeight;
+            cacheBack.height = newHeight;
             if (clip) {
               var clipSrcLeft = newX > oldX ? (newX - oldX) : 0;
               var clipSrcTop = newY > oldY ? (newY - oldY) : 0;
@@ -249,7 +226,8 @@ export default (
               clipTarRight = newWidth + clipTarLeft;
               clipTarTop = newY < oldY ? (oldY - newY) : 0;
               clipTarBottom = newHeight + clipTarTop;
-              cacheBack.drawImageExt(cacheFore.getCanvas(), clipSrcLeft, clipTarTop, clipWidth, clipHeight,
+
+              cacheBack.drawImageExt(cacheFore.getCanvas(), clipSrcLeft, clipSrcTop, clipWidth, clipHeight,
                 clipTarLeft, clipTarTop, clipWidth, clipHeight);
             }
 
@@ -380,6 +358,8 @@ export default (
           if (newWidth !== oldWidth || newHeight !== oldHeight) {
             cacheFore.width = newWidth;
             cacheFore.height = newHeight;
+          } else {
+            cacheFore.clear();
           }
           var tileData = this.tileData
           if (LangUtil.isArray(tileData)) {
@@ -393,14 +373,14 @@ export default (
             var tileDataLen = tileData.length;
             // 往上面绘制
             for (var row = sRow - 1, startCol = sCol - 1, startTileX = 0, startTileY = -tileStepHeight;
-                 startTileX < newWidth && row < tileDataLen;
+                 startTileX < newWidth;
                  row -= 1, startCol += 1, startTileX += tileWidth) {
               if (row >= 0) {
                 var tileRow = tileData[row];
                 if (LangUtil.isArray(tileRow)) {
                   var tileRowLen = tileRow.length;
                   for (var col = startCol, tileX = startTileX, tileY = startTileY;
-                       tileX < newWidth && tileY < newHeight && col < tileRowLen;
+                       tileX < newWidth && tileY < newHeight;
                        col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
                     if (col >= 0) {
                       var tileCell = tileRow[col];
@@ -436,16 +416,16 @@ export default (
             }
             // 向下方绘制
             for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = 0;
-                 startTileY < newHeight && row < tileDataLen;
+                 startTileY < newHeight;
                  row += 1, startCol += 1, startTileY += tileHeight) {
               if (row >= 0) {
                 var tileRow = tileData[row];
                 if (LangUtil.isArray(tileRow)) {
                   var tileRowLen = tileRow.length;
                   for (var col = startCol, tileX = startTileX, tileY = startTileY;
-                       tileX < newWidth && tileY < newHeight && col < tileRowLen;
+                       tileX < newWidth && tileY < newHeight;
                        col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
-                    if (col > 0) {
+                    if (col >= 0) {
                       var tileCell = tileRow[col];
                       var imgClip = tileImgClip[tileCell];
                       if (imgClip) {
@@ -487,7 +467,6 @@ export default (
       }
 
       return {
-        syncTileType: syncTileType,
         syncVertexValid: syncVertexValid,
         syncSizeValid: syncSizeValid,
         syncCacheValid: syncCacheValid,
@@ -508,9 +487,6 @@ export default (
         this.defineNotifyProperty('tileData', LangUtil.checkAndGet(conf.tileData, {}));
 
         this._renderContext = {
-          sinCosValid: false,
-          sin: 0,
-          cos: 0,
           vertexValid: false,
           x: 0,
           y: 0,
@@ -522,8 +498,6 @@ export default (
           cacheFore: new CanvasRender({canvas: doc.createElement('canvas')}),
           cacheBack: new CanvasRender({canvas: doc.createElement('canvas')})
         }
-
-        this.addObserver('tileTypeChanged', functions.syncTileType, this, this);
 
         this.addObserver('tileTypeChanged', functions.syncVertexValid, this, this);
         this.addObserver('tileWidthChanged', functions.syncVertexValid, this, this);
