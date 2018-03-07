@@ -203,14 +203,14 @@ export default (
         var newHeight = oldHeight;
         if (!renderContext.vertexValid){
           newX = (sCol - sRow - 1) * this.tileWidth / 2;
-          newY = (sCol + sRow) * this.tileHeight / 2;
+          newY = (sCol + sRow - 1) * this.tileHeight / 2;
           renderContext.x = newX;
           renderContext.y = newY;
           renderContext.vertexValid = true;
         }
         if (!renderContext.sizeValid) {
           newWidth = (eCol - eRow + 1) * this.tileWidth / 2 - newX;
-          newHeight = (eCol + eRow + 2) * this.tileHeight / 2  - newY;
+          newHeight = (eCol + eRow + 3) * this.tileHeight / 2  - newY;
           renderContext.width = newWidth;
           renderContext.height = newHeight;
           renderContext.sizeValid = true;
