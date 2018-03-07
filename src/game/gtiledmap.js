@@ -57,7 +57,7 @@ export default (
       }
       function renderTiledMapCacheType1 (renderContext) {
         var oldX = renderContext.x;
-        var oldY = renderContext.y
+        var oldY = renderContext.y;
         var oldWidth = renderContext.width;
         var oldHeight = renderContext.height;
         var newX = oldX;
@@ -183,6 +183,16 @@ export default (
         }
       }
       function renderTiledMapCacheTypeOther (renderContext) {
+        var tileWidth = this.tileWidth;
+        var tileHeight = this.tileHeight;
+        var tileStepWidth = tileWidth / 2;
+        var tileStepHeight = tileHeight / 2;
+
+        var sRow = Math.floor(this.containerTop / this.tileHeight - this.containerLeft / this.tileWidth);
+        var sCol = Math.floor(this.containerTop / this.tileHeight + this.containerLeft / this.tileWidth);
+        var eRow = Math.floor(this.containerBottom / this.tileHeight - this.containerRight / this.tileWidth);
+        var eCol = Math.floor(this.containerBottom / this.tileHeight + this.containerRight / this.tileWidth);
+
         var oldX = renderContext.x;
         var oldY = renderContext.y;
         var oldWidth = renderContext.width;
@@ -192,23 +202,19 @@ export default (
         var newWidth = oldWidth;
         var newHeight = oldHeight;
         if (!renderContext.vertexValid){
-          newX = Math.floor(this.containerLeft / this.tileWidth) * this.tileWidth;
-          newY = (Math.floor(this.containerTop / this.tileHeight) - 0.5) * this.tileHeight;
+          newX = (sCol - sRow - 1) * this.tileWidth / 2;
+          newY = (sCol + sRow) * this.tileHeight / 2;
           renderContext.x = newX;
           renderContext.y = newY;
           renderContext.vertexValid = true;
         }
         if (!renderContext.sizeValid) {
-          newWidth = Math.ceil(this.containerRight / this.tileWidth) * this.tileWidth - newX;
-          newHeight = (Math.ceil(this.containerBottom / this.tileHeight) + 0.5) * this.tileHeight - newY;
+          newWidth = (eCol - eRow + 1) * this.tileWidth / 2 - newX;
+          newHeight = (eCol + eRow + 2) * this.tileHeight / 2  - newY;
           renderContext.width = newWidth;
           renderContext.height = newHeight;
           renderContext.sizeValid = true;
         }
-
-        const sRow = Math.floor(this.containerTop / this.tileHeight - this.containerLeft / this.tileWidth);
-        const sCol = Math.floor(this.containerLeft / this.tileWidth + this.containerTop / this.tileHeight);
-        console.warn(sRow, sCol);
         if (renderContext.cacheInit) {
           if (newWidth !== oldWidth || newHeight !== oldHeight || newX !== oldX || newY !== oldY) {
             var clipWidth = Math.min(newWidth + newX, oldWidth + oldX) - Math.max(newX, oldX);
@@ -234,25 +240,21 @@ export default (
             var tileData = this.tileData
             if (LangUtil.isArray(tileData)) {
               var fileLoader = this.findApplication().getFileLoader();
-              var tileWidth = this.tileWidth;
-              var tileHeight = this.tileHeight;
-              var tileStepWidth = tileWidth / 2;
-              var tileStepHeight = tileHeight / 2;
               var tileImg = this.tileImg;
               var tileImgClip = this.tileImgClip;
               var tileDataLen = tileData.length;
               // 往上面绘制
               for (var row = sRow - 1, startCol = sCol - 1, startTileX = 0, startTileY = -tileStepHeight;
-                   startTileX < newWidth && row < tileDataLen;
+                   startTileX < newWidth;
                    row -= 1, startCol += 1, startTileX += tileWidth) {
-                if (row >= 0) {
+                if (row >= 0 && row < tileDataLen) {
                   var tileRow = tileData[row];
                   if (LangUtil.isArray(tileRow)) {
                     var tileRowLen = tileRow.length;
                     for (var col = startCol, tileX = startTileX, tileY = startTileY;
-                         tileX < newWidth && tileY < newHeight && col < tileRowLen;
+                         tileX < newWidth && tileY < newHeight;
                          col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
-                      if (col >= 0) {
+                      if (col >= 0 && col < tileRowLen) {
                         var tileCell = tileRow[col];
                         var imgClip = tileImgClip[tileCell];
                         if (imgClip) {
@@ -298,14 +300,14 @@ export default (
               for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = 0;
                    startTileY < newHeight && row < tileDataLen;
                    row += 1, startCol += 1, startTileY += tileHeight) {
-                if (row >= 0) {
+                if (row >= 0 && row < tileDataLen) {
                   var tileRow = tileData[row];
                   if (LangUtil.isArray(tileRow)) {
                     var tileRowLen = tileRow.length;
                     for (var col = startCol, tileX = startTileX, tileY = startTileY;
                          tileX < newWidth && tileY < newHeight && col < tileRowLen;
                          col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
-                      if (col > 0) {
+                      if (col >= 0 && col < tileRowLen) {
                         var tileCell = tileRow[col];
                         var imgClip = tileImgClip[tileCell];
                         if (imgClip) {
@@ -364,10 +366,6 @@ export default (
           var tileData = this.tileData
           if (LangUtil.isArray(tileData)) {
             var fileLoader = this.findApplication().getFileLoader();
-            var tileWidth = this.tileWidth;
-            var tileHeight = this.tileHeight;
-            var tileStepWidth = tileWidth / 2;
-            var tileStepHeight = tileHeight / 2;
             var tileImg = this.tileImg;
             var tileImgClip = this.tileImgClip;
             var tileDataLen = tileData.length;
@@ -375,14 +373,14 @@ export default (
             for (var row = sRow - 1, startCol = sCol - 1, startTileX = 0, startTileY = -tileStepHeight;
                  startTileX < newWidth;
                  row -= 1, startCol += 1, startTileX += tileWidth) {
-              if (row >= 0) {
+              if (row >= 0 && row < tileDataLen) {
                 var tileRow = tileData[row];
                 if (LangUtil.isArray(tileRow)) {
                   var tileRowLen = tileRow.length;
                   for (var col = startCol, tileX = startTileX, tileY = startTileY;
                        tileX < newWidth && tileY < newHeight;
                        col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
-                    if (col >= 0) {
+                    if (col >= 0 && col < tileRowLen) {
                       var tileCell = tileRow[col];
                       var imgClip = tileImgClip[tileCell];
                       if (imgClip) {
@@ -418,14 +416,14 @@ export default (
             for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = 0;
                  startTileY < newHeight;
                  row += 1, startCol += 1, startTileY += tileHeight) {
-              if (row >= 0) {
+              if (row >= 0 && row < tileDataLen) {
                 var tileRow = tileData[row];
                 if (LangUtil.isArray(tileRow)) {
                   var tileRowLen = tileRow.length;
                   for (var col = startCol, tileX = startTileX, tileY = startTileY;
                        tileX < newWidth && tileY < newHeight;
                        col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
-                    if (col >= 0) {
+                    if (col >= 0 && col < tileRowLen) {
                       var tileCell = tileRow[col];
                       var imgClip = tileImgClip[tileCell];
                       if (imgClip) {

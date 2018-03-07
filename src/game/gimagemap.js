@@ -14,11 +14,11 @@ export default (
           var img = this._img;
           img.url = this.img;
           img.needAdjustMapSize = true;
-          if (this.getObserverByAllParams('render', render_img, this, this) === null) {
-            this.addObserver('render', render_img, this, this);
+          if (this.getObserverByAllParams('render', renderImg, this, this) === null) {
+            this.addObserver('render', renderImg, this, this);
           }
         } else {
-          this.removeObserver('render', render_img, this, this);
+          this.removeObserver('render', renderImg, this, this);
         }
         this.render();
       }
@@ -48,9 +48,7 @@ export default (
       }
       
       return {
-        syncImg: syncImg,
-        renderImg: renderImg,
-        imageLoadFinished: imageLoadFinished
+        syncImg: syncImg
       }
     })();
 
