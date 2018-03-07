@@ -5,18 +5,18 @@
     <title>Title</title>
 </head>
 <body style="background-color: black">
-<canvas id="canvas" style="position: absolute; top: 35px; left: 0;"></canvas>
+<canvas id="canvas" style="position: absolute; top: 35px; left: 0; display: none"></canvas>
 <img id="img" src="img/email.jpg" style="position: absolute; left: 0; top: 0;  left: 35px;">
 <img id="img2" src="img/lamp.gif">
 <script>
-    // var img = document.getElementById('img');
-    // var img2 = document.getElementById('img2');
-    // var canvas = document.getElementById('canvas');
-    // var context = canvas.getContext('2d');
+    var img = document.getElementById('img');
+    var img2 = document.getElementById('img2');
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
     //
-    // img.onload = function () {
-    //   var pat1 = context.createPattern(img, 'repeat');
-    //   var pat2 = context.createPattern(img2, 'repeat');
+    img.onload = function () {
+      var pat1 = context.createPattern(img, 'repeat');
+      var pat2 = context.createPattern(img2, 'repeat');
     //   var start;
     //   // context.lineWidth = 30;
     //   // context.strokeStyle = pat1;
@@ -34,15 +34,25 @@
     //
     //
     //
-    //   start = (new Date()).getTime();
-    //   for (var i = 0; i < 1000; ++i) {
-    //     if (i % 2 === 0) {
-    //       context.drawImage(img, 50, 50);
-    //     } else {
-    //       context.drawImage(img2, 50, 50);
-    //     }
-    //   }
-    //   console.log((new Date()).getTime() - start);
+      start = (new Date()).getTime();
+      for (var i = 0; i < 1000; ++i) {
+        if (i % 2 === 0) {
+          context.drawImage(img, 50, 50);
+        } else {
+          context.drawImage(img2, 50, 50);
+        }
+      }
+      console.log((new Date()).getTime() - start);
+
+      start = (new Date()).getTime();
+      var a = 0.001;
+      for (var i = 0; i < 10000000; ++i) {
+        a = a * i;
+        a = a / 4;
+        a = a + 0.1;
+        a = a - 0.23;
+      }
+      console.log((new Date()).getTime() - start);
     //
     //
     //
@@ -75,7 +85,7 @@
     //   }
     //   console.log((new Date()).getTime() - start);
     //
-    // }
+    }
 
     // context.lineTo(0, 0);
     // context.moveTo(0, 0);

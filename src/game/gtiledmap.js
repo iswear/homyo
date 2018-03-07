@@ -34,8 +34,6 @@ export default (
           var height = this.containerBottom - this.containerTop;
           render.drawImageExt(renderContext.cacheFore.getCanvas(), x, y, width, height,
             this.containerLeft, this.containerTop, width, height);
-          render.fillStyle = '#f00';
-          render.fillRect(-5, -5, 10, 10);
         } else {
           var x = this.containerLeft - renderContext.x;
           var y = this.containerTop - renderContext.y;
@@ -43,8 +41,6 @@ export default (
           var height = this.containerBottom - this.containerTop;
           render.drawImageExt(renderContext.cacheFore.getCanvas(), x, y, width, height,
             this.containerLeft, this.containerTop, width, height);
-          render.fillStyle = '#f00';
-          render.fillRect(-5, -5, 10, 10);
         }
       }
       function renderTiledMapCache () {
@@ -142,7 +138,7 @@ export default (
             renderContext.cacheFore = cacheBack;
           }
         } else {
-          // renderContext.cacheInit = true;
+          renderContext.cacheInit = true;
           var cacheFore = renderContext.cacheFore;
           if (newWidth !== oldWidth || newHeight !== oldHeight) {
             cacheFore.width = newWidth;
