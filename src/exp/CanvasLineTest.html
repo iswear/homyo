@@ -5,9 +5,9 @@
     <title>Title</title>
 </head>
 <body style="background-color: black">
-<canvas id="canvas" style="position: absolute; top: 35px; left: 0; display: none"></canvas>
+<canvas id="canvas" style="position: absolute; top: 35px; left: 0;" width="1024" height="1024"></canvas>
 <img id="img" src="img/email.jpg" style="position: absolute; left: 0; top: 0;  left: 35px;">
-<img id="img2" src="img/lamp.gif">
+<img id="img2" src="img/102221a.png" style="display: none;">
 <script>
     var img = document.getElementById('img');
     var img2 = document.getElementById('img2');
@@ -34,25 +34,42 @@
     //
     //
     //
-      start = (new Date()).getTime();
-      for (var i = 0; i < 1000; ++i) {
-        if (i % 2 === 0) {
-          context.drawImage(img, 50, 50);
-        } else {
-          context.drawImage(img2, 50, 50);
-        }
-      }
-      console.log((new Date()).getTime() - start);
 
-      start = (new Date()).getTime();
-      var a = 0.001;
-      for (var i = 0; i < 10000000; ++i) {
-        a = a * i;
-        a = a / 4;
-        a = a + 0.1;
-        a = a - 0.23;
+      start = 0;
+      function  aa () {
+        console.log((new Date()).getTime() - start);
+        // start = (new Date()).getTime();
+        // for (var i = 0; i < 10000; ++i) {
+        //   a = a * i;
+        //   a = a / 4;
+        //   a = a + 0.1;
+        //   a = a - 0.23;
+        // }
+        // context.globalCompositeOperation = 'destination-over';
+        for (var i = 0; i < 1; ++i) {
+          context.drawImage(img2, 0, 0, 500, 500, 100, 100, 500, 500);
+          // if (i % 2 === 0) {
+          //   context.drawImage(img, 50, 50);
+          // } else {
+          //   context.drawImage(img2, 100, 100);
+          // }
+        }
+        requestAnimationFrame(aa);
       }
-      console.log((new Date()).getTime() - start);
+
+      requestAnimationFrame(aa);
+      
+
+
+      // start = (new Date()).getTime();
+      // var a = 0.001;
+      // for (var i = 0; i < 10000000; ++i) {
+      //   a = a * i;
+      //   a = a / 4;
+      //   a = a + 0.1;
+      //   a = a - 0.23;
+      // }
+      // console.log((new Date()).getTime() - start);
     //
     //
     //

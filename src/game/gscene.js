@@ -40,6 +40,7 @@ export default (
           if (map.getObserverByAllParams('render', syncContainerZoneListener, this, map) === null) {
             map.addObserver('render', syncContainerZoneListener, this, map, -1);
           }
+          this._needUpdateMapContainerZone = true;
         }
       }
       function syncContainerZone (sender) {
@@ -65,8 +66,7 @@ export default (
 
       return {
         syncMap: syncMap,
-        syncContainerZone: syncContainerZone,
-        syncContainerZoneListener: syncContainerZoneListener
+        syncContainerZone: syncContainerZone
       }
     })();
 
