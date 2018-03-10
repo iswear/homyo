@@ -341,6 +341,7 @@ export default (
       }
 
       InnerNode.prototype._dispatchRender = function (render, parentAlpha, parentWTransform, parentWReverseTransform, parentUpdateTransform) {
+        this.postNotification('frame', this, [render]);
         var transform = this._transform, rectInSelf = this._rectInSelf;
         if (rectInSelf.needUpdateRectInSelf) {
           rectInSelf.width = Math.round(this.width);

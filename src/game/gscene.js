@@ -37,8 +37,8 @@ export default (
           if (map.getObserverByAllParams('inclineY', syncContainerZone, this, map) === null) {
             map.addObserver('inclineY', syncContainerZone, this, map);
           }
-          if (map.getObserverByAllParams('render', syncContainerZoneListener, this, map) === null) {
-            map.addObserver('render', syncContainerZoneListener, this, map, -1);
+          if (map.getObserverByAllParams('frame', syncContainerZoneListener, this, map) === null) {
+            map.addObserver('frame', syncContainerZoneListener, this, map, -1);
           }
           this._needUpdateMapContainerZone = true;
         }
