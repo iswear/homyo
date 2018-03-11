@@ -150,7 +150,7 @@ export default (
         }
         if (arguments.length > 3) {
           if (prevNodeId === null) {
-            parentNode.addChildNode(node, 0);
+            parentNode.addChildNodeToLayer(node, 0);
             this._nameMap[nodeId] = node;
             return;
           } else {

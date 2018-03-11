@@ -15,7 +15,7 @@ export default (
         }
         var map = this.map;
         if (map) {
-          this.addChildNode(map, 0);
+          this.addChildNodeToLayer(map, 0);
           if (map.getObserverByAllParams('xChanged', syncContainerZone, this, map) === null) {
             map.addObserver('xChanged', syncContainerZone, this, map);
           }
@@ -38,7 +38,7 @@ export default (
             map.addObserver('inclineY', syncContainerZone, this, map);
           }
           if (map.getObserverByAllParams('frame', syncContainerZoneListener, this, map) === null) {
-            map.addObserver('frame', syncContainerZoneListener, this, map, -1);
+            map.addObserver('frame', syncContainerZoneListener, this, map);
           }
           this._needUpdateMapContainerZone = true;
         }
