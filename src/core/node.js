@@ -341,7 +341,6 @@ export default (
       }
 
       InnerNode.prototype._dispatchRender = function (render, parentAlpha, parentWTransform, parentWReverseTransform, parentUpdateTransform) {
-        this.postNotification('frame', this);
         var transform = this._transform, rectInSelf = this._rectInSelf;
         if (rectInSelf.needUpdateRectInSelf) {
           rectInSelf.width = Math.round(this.width);
@@ -367,7 +366,7 @@ export default (
           transform.wTransform = MatrixUtil.mulMat2d(parentWTransform, transform.lTransform);
           transform.wReverseTransform = MatrixUtil.mulMat2d(transform.lReverseTransform, parentWReverseTransform);
         }
-
+        this.postNotification('frame', this);
         var alpha = this.alpha * parentAlpha
         if (this.visible && alpha > 0) {
           if (this.needRender()) {
