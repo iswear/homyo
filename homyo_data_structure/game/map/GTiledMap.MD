@@ -1,7 +1,7 @@
 # GTiledMap配置项数据结构（JAVA描述）
 ## 一、数据结构
 ```java
-public class GTiledMap extends GMapConfig {
+public class GTilMap extends GMapConfig {
   private Integer tileInclineX;
   private Integer tileInclineY;
   private Integer tileWidth;

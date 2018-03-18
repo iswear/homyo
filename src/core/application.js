@@ -396,6 +396,9 @@ export default (
           this._render.setTransform(1, 0, 0, 1, 0, 0);
           this._render.clear()
           this.root._dispatchRender(this._render, 1, this._transform, this._transform, this._needUpdateTranform);
+          // this._renderCache.setTransform(1, 0, 0, 1, 0, 0);
+          // this._renderCache.clear();
+          // this.root._dispatchRender(this._renderCache, 1, this._transform, this._transform, this._needUpdateTranform);
           // this._render.clear();
           // this._render.drawImage(this._renderCache.getCanvas(), 0, 0);
         }
