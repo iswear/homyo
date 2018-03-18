@@ -34,6 +34,7 @@ export default (
           var y = this.containerTop - renderContext.y;
           var width = this.containerRight - this.containerLeft;
           var height = this.containerBottom - this.containerTop;
+          render.fillRect(-10, -10, 20, 20);
           render.drawImageExt(renderContext.cacheFore.getCanvas(), x, y, width, height,
             this.containerLeft, this.containerTop, width, height);
         } else {
@@ -41,6 +42,7 @@ export default (
           var y = this.containerTop - renderContext.y;
           var width = this.containerRight - this.containerLeft;
           var height = this.containerBottom - this.containerTop;
+          render.fillRect(-10, -10, 20, 20);
           render.drawImageExt(renderContext.cacheFore.getCanvas(), x, y, width, height,
             this.containerLeft, this.containerTop, width, height);
         }
@@ -191,6 +193,10 @@ export default (
         var eRow = Math.floor(this.containerBottom / this.tileHeight - this.containerRight / this.tileWidth);
         var eCol = Math.floor(this.containerBottom / this.tileHeight + this.containerRight / this.tileWidth);
 
+        if ((eRow + eCol - sRow - sCol) % 2 !== 0) {
+          eRow += 1;
+        }
+
         var oldX = renderContext.x;
         var oldY = renderContext.y;
         var oldWidth = renderContext.width;
@@ -200,15 +206,15 @@ export default (
         var newWidth = oldWidth;
         var newHeight = oldHeight;
         if (!renderContext.vertexValid){
-          newX = (sCol - sRow - 2) * this.tileWidth / 2;
-          newY = (sCol + sRow) * this.tileHeight / 2;
+          newX = (sCol - sRow - 1) * this.tileWidth / 2;
+          newY = (sCol + sRow - 1) * this.tileHeight / 2;
           renderContext.x = newX;
           renderContext.y = newY;
           renderContext.vertexValid = true;
         }
         if (!renderContext.sizeValid) {
-          newWidth = (eCol - eRow + 2) * this.tileWidth / 2 - newX;
-          newHeight = (eCol + eRow + 2) * this.tileHeight / 2  - newY;
+          newWidth = (eCol - eRow + 1) * this.tileWidth / 2 - newX;
+          newHeight = (eCol + eRow + 3) * this.tileHeight / 2  - newY;
           renderContext.width = newWidth;
           renderContext.height = newHeight;
           renderContext.sizeValid = true;
@@ -422,7 +428,7 @@ export default (
             renderContext.cacheFore = cacheBack;
           }
         } else {
-          renderContext.cacheInit = true;
+          // renderContext.cacheInit = true;
           var cacheFore = renderContext.cacheFore;
           if (newWidth !== oldWidth || newHeight !== oldHeight) {
             cacheFore.width = newWidth;
