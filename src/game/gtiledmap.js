@@ -79,6 +79,7 @@ export default (
           renderContext.width = newWidth;
           renderContext.height = newHeight;
           renderContext.sizeValid = true;
+          console.warn(newX, newY, newWidth, newHeight);
         }
 
         var sRow = Math.floor(this.containerTop / this.tileHeight);
@@ -194,7 +195,7 @@ export default (
         var eCol = Math.floor(this.containerBottom / this.tileHeight + this.containerRight / this.tileWidth);
 
         if ((eRow + eCol - sRow - sCol) % 2 !== 0) {
-          eRow += 1;
+          eCol += 1;
         }
 
         var oldX = renderContext.x;
@@ -205,25 +206,27 @@ export default (
         var newY = oldY;
         var newWidth = oldWidth;
         var newHeight = oldHeight;
-        if (!renderContext.vertexValid){
-          newX = (sCol - sRow - 1) * this.tileWidth / 2;
-          newY = (sCol + sRow - 1) * this.tileHeight / 2;
+        if (!renderContext.vertexValid) {
+          newX = (sCol - sRow - 2) * this.tileWidth / 2;
+          newY = (sCol + sRow) * this.tileHeight / 2;
           renderContext.x = newX;
           renderContext.y = newY;
           renderContext.vertexValid = true;
         }
         if (!renderContext.sizeValid) {
-          newWidth = (eCol - eRow + 1) * this.tileWidth / 2 - newX;
-          newHeight = (eCol + eRow + 3) * this.tileHeight / 2  - newY;
+          newWidth = (eCol - eRow + 2) * this.tileWidth / 2 - newX;
+          newHeight = (eCol + eRow + 2) * this.tileHeight / 2  - newY;
           renderContext.width = newWidth;
           renderContext.height = newHeight;
           renderContext.sizeValid = true;
+          console.log(newX / 64, newY / 32, newWidth / 64, newHeight / 32);
         }
+        var clip = false;
         if (renderContext.cacheInit) {
           if (newWidth !== oldWidth || newHeight !== oldHeight || newX !== oldX || newY !== oldY) {
             var clipWidth = Math.min(newWidth + newX, oldWidth + oldX) - Math.max(newX, oldX);
             var clipHeight = Math.min(newHeight + newY, oldHeight + oldY) - Math.max(newY, oldY);
-            var clip = clipWidth > 0 && clipHeight > 0;
+            clip = clipWidth > 0 && clipHeight > 0;
             var clipTarLeft = 0, clipTarTop = 0, clipTarRight = 0, clipTarBottom = 0;
             var cacheFore = renderContext.cacheFore;
             var cacheBack = renderContext.cacheBack;
@@ -251,7 +254,7 @@ export default (
               var tClipTarTop = clipTarTop - tileStepHeight;
               var tClipTarBottom = clipTarBottom - tileStepHeight;
               // 往上面绘制
-              for (var row = sRow - 1, startCol = sCol - 1, startTileX = 0, startTileY = -tileStepHeight;
+              for (var row = sRow, startCol = sCol - 1, startTileX = 0, startTileY = -tileStepHeight;
                    startTileX < newWidth;
                    row -= 1, startCol += 1, startTileX += tileWidth) {
                 if (row >= 0 && row < tileDataLen) {
@@ -337,7 +340,7 @@ export default (
                 }
               }
               // 向下方绘制
-              for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = 0;
+              for (var row = sRow - 1, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = 0;
                    startTileY < newHeight && row < tileDataLen;
                    row += 1, startCol += 1, startTileY += tileHeight) {
                 if (row >= 0 && row < tileDataLen) {
@@ -428,7 +431,7 @@ export default (
             renderContext.cacheFore = cacheBack;
           }
         } else {
-          // renderContext.cacheInit = true;
+          renderContext.cacheInit = true;
           var cacheFore = renderContext.cacheFore;
           if (newWidth !== oldWidth || newHeight !== oldHeight) {
             cacheFore.width = newWidth;
@@ -444,7 +447,7 @@ export default (
             var tileDataLen = tileData.length;
             var srcX, srcY, srcWidth, srcHeight, desX, desY, desWidth, desHeight;
             // 往上面绘制
-            for (var row = sRow - 1, startCol = sCol - 1, startTileX = 0, startTileY = -tileStepHeight;
+            for (var row = sRow, startCol = sCol - 1, startTileX = 0, startTileY = -tileStepHeight;
                  startTileX < newWidth;
                  row -= 1, startCol += 1, startTileX += tileWidth) {
               if (row >= 0 && row < tileDataLen) {
@@ -487,7 +490,7 @@ export default (
               }
             }
             // 向下方绘制
-            for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = 0;
+            for (var row = sRow - 1, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = 0;
                  startTileY < newHeight;
                  row += 1, startCol += 1, startTileY += tileHeight) {
               if (row >= 0 && row < tileDataLen) {
