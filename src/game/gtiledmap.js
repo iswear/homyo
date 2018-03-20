@@ -79,6 +79,7 @@ export default (
           renderContext.width = newWidth;
           renderContext.height = newHeight;
           renderContext.sizeValid = true;
+          console.warn(newX, newY, newWidth, newHeight);
         }
 
         var sRow = Math.floor(this.containerTop / this.tileHeight);
@@ -194,7 +195,7 @@ export default (
         var eCol = Math.floor(this.containerBottom / this.tileHeight + this.containerRight / this.tileWidth);
 
         if ((eRow + eCol - sRow - sCol) % 2 !== 0) {
-          eRow += 1;
+          eCol += 1;
         }
 
         var oldX = renderContext.x;
@@ -205,7 +206,7 @@ export default (
         var newY = oldY;
         var newWidth = oldWidth;
         var newHeight = oldHeight;
-        if (!renderContext.vertexValid){
+        if (!renderContext.vertexValid) {
           newX = (sCol - sRow - 2) * this.tileWidth / 2;
           newY = (sCol + sRow) * this.tileHeight / 2;
           renderContext.x = newX;
@@ -218,12 +219,14 @@ export default (
           renderContext.width = newWidth;
           renderContext.height = newHeight;
           renderContext.sizeValid = true;
+          console.log(newX / 64, newY / 32, newWidth / 64, newHeight / 32);
         }
+        var clip = false;
         if (renderContext.cacheInit) {
           if (newWidth !== oldWidth || newHeight !== oldHeight || newX !== oldX || newY !== oldY) {
             var clipWidth = Math.min(newWidth + newX, oldWidth + oldX) - Math.max(newX, oldX);
             var clipHeight = Math.min(newHeight + newY, oldHeight + oldY) - Math.max(newY, oldY);
-            var clip = clipWidth > 0 && clipHeight > 0;
+            clip = clipWidth > 0 && clipHeight > 0;
             var clipTarLeft = 0, clipTarTop = 0, clipTarRight = 0, clipTarBottom = 0;
             var cacheFore = renderContext.cacheFore;
             var cacheBack = renderContext.cacheBack;
