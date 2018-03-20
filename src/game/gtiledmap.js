@@ -189,72 +189,64 @@ export default (
         var tileStepWidth = tileWidth / 2;
         var tileStepHeight = tileHeight / 2;
 
-        var sRow = Math.floor(this.containerTop / this.tileHeight - this.containerLeft / this.tileWidth);
-        var sCol = Math.floor(this.containerTop / this.tileHeight + this.containerLeft / this.tileWidth);
-        var eRow = Math.floor(this.containerBottom / this.tileHeight - this.containerRight / this.tileWidth);
-        var eCol = Math.floor(this.containerBottom / this.tileHeight + this.containerRight / this.tileWidth);
-
-        if ((eRow + eCol - sRow - sCol) % 2 !== 0) {
-          eCol += 1;
-        }
+        var sRow = Math.floor(this.containerTop / tileHeight - this.containerLeft / tileWidth);
+        var sCol = Math.floor(this.containerTop / tileHeight+ this.containerLeft / tileWidth);
+        var eRow = Math.floor(this.containerBottom / tileHeight - this.containerLeft / tileWidth);
+        var eCol = Math.floor(this.containerBottom / tileHeight + this.containerLeft / tileWidth);
 
         var oldX = renderContext.x;
         var oldY = renderContext.y;
         var oldWidth = renderContext.width;
         var oldHeight = renderContext.height;
+
         var newX = oldX;
         var newY = oldY;
         var newWidth = oldWidth;
         var newHeight = oldHeight;
         if (!renderContext.vertexValid) {
-          newX = (sCol - sRow - 2) * this.tileWidth / 2;
+          newX = (sCol - sRow - 1) * this.tileWidth / 2;
           newY = (sCol + sRow) * this.tileHeight / 2;
           renderContext.x = newX;
           renderContext.y = newY;
           renderContext.vertexValid = true;
         }
         if (!renderContext.sizeValid) {
-          newWidth = (eCol - eRow + 2) * this.tileWidth / 2 - newX;
+          newWidth = (eCol - eRow + 1) * this.tileWidth / 2 - newX;
           newHeight = (eCol + eRow + 2) * this.tileHeight / 2  - newY;
           renderContext.width = newWidth;
           renderContext.height = newHeight;
           renderContext.sizeValid = true;
           console.log(newX / 64, newY / 32, newWidth / 64, newHeight / 32);
         }
+
+        var edgeLeft = -tileStepWidth;
+        var edgeRight = newWidth - tileStepWidth;
+        var edgeTop = -tileStepHeight;
+        var edgeBottom = newHeight - tileStepHeight;
         var clip = false;
         if (renderContext.cacheInit) {
           if (newWidth !== oldWidth || newHeight !== oldHeight || newX !== oldX || newY !== oldY) {
             var clipWidth = Math.min(newWidth + newX, oldWidth + oldX) - Math.max(newX, oldX);
             var clipHeight = Math.min(newHeight + newY, oldHeight + oldY) - Math.max(newY, oldY);
             clip = clipWidth > 0 && clipHeight > 0;
-            var clipTarLeft = 0, clipTarTop = 0, clipTarRight = 0, clipTarBottom = 0;
-            var cacheFore = renderContext.cacheFore;
-            var cacheBack = renderContext.cacheBack;
-            cacheBack.width = newWidth;
-            cacheBack.height = newHeight;
             if (clip) {
               var clipSrcLeft = newX > oldX ? (newX - oldX) : 0;
               var clipSrcTop = newY > oldY ? (newY - oldY) : 0;
-              clipTarLeft = newX < oldX ? (oldX - newX) : 0;
-              clipTarRight = clipTarLeft + clipWidth;
-              clipTarTop = newY < oldY ? (oldY - newY) : 0;
-              clipTarBottom = clipTarTop + clipHeight;
-              cacheBack.drawImageExt(cacheFore.getCanvas(), clipSrcLeft, clipSrcTop, clipWidth, clipHeight,
+              var clipTarLeft = newX < oldX ? (oldX - newX) : 0;
+              var clipTarTop = newY < oldY ? (oldY - newY) : 0;
+              var clipTarRight = clipTarLeft + clipWidth;
+              var clipTarBottom = clipTarTop + clipHeight;
+              var cacheFore = renderContext.cacheBack;
+              var cacheBack = renderContext.cacheFore;
+              var edgeClipLeft = clipTarLeft - tileStepWidth;
+              var edgeClipRight = clipTarRight - tileStepWidth;
+              var edgeClipTop = clipTarTop - tileStepHeight;
+              var edgeClipBottom = clipTarBottom - tileStepHeight;
+              cacheFore.width = newWidth;
+              cacheFore.height = newHeight;
+              cacheFore.drawImageExt(cacheBack.getCanvas(), clipSrcLeft, clipSrcTop, clipWidth, clipHeight,
                 clipTarLeft, clipTarTop, clipWidth, clipHeight);
-            }
-
-            var tileData = this.tileData
-            if (LangUtil.isArray(tileData)) {
-              var fileLoader = this.findApplication().getFileLoader();
-              var tileImg = this.tileImg;
-              var tileImgClip = this.tileImgClip;
-              var tileDataLen = tileData.length;
-              var tClipTarLeft = clipTarLeft - tileStepWidth;
-              var tClipTarRight = clipTarRight - tileStepWidth;
-              var tClipTarTop = clipTarTop - tileStepHeight;
-              var tClipTarBottom = clipTarBottom - tileStepHeight;
-              // 往上面绘制
-              for (var row = sRow, startCol = sCol - 1, startTileX = 0, startTileY = -tileStepHeight;
+              for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = -tileStepHeight;
                    startTileX < newWidth;
                    row -= 1, startCol += 1, startTileX += tileWidth) {
                 if (row >= 0 && row < tileDataLen) {
@@ -265,160 +257,94 @@ export default (
                          tileX < newWidth && tileY < newHeight;
                          col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
                       if (col >= 0 && col < tileRowLen) {
-                        var tileCell = tileRow[col];
-                        var imgClip = tileImgClip[tileCell];
-                        if (imgClip) {
-                          var img = tileImg[imgClip.imgId];
-                          if (img) {
-                            var image = fileLoader.loadImageAsync(img, loadImageFinished, this);
-                            if (image) {
-                              if (tileY < 0) {
-                                if (!clip || tileX < clipTarLeft || tileX >= clipTarRight || clipTarTop > 0) {
-                                  cacheBack.drawImageExt(image, imgClip.x, (imgClip.y + imgClip.height / 2), imgClip.width, imgClip.height / 2,
-                                    tileX, 0, tileWidth, tileStepHeight);
-                                }
-                              } else if (newHeight < tileY + tileHeight) {
-                                if (!clip || tileX < clipTarLeft || tileX >= clipTarRight || clipTarBottom < newHeight) {
-                                  cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height / 2,
-                                    tileX, tileY, tileWidth, tileStepHeight);
-                                }
-                              } else if (tileX < 0) {
-                                if (!clip || tileY < clipTarTop || tileY >= clipTarBottom || clipTarLeft > 0) {
-                                  cacheBack.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height,
-                                    0, tileY, tileStepWidth, tileHeight);
-                                }
-                              } else if (newWidth < tileX + tileWidth) {
-                                if (!clip || tileY < clipTarTop || tileY >= clipTarBottom || clipTarRight < newWidth) {
-                                  cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height,
-                                    tileX, tileY, tileStepWidth, tileHeight);
-                                }
-                              } else {
-                                if (clip) {
-                                  if (tileX >= tClipTarLeft && tileX <= tClipTarRight && tileY >= tClipTarTop && tileY <= tClipTarBottom) {
-                                    if (tileX === tClipTarLeft) {
-                                      cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height,
-                                        tileX, tileY, tileStepWidth, tileHeight);
-                                      if (tileY === tClipTarTop) {
-                                        cacheBack.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height / 2,
-                                          tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
-                                      } else if (tileY === tClipTarBottom) {
-                                        cacheBack.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y + imgClip.height / 2, imgClip.width / 2, imgClip.height / 2,
-                                          tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
-                                      }
-                                    } else if (tileX === tClipTarRight) {
-                                      cacheBack.drawImageExt(image, (imgClip.x + imgClip.width / 2), imgClip.y, imgClip.width / 2, imgClip.height,
-                                        tileX + tileStepWidth, tileY, tileStepWidth, tileHeight);
-                                      if (tileY === tClipTarTop) {
-                                        cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height / 2,
-                                          tileX, tileY, tileStepWidth, tileStepHeight);
-                                      } else if (tileY === tClipTarBottom) {
-                                        cacheBack.drawImageExt(image, imgClip.x, imgClip.y + imgClip.height / 2, imgClip.width / 2, imgClip.height / 2,
-                                          tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
-                                      }
-                                    } else if (tileY === tClipTarTop) {
-                                      cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height / 2,
-                                        tileX, tileY, tileWidth, tileStepHeight);
-                                    } else if (tileY === tClipTarBottom) {
-                                      cacheBack.drawImageExt(image, imgClip.x, (imgClip.y + imgClip.height / 2), imgClip.width, imgClip.height / 2,
-                                        tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
-                                    }
-                                  } else {
-                                    cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height,
-                                      tileX, tileY, tileWidth, tileHeight);
-                                  }
-                                } else {
-                                  cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height,
-                                    tileX, tileY, tileWidth, tileHeight);
-                                }
-                              }
-                            }
+                        if (tileX < 0) {
+                          sX = tileStepWidth;
+                          tX = 0;
+                        } else {
+                          sX = 0;
+                          tX = tileX;
+                        }
+                        if (tileY < 0) {
+                          sY = tileStepHeight;
+                          tY = 0;
+                        } else {
+                          sY = tileY;
+                          tY = tileY;
+                        }
+                        w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
+                        h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
+                        // 剪切逻辑
+                        if (sX === edgeClipLeft) {
+                          if (sY === edgeClipTop) {
+
+                          } else if (sY === edgeClipBottom) {
+
                           }
+                        } else if (sX === edgeClipRight) {
+                          if (sY === edgeClipTop) {
+
+                          } else if (sY === edgeClipBottom) {
+
+                          }
+                        } else if (sY === edgeClipTop) {
+
+                        } else if (sY === edgeClipBottom) {
+
+                        } else {
+
                         }
                       }
                     }
                   }
                 }
               }
-              // 向下方绘制
-              for (var row = sRow + 1, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = 0;
-                   startTileY < newHeight && row < tileDataLen;
+              // 往下面绘制
+              for (var row = sRow + 1, startCol = sCol, startTileX = -tileStepWidth, startTileY = 0;
+                   startTileY < newHeight;
                    row += 1, startCol += 1, startTileY += tileHeight) {
-                if (row >= 0 && row < tileDataLen) {
+                if (row >= 0 && col < tileRowLen) {
                   var tileRow = tileData[row];
                   if (LangUtil.isArray(tileRow)) {
                     var tileRowLen = tileRow.length;
                     for (var col = startCol, tileX = startTileX, tileY = startTileY;
-                         tileX < newWidth && tileY < newHeight && col < tileRowLen;
+                         tileX < newWidth && tileY < newHeight;
                          col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
                       if (col >= 0 && col < tileRowLen) {
-                        var tileCell = tileRow[col];
-                        var imgClip = tileImgClip[tileCell];
-                        if (imgClip) {
-                          var img = tileImg[imgClip.imgId];
-                          if (img) {
-                            var image = fileLoader.loadImageAsync(img, loadImageFinished, this);
-                            if (image) {
-                              if (tileY < 0) {
-                                if (!clip || tileX < clipTarLeft || tileX >= clipTarRight || clipTarTop > 0) {
-                                  cacheBack.drawImageExt(image, imgClip.x, (imgClip.y + imgClip.height / 2), imgClip.width, imgClip.height / 2,
-                                    tileX, 0, tileWidth, tileStepHeight);
-                                }
-                              } else if (newHeight < tileY + tileHeight) {
-                                if (!clip || tileX < clipTarLeft || tileX >= clipTarRight || clipTarBottom < newHeight) {
-                                  cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height / 2,
-                                    tileX, tileY, tileWidth, tileStepHeight);
-                                }
-                              } else if (tileX < 0) {
-                                if (!clip || tileY < clipTarTop || tileY >= clipTarBottom || clipTarLeft > 0) {
-                                  cacheBack.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height,
-                                    0, tileY, tileStepWidth, tileHeight);
-                                }
-                              } else if (newWidth < tileX + tileWidth) {
-                                if (!clip || tileY < clipTarTop || tileY >= clipTarBottom || clipTarRight < newWidth) {
-                                  cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height,
-                                    tileX, tileY, tileStepWidth, tileHeight);
-                                }
-                              } else {
-                                if (clip) {
-                                  if (tileX >= tClipTarLeft && tileX <= tClipTarRight && tileY >= tClipTarTop && tileY <= tClipTarBottom) {
-                                    if (tileX === tClipTarLeft) {
-                                      cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height,
-                                        tileX, tileY, tileStepWidth, tileHeight);
-                                      if (tileY === tClipTarTop) {
-                                        cacheBack.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height / 2,
-                                          tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
-                                      } else if (tileY === tClipTarBottom) {
-                                        cacheBack.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y + imgClip.height / 2, imgClip.width / 2, imgClip.height / 2,
-                                          tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
-                                      }
-                                    } else if (tileX === tClipTarRight) {
-                                      cacheBack.drawImageExt(image, (imgClip.x + imgClip.width / 2), imgClip.y, imgClip.width / 2, imgClip.height,
-                                        tileX + tileStepWidth, tileY, tileStepWidth, tileHeight);
-                                      if (tileY === tClipTarTop) {
-                                        cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height / 2,
-                                          tileX, tileY, tileStepWidth, tileStepHeight);
-                                      } else if (tileY === tClipTarBottom) {
-                                        cacheBack.drawImageExt(image, imgClip.x, imgClip.y + imgClip.height / 2, imgClip.width / 2, imgClip.height / 2,
-                                          tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
-                                      }
-                                    } else if (tileY === tClipTarTop) {
-                                      cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height / 2,
-                                        tileX, tileY, tileWidth, tileStepHeight);
-                                    } else if (tileY === tClipTarBottom) {
-                                      cacheBack.drawImageExt(image, imgClip.x, (imgClip.y + imgClip.height / 2), imgClip.width, imgClip.height / 2,
-                                        tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
-                                    }
-                                  } else {
-                                    cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height,
-                                      tileX, tileY, tileWidth, tileHeight);
-                                  }
-                                } else {
-                                  cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height,
-                                    tileX, tileY, tileWidth, tileHeight);
-                                }
-                              }
-                            }
+                        if (tileX < 0) {
+                          sX = tileStepWidth;
+                          tX = 0;
+                        } else {
+                          sX = 0;
+                          tX = tileX;
+                        }
+                        if (tileY < 0) {
+                          sY = tileStepHeight;
+                          tY = 0;
+                        } else {
+                          sY = tileY;
+                          tY = tileY;
+                        }
+                        w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
+                        h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
+                        // 剪切逻辑
+                        if (sX === edgeClipLeft) {
+                          if (sY === edgeClipTop) {
+
+                          } else if (sY === edgeClipBottom) {
+
                           }
+                        } else if (sX === edgeClipRight) {
+                          if (sY === edgeClipTop) {
+
+                          } else if (sY === edgeClipBottom) {
+
+                          }
+                        } else if (sY === edgeClipTop) {
+
+                        } else if (sY === edgeClipBottom) {
+
+                        } else {
+
                         }
                       }
                     }
@@ -426,28 +352,35 @@ export default (
                 }
               }
             }
-            cacheFore.clear();
-            renderContext.cacheBack = cacheFore;
-            renderContext.cacheFore = cacheBack;
-          }
-        } else {
-          renderContext.cacheInit = true;
-          var cacheFore = renderContext.cacheFore;
-          if (newWidth !== oldWidth || newHeight !== oldHeight) {
-            cacheFore.width = newWidth;
-            cacheFore.height = newHeight;
+            renderContext.cacheFore = cacheFore;
+            renderContext.cacheBack = cacheBack;
           } else {
-            cacheFore.clear();
+            clip = true;
           }
-          var tileData = this.tileData
+        }
+
+        if (!clip) {
+          var cacheFore;
+          if (renderContext.cacheInit) {
+            cacheFore = renderContext.cacheFore;
+            if (newWidth === oldWidth && newHeight === oldHeight) {
+              cacheFore.clear();
+            } else {
+              cacheFore.width = newWidth;
+              cacheFore.height = newHeight;
+            }
+          } else {
+            cacheFore = renderContext.cacheFore;
+          }
+          var tileData = this.tileData;
           if (LangUtil.isArray(tileData)) {
-            var fileLoader = this.findApplication().getFileLoader();
+            var fileLoader = this.findApplcation().getFileLoader();
             var tileImg = this.tileImg;
             var tileImgClip = this.tileImgClip;
             var tileDataLen = tileData.length;
-            var srcX, srcY, srcWidth, srcHeight, desX, desY, desWidth, desHeight;
+            var sX, sY, tX, tY, w, h;
             // 往上面绘制
-            for (var row = sRow, startCol = sCol - 1, startTileX = 0, startTileY = -tileStepHeight;
+            for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = -tileStepHeight;
                  startTileX < newWidth;
                  row -= 1, startCol += 1, startTileX += tileWidth) {
               if (row >= 0 && row < tileDataLen) {
@@ -458,42 +391,33 @@ export default (
                        tileX < newWidth && tileY < newHeight;
                        col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
                     if (col >= 0 && col < tileRowLen) {
-                      var tileCell = tileRow[col];
-                      var imgClip = tileImgClip[tileCell];
-                      if (imgClip) {
-                        var img = tileImg[imgClip.imgId];
-                        if (img) {
-                          var image = fileLoader.loadImageAsync(img, loadImageFinished, this);
-                          if (image) {
-                            if (tileY < 0) {
-                              cacheFore.drawImageExt(image, imgClip.x, (imgClip.y + imgClip.height / 2), imgClip.width, imgClip.height / 2,
-                                tileX, 0, tileWidth, tileStepHeight);
-                            } else if (newHeight < tileY + tileHeight) {
-                              cacheFore.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height / 2,
-                                tileX, tileY, tileWidth, tileStepHeight);
-                            } else if (tileX < 0) {
-                              cacheFore.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height,
-                                0, tileY, tileStepWidth, tileHeight);
-                            } else if (newWidth < tileX + tileWidth) {
-                              cacheFore.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height,
-                                tileX, tileY, tileStepWidth, tileHeight);
-                            } else {
-                              cacheFore.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height,
-                                tileX, tileY, tileWidth, tileHeight);
-                            }
-                          }
-                        }
+                      if (tileX < 0) {
+                        sX = tileStepWidth;
+                        tX = 0;
+                      } else {
+                        sX = 0;
+                        tX = tileX;
                       }
+                      if (tileY < 0) {
+                        sY = tileStepHeight;
+                        tY = 0;
+                      } else {
+                        sY = tileY;
+                        tY = tileY;
+                      }
+                      w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
+                      h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
+                      // TODO 绘制
                     }
                   }
                 }
               }
             }
-            // 向下方绘制
-            for (var row = sRow + 1, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = 0;
+            // 往下面绘制
+            for (var row = sRow + 1, startCol = sCol, startTileX = -tileStepWidth, startTileY = 0;
                  startTileY < newHeight;
                  row += 1, startCol += 1, startTileY += tileHeight) {
-              if (row >= 0 && row < tileDataLen) {
+              if (row >= 0 && col < tileRowLen) {
                 var tileRow = tileData[row];
                 if (LangUtil.isArray(tileRow)) {
                   var tileRowLen = tileRow.length;
@@ -501,32 +425,23 @@ export default (
                        tileX < newWidth && tileY < newHeight;
                        col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
                     if (col >= 0 && col < tileRowLen) {
-                      var tileCell = tileRow[col];
-                      var imgClip = tileImgClip[tileCell];
-                      if (imgClip) {
-                        var img = tileImg[imgClip.imgId];
-                        if (img) {
-                          var image = fileLoader.loadImageAsync(img, loadImageFinished, this);
-                          if (image) {
-                            if (tileY < 0) {
-                              cacheFore.drawImageExt(image, imgClip.x, (imgClip.y + imgClip.height / 2), imgClip.width, imgClip.height / 2,
-                                tileX, 0, tileWidth, tileStepHeight);
-                            } else if (newHeight < tileY + tileHeight) {
-                              cacheFore.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height / 2,
-                                tileX, tileY, tileWidth, tileStepHeight);
-                            } else if (tileX < 0) {
-                              cacheFore.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height,
-                                0, tileY, tileStepWidth, tileHeight);
-                            } else if (newWidth < tileX + tileWidth) {
-                              cacheFore.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height,
-                                tileX, tileY, tileStepWidth, tileHeight);
-                            } else {
-                              cacheFore.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height,
-                                tileX, tileY, tileWidth, tileHeight);
-                            }
-                          }
-                        }
+                      if (tileX < 0) {
+                        sX = tileStepWidth;
+                        tX = 0;
+                      } else {
+                        sX = 0;
+                        tX = tileX;
                       }
+                      if (tileY < 0) {
+                        sY = tileStepHeight;
+                        tY = 0;
+                      } else {
+                        sY = tileY;
+                        tY = tileY;
+                      }
+                      w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
+                      h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
+                      // TODO 绘制
                     }
                   }
                 }
