@@ -223,6 +223,10 @@ export default (
         var edgeRight = newWidth - tileStepWidth;
         var edgeTop = -tileStepHeight;
         var edgeBottom = newHeight - tileStepHeight;
+        var tileData = this.tileData;
+        if (LangUtil.isNotArray(tileData)) {
+          return;
+        }
         var clip = false;
         if (renderContext.cacheInit) {
           if (newWidth !== oldWidth || newHeight !== oldHeight || newX !== oldX || newY !== oldY) {
@@ -249,6 +253,7 @@ export default (
               for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = -tileStepHeight;
                    startTileX < newWidth;
                    row -= 1, startCol += 1, startTileX += tileWidth) {
+                var tileDataLen = tileData.length;
                 if (row >= 0 && row < tileDataLen) {
                   var tileRow = tileData[row];
                   if (LangUtil.isArray(tileRow)) {
@@ -372,77 +377,74 @@ export default (
           } else {
             cacheFore = renderContext.cacheFore;
           }
-          var tileData = this.tileData;
-          if (LangUtil.isArray(tileData)) {
-            var fileLoader = this.findApplcation().getFileLoader();
-            var tileImg = this.tileImg;
-            var tileImgClip = this.tileImgClip;
-            var tileDataLen = tileData.length;
-            var sX, sY, tX, tY, w, h;
-            // 往上面绘制
-            for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = -tileStepHeight;
-                 startTileX < newWidth;
-                 row -= 1, startCol += 1, startTileX += tileWidth) {
-              if (row >= 0 && row < tileDataLen) {
-                var tileRow = tileData[row];
-                if (LangUtil.isArray(tileRow)) {
-                  var tileRowLen = tileRow.length;
-                  for (var col = startCol, tileX = startTileX, tileY = startTileY;
-                       tileX < newWidth && tileY < newHeight;
-                       col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
-                    if (col >= 0 && col < tileRowLen) {
-                      if (tileX < 0) {
-                        sX = tileStepWidth;
-                        tX = 0;
-                      } else {
-                        sX = 0;
-                        tX = tileX;
-                      }
-                      if (tileY < 0) {
-                        sY = tileStepHeight;
-                        tY = 0;
-                      } else {
-                        sY = tileY;
-                        tY = tileY;
-                      }
-                      w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
-                      h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
-                      // TODO 绘制
+          var fileLoader = this.findApplcation().getFileLoader();
+          var tileImg = this.tileImg;
+          var tileImgClip = this.tileImgClip;
+          var tileDataLen = tileData.length;
+          var sX, sY, tX, tY, w, h;
+          // 往上面绘制
+          for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = -tileStepHeight;
+               startTileX < newWidth;
+               row -= 1, startCol += 1, startTileX += tileWidth) {
+            if (row >= 0 && row < tileDataLen) {
+              var tileRow = tileData[row];
+              if (LangUtil.isArray(tileRow)) {
+                var tileRowLen = tileRow.length;
+                for (var col = startCol, tileX = startTileX, tileY = startTileY;
+                     tileX < newWidth && tileY < newHeight;
+                     col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
+                  if (col >= 0 && col < tileRowLen) {
+                    if (tileX < 0) {
+                      sX = tileStepWidth;
+                      tX = 0;
+                    } else {
+                      sX = 0;
+                      tX = tileX;
                     }
+                    if (tileY < 0) {
+                      sY = tileStepHeight;
+                      tY = 0;
+                    } else {
+                      sY = tileY;
+                      tY = tileY;
+                    }
+                    w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
+                    h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
+                    // TODO 绘制
                   }
                 }
               }
             }
-            // 往下面绘制
-            for (var row = sRow + 1, startCol = sCol, startTileX = -tileStepWidth, startTileY = 0;
-                 startTileY < newHeight;
-                 row += 1, startCol += 1, startTileY += tileHeight) {
-              if (row >= 0 && col < tileRowLen) {
-                var tileRow = tileData[row];
-                if (LangUtil.isArray(tileRow)) {
-                  var tileRowLen = tileRow.length;
-                  for (var col = startCol, tileX = startTileX, tileY = startTileY;
-                       tileX < newWidth && tileY < newHeight;
-                       col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
-                    if (col >= 0 && col < tileRowLen) {
-                      if (tileX < 0) {
-                        sX = tileStepWidth;
-                        tX = 0;
-                      } else {
-                        sX = 0;
-                        tX = tileX;
-                      }
-                      if (tileY < 0) {
-                        sY = tileStepHeight;
-                        tY = 0;
-                      } else {
-                        sY = tileY;
-                        tY = tileY;
-                      }
-                      w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
-                      h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
-                      // TODO 绘制
+          }
+          // 往下面绘制
+          for (var row = sRow + 1, startCol = sCol, startTileX = -tileStepWidth, startTileY = 0;
+               startTileY < newHeight;
+               row += 1, startCol += 1, startTileY += tileHeight) {
+            if (row >= 0 && col < tileRowLen) {
+              var tileRow = tileData[row];
+              if (LangUtil.isArray(tileRow)) {
+                var tileRowLen = tileRow.length;
+                for (var col = startCol, tileX = startTileX, tileY = startTileY;
+                     tileX < newWidth && tileY < newHeight;
+                     col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
+                  if (col >= 0 && col < tileRowLen) {
+                    if (tileX < 0) {
+                      sX = tileStepWidth;
+                      tX = 0;
+                    } else {
+                      sX = 0;
+                      tX = tileX;
                     }
+                    if (tileY < 0) {
+                      sY = tileStepHeight;
+                      tY = 0;
+                    } else {
+                      sY = tileY;
+                      tY = tileY;
+                    }
+                    w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
+                    h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
+                    // TODO 绘制
                   }
                 }
               }
