@@ -21,12 +21,12 @@ export default (
       function syncCacheValid () {
         this._renderContext.cacheValid = false;
       }
-      function renderTiledMap (sender, render) {
+      function renderMap (sender, render) {
         var renderContext = this._renderContext;
         this._renderContext.cacheFore.imageCount = 0;
         this._renderContext.cacheBack.imageCount = 0;
         if (!renderContext.cacheValid) {
-          renderTiledMapCache.call(this);
+          renderMapCache(this, renderContext);
           renderContext.cacheValid = true;
         }
         if (this.tileType === 1) {
@@ -47,15 +47,31 @@ export default (
             this.containerLeft, this.containerTop, width, height);
         }
       }
-      function renderTiledMapCache () {
-        var renderContext = this._renderContext;
-        if (this.tileType === 1) {
-          renderTiledMapCacheType1.call(this, renderContext);
+      function renderMapCache (self, renderContext) {
+        if (self.tileType === 1) {
+          renderMapCacheSquare(self, renderContext);
         } else {
-          renderTiledMapCacheTypeOther.call(this, renderContext);
+          renderMapCacheDiamond(self, renderContext);
         }
       }
-      function renderTiledMapCacheType1 (renderContext) {
+      function renderMapBlock (self, render, fileLoader, tileImg, tileImgClip, tileCell, sX, sY, sW, sH, tX, tY, tW, tH) {
+        var imgClip = tileImgClip[tileCell];
+        if (imgClip) {
+          var img = tileImg[imgClip.imgId];
+          if (img) {
+            var image = fileLoader.loadImageAsync(img, loadImageFinished, self);
+            if (image) {
+              render.drawImageExt(image, sX, sY, sW, sH, tX, tY, tW, tH);
+            }
+          }
+        }
+      }
+      function renderMapCacheSquare (self, renderContext) {
+        var tileWidth = self.tileWidth;
+        var tileHeight = self.tileHeight;
+        var tileStepWidth = tileWidth;
+        var tileStepHeight = tileHeight;
+
         var oldX = renderContext.x;
         var oldY = renderContext.y;
         var oldWidth = renderContext.width;
@@ -66,24 +82,24 @@ export default (
         var newHeight = oldHeight;
 
         if (!renderContext.vertexValid) {
-          newX = Math.floor(this.containerLeft / this.tileWidth) * this.tileWidth;
-          newY = Math.floor(this.containerTop / this.tileHeight) * this.tileHeight;
+          newX = Math.floor(self.containerLeft / tileWidth) * tileWidth;
+          newY = Math.floor(self.containerTop / tileHeight) * tileHeight;
           renderContext.x = newX;
           renderContext.y = newY;
           renderContext.vertexValid = true;
         }
 
         if (!renderContext.sizeValid) {
-          newWidth = Math.ceil(this.containerRight / this.tileWidth)  * this.tileWidth - newX;
-          newHeight = Math.ceil(this.containerBottom / this.tileHeight) * this.tileHeight - newY;
+          newWidth = Math.ceil(self.containerRight / tileWidth)  * tileWidth - newX;
+          newHeight = Math.ceil(self.containerBottom / tileHeight) * tileHeight - newY;
           renderContext.width = newWidth;
           renderContext.height = newHeight;
           renderContext.sizeValid = true;
           console.warn(newX, newY, newWidth, newHeight);
         }
 
-        var sRow = Math.floor(this.containerTop / this.tileHeight);
-        var sCol = Math.floor(this.containerLeft / this.tileWidth);
+        var sRow = Math.floor(self.containerTop / tileHeight);
+        var sCol = Math.floor(self.containerLeft / tileWidth);
         if (renderContext.cacheInit) {
           if (newWidth !== oldWidth || newHeight !== oldHeight || newX !== oldX || newY !== oldY) {
             var clipWidth = Math.min(newWidth + newX, oldWidth + oldX) - Math.max(newX, oldX);
@@ -105,15 +121,11 @@ export default (
                 clipTarLeft, clipTarTop, clipWidth, clipHeight);
             }
 
-            var tileData = this.tileData
+            var tileData = self.tileData
             if (LangUtil.isArray(tileData)) {
-              var fileLoader = this.findApplication().getFileLoader();
-              var tileWidth = this.tileWidth;
-              var tileHeight = this.tileHeight;
-              var tileStepWidth = tileWidth;
-              var tileStepHeight = tileHeight;
-              var tileImg = this.tileImg;
-              var tileImgClip = this.tileImgClip;
+              var fileLoader = self.findApplication().getFileLoader();
+              var tileImg = self.tileImg;
+              var tileImgClip = self.tileImgClip;
               var tileDataLen = tileData.length;
               for (var row = sRow, tileY = 0; tileY < newHeight && row < tileDataLen; row += 1, tileY += tileStepHeight) {
                 var tileRow = tileData[row];
@@ -122,6 +134,8 @@ export default (
                   for (var col = sCol, tileX = 0; tileX < newWidth && col < tileRowLen; col += 1, tileX += tileStepWidth) {
                     if (!(clip && tileX >= clipTarLeft && tileX < clipTarRight && tileY >= clipTarTop && tileY < clipTarBottom)) {
                       var tileCell = tileRow[col];
+                      renderMapBlock(self, cacheFore, fileLoader, tileImg, tileImgClip, tileCell);
+                      /*
                       var imgClip = tileImgClip[tileCell];
                       if (imgClip) {
                         var img = tileImg[imgClip.imgId];
@@ -133,6 +147,7 @@ export default (
                           }
                         }
                       }
+                      */
                     }
                   }
                 }
@@ -149,15 +164,11 @@ export default (
             cacheFore.width = newWidth;
             cacheFore.height = newHeight;
           }
-          var tileData = this.tileData
+          var tileData = self.tileData
           if (LangUtil.isArray(tileData)) {
-            var fileLoader = this.findApplication().getFileLoader();
-            var tileWidth = this.tileWidth;
-            var tileHeight = this.tileHeight;
-            var tileStepWidth = tileWidth;
-            var tileStepHeight = tileHeight;
-            var tileImg = this.tileImg;
-            var tileImgClip = this.tileImgClip;
+            var fileLoader = self.findApplication().getFileLoader();
+            var tileImg = self.tileImg;
+            var tileImgClip = self.tileImgClip;
             var tileDataLen = tileData.length;
 
             for (var row = sRow, tileY = 0; tileY < newHeight && row < tileDataLen; row += 1, tileY += tileStepHeight) {
@@ -166,6 +177,8 @@ export default (
                 var tileRowLen = tileRow.length;
                 for (var col = sCol, tileX = 0; tileX < newWidth && col < tileRowLen; col += 1, tileX += tileStepWidth) {
                   var tileCell = tileRow[col];
+                  renderMapBlock();
+
                   var imgClip = tileImgClip[tileCell];
                   if (imgClip) {
                     var img = tileImg[imgClip.imgId];
@@ -183,16 +196,16 @@ export default (
           }
         }
       }
-      function renderTiledMapCacheTypeOther (renderContext) {
-        var tileWidth = this.tileWidth;
-        var tileHeight = this.tileHeight;
+      function renderMapCacheDiamond(self, renderContext) {
+        var tileWidth = self.tileWidth;
+        var tileHeight = self.tileHeight;
         var tileStepWidth = tileWidth / 2;
         var tileStepHeight = tileHeight / 2;
 
-        var sRow = Math.floor(this.containerTop / tileHeight - this.containerLeft / tileWidth);
-        var sCol = Math.floor(this.containerTop / tileHeight+ this.containerLeft / tileWidth);
-        var eRow = Math.floor(this.containerBottom / tileHeight - this.containerLeft / tileWidth);
-        var eCol = Math.floor(this.containerBottom / tileHeight + this.containerLeft / tileWidth);
+        var sRow = Math.floor(self.containerTop / tileHeight - self.containerLeft / tileWidth);
+        var sCol = Math.floor(self.containerTop / tileHeight+ self.containerLeft / tileWidth);
+        var eRow = Math.floor(self.containerBottom / tileHeight - self.containerLeft / tileWidth);
+        var eCol = Math.floor(self.containerBottom / tileHeight + self.containerLeft / tileWidth);
 
         var oldX = renderContext.x;
         var oldY = renderContext.y;
@@ -204,26 +217,25 @@ export default (
         var newWidth = oldWidth;
         var newHeight = oldHeight;
         if (!renderContext.vertexValid) {
-          newX = (sCol - sRow - 1) * this.tileWidth / 2;
-          newY = (sCol + sRow) * this.tileHeight / 2;
+          newX = (sCol - sRow - 1) * self.tileWidth / 2;
+          newY = (sCol + sRow) * self.tileHeight / 2;
           renderContext.x = newX;
           renderContext.y = newY;
           renderContext.vertexValid = true;
         }
         if (!renderContext.sizeValid) {
-          newWidth = (eCol - eRow + 1) * this.tileWidth / 2 - newX;
-          newHeight = (eCol + eRow + 2) * this.tileHeight / 2  - newY;
+          newWidth = (eCol - eRow + 1) * self.tileWidth / 2 - newX;
+          newHeight = (eCol + eRow + 2) * self.tileHeight / 2  - newY;
           renderContext.width = newWidth;
           renderContext.height = newHeight;
           renderContext.sizeValid = true;
-          console.log(newX / 64, newY / 32, newWidth / 64, newHeight / 32);
         }
 
         var edgeLeft = -tileStepWidth;
         var edgeRight = newWidth - tileStepWidth;
         var edgeTop = -tileStepHeight;
         var edgeBottom = newHeight - tileStepHeight;
-        var tileData = this.tileData;
+        var tileData = self.tileData;
         if (LangUtil.isNotArray(tileData)) {
           return;
         }
@@ -377,9 +389,9 @@ export default (
           } else {
             cacheFore = renderContext.cacheFore;
           }
-          var fileLoader = this.findApplcation().getFileLoader();
-          var tileImg = this.tileImg;
-          var tileImgClip = this.tileImgClip;
+          var fileLoader = self.findApplcation().getFileLoader();
+          var tileImg = self.tileImg;
+          var tileImgClip = self.tileImgClip;
           var tileDataLen = tileData.length;
           var sX, sY, tX, tY, w, h;
           // 往上面绘制
@@ -462,7 +474,7 @@ export default (
         syncVertexValid: syncVertexValid,
         syncSizeValid: syncSizeValid,
         syncCacheValid: syncCacheValid,
-        renderTiledMap: renderTiledMap
+        renderMap: renderMap
       }
     })();
 
@@ -512,7 +524,7 @@ export default (
         this.addObserver('containerLeftChanged', functions.syncCacheValid, this, this);
         this.addObserver('containerRightChanged', functions.syncCacheValid, this, this);
 
-        this.addObserver('render', functions.renderTiledMap, this, this);
+        this.addObserver('render', functions.renderMap, this, this);
       }
 
       InnerGTiledMap.prototype.invalidAndRefresh = function () {
