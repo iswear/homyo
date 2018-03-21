@@ -303,23 +303,109 @@ export default (
                           // 需要绘制
                           if (tileX === edgeClipLeft) {
                             if (tileX < 0) {
-                              if (tileY === )
-                            } else {
+                              if (tileY === edgeClipTop) {
+                                if (tileY < 0) {
 
+                                }  else {
+
+                                }
+                              } else if (tileY === edgeClipBottom) {
+                                if (tileY === edgeBottom) {
+
+                                }  else {
+
+                                }
+                              } else {
+                                if (tileY < 0) {
+
+                                } else if (tileY === edgeBottom) {
+
+                                } else {
+
+                                }
+                              }
+                            } else {
+                              if (tileY === edgeClipTop) {
+                                if (tileY < 0) {
+
+                                }  else {
+
+                                }
+                              } else if (tileY === edgeClipBottom) {
+                                if (tileY === edgeBottom) {
+
+                                }  else {
+
+                                }
+                              } else {
+                                if (tileY < 0) {
+
+                                } else if (tileY === edgeBottom) {
+
+                                } else {
+
+                                }
+                              }
                             }
                           } else if (tileX === edgeClipRight) {
                             if (tileX === edgeRight) {
+                              if (tileY === edgeClipTop) {
+                                if (tileY < 0) {
 
+                                }  else {
+
+                                }
+                              } else if (tileY === edgeClipBottom) {
+                                if (tileY === edgeBottom) {
+
+                                }  else {
+
+                                }
+                              } else {
+
+                              }
                             } else {
+                              if (tileY === edgeClipTop) {
 
+                              } else if (tileY === edgeClipBottom) {
+
+                              } else {
+
+                              }
                             }
                           } else {
                             if (tileX < 0) {
+                              if (tileY === edgeClipTop) {
+                                if (tileY < 0) {
 
+                                }  else {
+
+                                }
+                              } else if (tileY === edgeClipBottom) {
+                                if (tileY === edgeBottom) {
+
+                                }  else {
+
+                                }
+                              } else {
+
+                              }
                             } else if (tileX === edgeRight) {
+                              if (tileY === edgeClipTop) {
 
+                              } else if (tileY === edgeClipBottom) {
+
+                              } else {
+
+                              }
                             } else {
+                              if (tileY === edgeClipTop) {
 
+                              } else if (tileY === edgeClipBottom) {
+
+                              } else {
+
+                              }
                             }
                           }
                         }
