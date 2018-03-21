@@ -12,6 +12,16 @@ export default (
     var doc = document;
 
     var functions = (function () {
+      var BLOCK_FULL = 0;
+      var BLOCK_TOP = 1;
+      var BLOCK_RIGHT = 2;
+      var BLOCK_BOTTOM = 3;
+      var BLOCK_LEFT = 4;
+      var BLOCK_TOP_LEFT = 5;
+      var BLOCK_TOP_RIGHT = 6;
+      var BLOCK_BOTTOM_LEFT = 7;
+      var BLOCK_BOTTOM_RIGHT = 8;
+
       function syncVertexValid () {
         this._renderContext.vertexValid = false;
       }
@@ -54,14 +64,53 @@ export default (
           renderMapCacheDiamond(self, renderContext);
         }
       }
-      function renderMapBlock (self, render, fileLoader, tileImg, tileImgClip, tileCell, sX, sY, sW, sH, tX, tY, tW, tH) {
+      function renderMapBlock (self, render, fileLoader, tileImg, tileImgClip, tileCell, srcType, tX, tY, tW, tH) {
         var imgClip = tileImgClip[tileCell];
         if (imgClip) {
           var img = tileImg[imgClip.imgId];
           if (img) {
             var image = fileLoader.loadImageAsync(img, loadImageFinished, self);
             if (image) {
-              render.drawImageExt(image, sX, sY, sW, sH, tX, tY, tW, tH);
+              switch (srcType) {
+                case BLOCK_FULL:
+                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height,
+                    tileX, tileY, tileWidth, tileHeight);
+                  break;
+                case BLOCK_TOP:
+                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height / 2,
+                    tileX, tileY, tileWidth, tileHeight / 2);
+                  break;
+                case BLOCK_RIGHT:
+                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height,
+                    tileX + tileWidth / 2, tileY, tileWidth / 2, tileHeight);
+                  break;
+                case BLOCK_BOTTOM:
+                  render.drawImageExt(image, imgClip.x, imgClip.y + imgClip.height / 2, imgClip.width, imgClip.height / 2,
+                    tileX, tileY + tileHeight / 2, tileWidth, tileHeight / 2);
+                  break;
+                case BLOCK_LEFT:
+                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height,
+                    tileX, tileY, tileWidth / 2, tileHeight);
+                  break;
+                case BLOCK_TOP_LEFT:
+                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height / 2,
+                    tileX, tileY, tileWidth / 2, tileHeight / 2);
+                  break;
+                case BLOCK_TOP_RIGHT:
+                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height / 2,
+                    tileX + tileWidth/ 2, tileY, tileWidth, tileHeight);
+                  break;
+                case BLOCK_BOTTOM_LEFT:
+                  render.drawImageExt(image, imgClip.x, imgClip.y + imgClip.height / 2, imgClip.width / 2, imgClip.height / 2,
+                    tileX, tileY + tileHeight / 2, tileWidth / 2, tileHeight / 2);
+                  break;
+                case BLOCK_BOTTOM_RIGHT:
+                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y + imgClip.height / 2, imgClip.width / 2, imgClip.height / 2,
+                    tileX + tileWidth / 2, tileY + tileHeight / 2, tileWidth / 2, tileHeight / 2);
+                  break;
+                default:
+                  break;
+              }
             }
           }
         }
@@ -95,9 +144,11 @@ export default (
           renderContext.width = newWidth;
           renderContext.height = newHeight;
           renderContext.sizeValid = true;
-          console.warn(newX, newY, newWidth, newHeight);
         }
-
+        var tileData = self.tileData;
+        if (LangUtil.isNotArray(tileData)) {
+          return;
+        }
         var sRow = Math.floor(self.containerTop / tileHeight);
         var sCol = Math.floor(self.containerLeft / tileWidth);
         if (renderContext.cacheInit) {
@@ -106,10 +157,10 @@ export default (
             var clipHeight = Math.min(newHeight + newY, oldHeight + oldY) - Math.max(newY, oldY);
             var clip = clipWidth > 0 && clipHeight > 0;
             var clipTarLeft = 0, clipTarTop = 0, clipTarRight = 0, clipTarBottom = 0;
-            var cacheFore = renderContext.cacheFore;
-            var cacheBack = renderContext.cacheBack;
-            cacheBack.width = newWidth;
-            cacheBack.height = newHeight;
+            var cacheFore = renderContext.cacheBack;
+            var cacheBack = renderContext.cacheFore;
+            cacheFore.width = newWidth;
+            cacheFore.height = newHeight;
             if (clip) {
               var clipSrcLeft = newX > oldX ? (newX - oldX) : 0;
               var clipSrcTop = newY > oldY ? (newY - oldY) : 0;
@@ -117,45 +168,29 @@ export default (
               clipTarRight = clipWidth + clipTarLeft;
               clipTarTop = newY < oldY ? (oldY - newY) : 0;
               clipTarBottom = clipHeight + clipTarTop;
-              cacheBack.drawImageExt(cacheFore.getCanvas(), clipSrcLeft, clipSrcTop, clipWidth, clipHeight,
+              cacheFore.drawImageExt(cacheBack.getCanvas(), clipSrcLeft, clipSrcTop, clipWidth, clipHeight,
                 clipTarLeft, clipTarTop, clipWidth, clipHeight);
             }
 
-            var tileData = self.tileData
-            if (LangUtil.isArray(tileData)) {
-              var fileLoader = self.findApplication().getFileLoader();
-              var tileImg = self.tileImg;
-              var tileImgClip = self.tileImgClip;
-              var tileDataLen = tileData.length;
-              for (var row = sRow, tileY = 0; tileY < newHeight && row < tileDataLen; row += 1, tileY += tileStepHeight) {
-                var tileRow = tileData[row];
-                if (LangUtil.isArray(tileRow)) {
-                  var tileRowLen = tileRow.length;
-                  for (var col = sCol, tileX = 0; tileX < newWidth && col < tileRowLen; col += 1, tileX += tileStepWidth) {
-                    if (!(clip && tileX >= clipTarLeft && tileX < clipTarRight && tileY >= clipTarTop && tileY < clipTarBottom)) {
-                      var tileCell = tileRow[col];
-                      renderMapBlock(self, cacheFore, fileLoader, tileImg, tileImgClip, tileCell);
-                      /*
-                      var imgClip = tileImgClip[tileCell];
-                      if (imgClip) {
-                        var img = tileImg[imgClip.imgId];
-                        if (img) {
-                          var image = fileLoader.loadImageAsync(img, loadImageFinished, this);
-                          if (image) {
-                            cacheBack.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height,
-                              tileX, tileY, tileWidth, tileHeight);
-                          }
-                        }
-                      }
-                      */
-                    }
+            var fileLoader = self.findApplication().getFileLoader();
+            var tileImg = self.tileImg;
+            var tileImgClip = self.tileImgClip;
+            var tileDataLen = tileData.length;
+            for (var row = sRow, tileY = 0; tileY < newHeight && row < tileDataLen; row += 1, tileY += tileStepHeight) {
+              var tileRow = tileData[row];
+              if (LangUtil.isArray(tileRow)) {
+                var tileRowLen = tileRow.length;
+                for (var col = sCol, tileX = 0; tileX < newWidth && col < tileRowLen; col += 1, tileX += tileStepWidth) {
+                  if (!(clip && tileX >= clipTarLeft && tileX < clipTarRight && tileY >= clipTarTop && tileY < clipTarBottom)) {
+                    var tileCell = tileRow[col];
+                    renderMapBlock(self, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL, tileX, tileY, tileWidth, tileHeight);
                   }
                 }
               }
             }
-            cacheFore.clear();
-            renderContext.cacheBack = cacheFore;
-            renderContext.cacheFore = cacheBack;
+            cacheBack.clear();
+            renderContext.cacheBack = cacheBack;
+            renderContext.cacheFore = cacheFore;
           }
         } else {
           renderContext.cacheInit = true;
@@ -164,33 +199,18 @@ export default (
             cacheFore.width = newWidth;
             cacheFore.height = newHeight;
           }
-          var tileData = self.tileData
-          if (LangUtil.isArray(tileData)) {
-            var fileLoader = self.findApplication().getFileLoader();
-            var tileImg = self.tileImg;
-            var tileImgClip = self.tileImgClip;
-            var tileDataLen = tileData.length;
+          var fileLoader = self.findApplication().getFileLoader();
+          var tileImg = self.tileImg;
+          var tileImgClip = self.tileImgClip;
 
-            for (var row = sRow, tileY = 0; tileY < newHeight && row < tileDataLen; row += 1, tileY += tileStepHeight) {
-              var tileRow = tileData[row];
-              if (LangUtil.isArray(tileRow)) {
-                var tileRowLen = tileRow.length;
-                for (var col = sCol, tileX = 0; tileX < newWidth && col < tileRowLen; col += 1, tileX += tileStepWidth) {
-                  var tileCell = tileRow[col];
-                  renderMapBlock();
-
-                  var imgClip = tileImgClip[tileCell];
-                  if (imgClip) {
-                    var img = tileImg[imgClip.imgId];
-                    if (img) {
-                      var image = fileLoader.loadImageAsync(img, loadImageFinished, this);
-                      if (image) {
-                        cacheFore.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height,
-                          tileX, tileY, tileWidth, tileHeight);
-                      }
-                    }
-                  }
-                }
+          var tileDataLen = tileData.length;
+          for (var row = sRow, tileY = 0; tileY < newHeight && row < tileDataLen; row += 1, tileY += tileStepHeight) {
+            var tileRow = tileData[row];
+            if (LangUtil.isArray(tileRow)) {
+              var tileRowLen = tileRow.length;
+              for (var col = sCol, tileX = 0; tileX < newWidth && col < tileRowLen; col += 1, tileX += tileStepWidth) {
+                var tileCell = tileRow[col];
+                renderMapBlock(self, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL, tileX, tileY, tileWidth, tileHeight);
               }
             }
           }
@@ -230,15 +250,15 @@ export default (
           renderContext.height = newHeight;
           renderContext.sizeValid = true;
         }
+        var tileData = self.tileData;
+        if (LangUtil.isNotArray(tileData)) {
+          return;
+        }
 
         var edgeLeft = -tileStepWidth;
         var edgeRight = newWidth - tileStepWidth;
         var edgeTop = -tileStepHeight;
         var edgeBottom = newHeight - tileStepHeight;
-        var tileData = self.tileData;
-        if (LangUtil.isNotArray(tileData)) {
-          return;
-        }
         var clip = false;
         if (renderContext.cacheInit) {
           if (newWidth !== oldWidth || newHeight !== oldHeight || newX !== oldX || newY !== oldY) {
@@ -262,10 +282,15 @@ export default (
               cacheFore.height = newHeight;
               cacheFore.drawImageExt(cacheBack.getCanvas(), clipSrcLeft, clipSrcTop, clipWidth, clipHeight,
                 clipTarLeft, clipTarTop, clipWidth, clipHeight);
+
+              var fileLoader = self.findApplication().getFileLoader();
+              var tileImg = self.tileImg;
+              var tileImgClip = self.tileImgClip;
+
+              var tileDataLen = tileData.length;
               for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = -tileStepHeight;
                    startTileX < newWidth;
                    row -= 1, startCol += 1, startTileX += tileWidth) {
-                var tileDataLen = tileData.length;
                 if (row >= 0 && row < tileDataLen) {
                   var tileRow = tileData[row];
                   if (LangUtil.isArray(tileRow)) {
@@ -274,41 +299,29 @@ export default (
                          tileX < newWidth && tileY < newHeight;
                          col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
                       if (col >= 0 && col < tileRowLen) {
-                        if (tileX < 0) {
-                          sX = tileStepWidth;
-                          tX = 0;
-                        } else {
-                          sX = 0;
-                          tX = tileX;
-                        }
-                        if (tileY < 0) {
-                          sY = tileStepHeight;
-                          tY = 0;
-                        } else {
-                          sY = tileY;
-                          tY = tileY;
-                        }
-                        w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
-                        h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
-                        // 剪切逻辑
-                        if (sX === edgeClipLeft) {
-                          if (sY === edgeClipTop) {
+                        if (tileX <= edgeClipLeft || tileX >= edgeClipRight || tileY <= edgeClipTop || tileY >= edgeClipBottom) {
+                          // 需要绘制
+                          if (tileX === edgeClipLeft) {
+                            if (tileX < 0) {
+                              if (tileY === )
+                            } else {
 
-                          } else if (sY === edgeClipBottom) {
+                            }
+                          } else if (tileX === edgeClipRight) {
+                            if (tileX === edgeRight) {
 
+                            } else {
+
+                            }
+                          } else {
+                            if (tileX < 0) {
+
+                            } else if (tileX === edgeRight) {
+
+                            } else {
+
+                            }
                           }
-                        } else if (sX === edgeClipRight) {
-                          if (sY === edgeClipTop) {
-
-                          } else if (sY === edgeClipBottom) {
-
-                          }
-                        } else if (sY === edgeClipTop) {
-
-                        } else if (sY === edgeClipBottom) {
-
-                        } else {
-
                         }
                       }
                     }
@@ -388,12 +401,14 @@ export default (
             }
           } else {
             cacheFore = renderContext.cacheFore;
+            cacheFore.width = newWidth;
+            cacheFore.height = newHeight;
           }
           var fileLoader = self.findApplcation().getFileLoader();
           var tileImg = self.tileImg;
           var tileImgClip = self.tileImgClip;
           var tileDataLen = tileData.length;
-          var sX, sY, tX, tY, w, h;
+          var tX, tY, tW, tH, srcType;
           // 往上面绘制
           for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = -tileStepHeight;
                startTileX < newWidth;
@@ -407,10 +422,8 @@ export default (
                      col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
                   if (col >= 0 && col < tileRowLen) {
                     if (tileX < 0) {
-                      sX = tileStepWidth;
                       tX = 0;
                     } else {
-                      sX = 0;
                       tX = tileX;
                     }
                     if (tileY < 0) {
@@ -420,6 +433,8 @@ export default (
                       sY = tileY;
                       tY = tileY;
                     }
+                    tX = tileX < 0 ? 0 : tileX;
+                    tY = tileY < 0 ? 0 : tileY;
                     w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
                     h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
                     // TODO 绘制
@@ -454,6 +469,7 @@ export default (
                       sY = tileY;
                       tY = tileY;
                     }
+
                     w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
                     h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
                     // TODO 绘制
