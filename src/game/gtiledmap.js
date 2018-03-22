@@ -79,7 +79,7 @@ export default (
                   render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height / 2, tX, tY, tW, tH);
                   break;
                 case BLOCK_RIGHT:
-                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height, tX, tY, tW, tY);
+                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height, tX, tY, tW, tH);
                   break;
                 case BLOCK_BOTTOM:
                   render.drawImageExt(image, imgClip.x, imgClip.y + imgClip.height / 2, imgClip.width, imgClip.height / 2, tX, tY, tW, tH);
@@ -507,6 +507,7 @@ export default (
               cacheFore.height = newHeight;
             }
           } else {
+            // renderContext.cacheInit = true;
             cacheFore = renderContext.cacheFore;
             cacheFore.clear();
             cacheFore.width = newWidth;
