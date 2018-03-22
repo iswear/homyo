@@ -36,7 +36,7 @@ export default (
         this._renderContext.cacheFore.imageCount = 0;
         this._renderContext.cacheBack.imageCount = 0;
         if (!renderContext.cacheValid) {
-          renderMapCache(this, renderContext);
+          renderMapCache.call(this, renderContext);
           renderContext.cacheValid = true;
         }
         if (this.tileType === 1) {
@@ -57,56 +57,47 @@ export default (
             this.containerLeft, this.containerTop, width, height);
         }
       }
-      function renderMapCache (self, renderContext) {
-        if (self.tileType === 1) {
-          renderMapCacheSquare(self, renderContext);
+      function renderMapCache (renderContext) {
+        if (this.tileType === 1) {
+          renderMapCacheSquare.call(this, renderContext);
         } else {
-          renderMapCacheDiamond(self, renderContext);
+          renderMapCacheDiamond.call(this, renderContext);
         }
       }
-      function renderMapBlock (self, render, fileLoader, tileImg, tileImgClip, tileCell, srcType, tX, tY, tW, tH) {
+      function renderMapBlock (render, fileLoader, tileImg, tileImgClip, tileCell, srcType, tX, tY, tW, tH) {
         var imgClip = tileImgClip[tileCell];
         if (imgClip) {
           var img = tileImg[imgClip.imgId];
           if (img) {
-            var image = fileLoader.loadImageAsync(img, loadImageFinished, self);
+            var image = fileLoader.loadImageAsync(img, loadImageFinished, this);
             if (image) {
               switch (srcType) {
                 case BLOCK_FULL:
-                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height,
-                    tileX, tileY, tileWidth, tileHeight);
+                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height, tX, tY, tW, tH);
                   break;
                 case BLOCK_TOP:
-                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height / 2,
-                    tileX, tileY, tileWidth, tileHeight / 2);
+                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height / 2, tX, tY, tW, tH);
                   break;
                 case BLOCK_RIGHT:
-                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height,
-                    tileX + tileWidth / 2, tileY, tileWidth / 2, tileHeight);
+                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height, tX, tY, tW, tY);
                   break;
                 case BLOCK_BOTTOM:
-                  render.drawImageExt(image, imgClip.x, imgClip.y + imgClip.height / 2, imgClip.width, imgClip.height / 2,
-                    tileX, tileY + tileHeight / 2, tileWidth, tileHeight / 2);
+                  render.drawImageExt(image, imgClip.x, imgClip.y + imgClip.height / 2, imgClip.width, imgClip.height / 2, tX, tY, tW, tH);
                   break;
                 case BLOCK_LEFT:
-                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height,
-                    tileX, tileY, tileWidth / 2, tileHeight);
+                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height, tX, tY, tW, tH);
                   break;
                 case BLOCK_TOP_LEFT:
-                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height / 2,
-                    tileX, tileY, tileWidth / 2, tileHeight / 2);
+                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height / 2, tX, tY, tW, tH);
                   break;
                 case BLOCK_TOP_RIGHT:
-                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height / 2,
-                    tileX + tileWidth/ 2, tileY, tileWidth, tileHeight);
+                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height / 2, tX, tY, tW, tH);
                   break;
                 case BLOCK_BOTTOM_LEFT:
-                  render.drawImageExt(image, imgClip.x, imgClip.y + imgClip.height / 2, imgClip.width / 2, imgClip.height / 2,
-                    tileX, tileY + tileHeight / 2, tileWidth / 2, tileHeight / 2);
+                  render.drawImageExt(image, imgClip.x, imgClip.y + imgClip.height / 2, imgClip.width / 2, imgClip.height / 2, tX, tY, tW, tH);
                   break;
                 case BLOCK_BOTTOM_RIGHT:
-                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y + imgClip.height / 2, imgClip.width / 2, imgClip.height / 2,
-                    tileX + tileWidth / 2, tileY + tileHeight / 2, tileWidth / 2, tileHeight / 2);
+                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y + imgClip.height / 2, imgClip.width / 2, imgClip.height / 2, tX, tY, tW, tH);
                   break;
                 default:
                   break;
@@ -115,9 +106,9 @@ export default (
           }
         }
       }
-      function renderMapCacheSquare (self, renderContext) {
-        var tileWidth = self.tileWidth;
-        var tileHeight = self.tileHeight;
+      function renderMapCacheSquare (renderContext) {
+        var tileWidth = this.tileWidth;
+        var tileHeight = this.tileHeight;
         var tileStepWidth = tileWidth;
         var tileStepHeight = tileHeight;
 
@@ -131,26 +122,26 @@ export default (
         var newHeight = oldHeight;
 
         if (!renderContext.vertexValid) {
-          newX = Math.floor(self.containerLeft / tileWidth) * tileWidth;
-          newY = Math.floor(self.containerTop / tileHeight) * tileHeight;
+          newX = Math.floor(this.containerLeft / tileWidth) * tileWidth;
+          newY = Math.floor(this.containerTop / tileHeight) * tileHeight;
           renderContext.x = newX;
           renderContext.y = newY;
           renderContext.vertexValid = true;
         }
 
         if (!renderContext.sizeValid) {
-          newWidth = Math.ceil(self.containerRight / tileWidth)  * tileWidth - newX;
-          newHeight = Math.ceil(self.containerBottom / tileHeight) * tileHeight - newY;
+          newWidth = Math.ceil(this.containerRight / tileWidth)  * tileWidth - newX;
+          newHeight = Math.ceil(this.containerBottom / tileHeight) * tileHeight - newY;
           renderContext.width = newWidth;
           renderContext.height = newHeight;
           renderContext.sizeValid = true;
         }
-        var tileData = self.tileData;
+        var tileData = this.tileData;
         if (LangUtil.isNotArray(tileData)) {
           return;
         }
-        var sRow = Math.floor(self.containerTop / tileHeight);
-        var sCol = Math.floor(self.containerLeft / tileWidth);
+        var sRow = Math.floor(this.containerTop / tileHeight);
+        var sCol = Math.floor(this.containerLeft / tileWidth);
         if (renderContext.cacheInit) {
           if (newWidth !== oldWidth || newHeight !== oldHeight || newX !== oldX || newY !== oldY) {
             var clipWidth = Math.min(newWidth + newX, oldWidth + oldX) - Math.max(newX, oldX);
@@ -172,9 +163,9 @@ export default (
                 clipTarLeft, clipTarTop, clipWidth, clipHeight);
             }
 
-            var fileLoader = self.findApplication().getFileLoader();
-            var tileImg = self.tileImg;
-            var tileImgClip = self.tileImgClip;
+            var fileLoader = this.findApplication().getFileLoader();
+            var tileImg = this.tileImg;
+            var tileImgClip = this.tileImgClip;
             var tileDataLen = tileData.length;
             for (var row = sRow, tileY = 0; tileY < newHeight && row < tileDataLen; row += 1, tileY += tileStepHeight) {
               var tileRow = tileData[row];
@@ -183,7 +174,7 @@ export default (
                 for (var col = sCol, tileX = 0; tileX < newWidth && col < tileRowLen; col += 1, tileX += tileStepWidth) {
                   if (!(clip && tileX >= clipTarLeft && tileX < clipTarRight && tileY >= clipTarTop && tileY < clipTarBottom)) {
                     var tileCell = tileRow[col];
-                    renderMapBlock(self, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL, tileX, tileY, tileWidth, tileHeight);
+                    renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL, tileX, tileY, tileWidth, tileHeight);
                   }
                 }
               }
@@ -199,9 +190,9 @@ export default (
             cacheFore.width = newWidth;
             cacheFore.height = newHeight;
           }
-          var fileLoader = self.findApplication().getFileLoader();
-          var tileImg = self.tileImg;
-          var tileImgClip = self.tileImgClip;
+          var fileLoader = this.findApplication().getFileLoader();
+          var tileImg = this.tileImg;
+          var tileImgClip = this.tileImgClip;
 
           var tileDataLen = tileData.length;
           for (var row = sRow, tileY = 0; tileY < newHeight && row < tileDataLen; row += 1, tileY += tileStepHeight) {
@@ -210,22 +201,22 @@ export default (
               var tileRowLen = tileRow.length;
               for (var col = sCol, tileX = 0; tileX < newWidth && col < tileRowLen; col += 1, tileX += tileStepWidth) {
                 var tileCell = tileRow[col];
-                renderMapBlock(self, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL, tileX, tileY, tileWidth, tileHeight);
+                renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL, tileX, tileY, tileWidth, tileHeight);
               }
             }
           }
         }
       }
-      function renderMapCacheDiamond(self, renderContext) {
-        var tileWidth = self.tileWidth;
-        var tileHeight = self.tileHeight;
+      function renderMapCacheDiamond(renderContext) {
+        var tileWidth = this.tileWidth;
+        var tileHeight = this.tileHeight;
         var tileStepWidth = tileWidth / 2;
         var tileStepHeight = tileHeight / 2;
 
-        var sRow = Math.floor(self.containerTop / tileHeight - self.containerLeft / tileWidth);
-        var sCol = Math.floor(self.containerTop / tileHeight+ self.containerLeft / tileWidth);
-        var eRow = Math.floor(self.containerBottom / tileHeight - self.containerLeft / tileWidth);
-        var eCol = Math.floor(self.containerBottom / tileHeight + self.containerLeft / tileWidth);
+        var sRow = Math.floor(this.containerTop / tileHeight - this.containerLeft / tileWidth);
+        var sCol = Math.floor(this.containerTop / tileHeight + this.containerLeft / tileWidth);
+        var eRow = Math.floor(this.containerBottom / tileHeight - this.containerRight / tileWidth);
+        var eCol = Math.floor(this.containerBottom / tileHeight + this.containerRight / tileWidth);
 
         var oldX = renderContext.x;
         var oldY = renderContext.y;
@@ -237,20 +228,22 @@ export default (
         var newWidth = oldWidth;
         var newHeight = oldHeight;
         if (!renderContext.vertexValid) {
-          newX = (sCol - sRow - 1) * self.tileWidth / 2;
-          newY = (sCol + sRow) * self.tileHeight / 2;
+          newX = (sCol - sRow - 1) * tileStepWidth;
+          newY = (sCol + sRow) * tileStepHeight;
           renderContext.x = newX;
           renderContext.y = newY;
+          console.log("position", newX, newY);
           renderContext.vertexValid = true;
         }
         if (!renderContext.sizeValid) {
-          newWidth = (eCol - eRow + 1) * self.tileWidth / 2 - newX;
-          newHeight = (eCol + eRow + 2) * self.tileHeight / 2  - newY;
+          newWidth = (eCol - eRow + 1) * tileStepWidth - newX;
+          newHeight = (eCol + eRow + 2) * tileStepHeight - newY;
           renderContext.width = newWidth;
           renderContext.height = newHeight;
+          console.log("size", newWidth, newHeight);
           renderContext.sizeValid = true;
         }
-        var tileData = self.tileData;
+        var tileData = this.tileData;
         if (LangUtil.isNotArray(tileData)) {
           return;
         }
@@ -283,9 +276,9 @@ export default (
               cacheFore.drawImageExt(cacheBack.getCanvas(), clipSrcLeft, clipSrcTop, clipWidth, clipHeight,
                 clipTarLeft, clipTarTop, clipWidth, clipHeight);
 
-              var fileLoader = self.findApplication().getFileLoader();
-              var tileImg = self.tileImg;
-              var tileImgClip = self.tileImgClip;
+              var fileLoader = this.findApplication().getFileLoader();
+              var tileImg = this.tileImg;
+              var tileImgClip = this.tileImgClip;
 
               var tileDataLen = tileData.length;
               for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = -tileStepHeight;
@@ -299,113 +292,90 @@ export default (
                          tileX < newWidth && tileY < newHeight;
                          col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
                       if (col >= 0 && col < tileRowLen) {
-                        if (tileX <= edgeClipLeft || tileX >= edgeClipRight || tileY <= edgeClipTop || tileY >= edgeClipBottom) {
-                          // 需要绘制
-                          if (tileX === edgeClipLeft) {
-                            if (tileX < 0) {
-                              if (tileY === edgeClipTop) {
-                                if (tileY < 0) {
-
-                                }  else {
-
-                                }
-                              } else if (tileY === edgeClipBottom) {
-                                if (tileY === edgeBottom) {
-
-                                }  else {
-
-                                }
-                              } else {
-                                if (tileY < 0) {
-
-                                } else if (tileY === edgeBottom) {
-
-                                } else {
-
-                                }
-                              }
+                        var tileCell = tileRow[col];
+                        if (tileX < edgeClipLeft || tileX > edgeClipRight || tileY < edgeClipTop || tileY > edgeClipBottom) {
+                          if (tileX === edgeLeft) {
+                            if (tileY === edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_RIGHT,
+                                tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                            } else if (tileY === edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_RIGHT,
+                                tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
                             } else {
-                              if (tileY === edgeClipTop) {
-                                if (tileY < 0) {
-
-                                }  else {
-
-                                }
-                              } else if (tileY === edgeClipBottom) {
-                                if (tileY === edgeBottom) {
-
-                                }  else {
-
-                                }
-                              } else {
-                                if (tileY < 0) {
-
-                                } else if (tileY === edgeBottom) {
-
-                                } else {
-
-                                }
-                              }
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_RIGHT,
+                                tileX + tileStepWidth, tileY, tileStepWidth, tileHeight);
                             }
-                          } else if (tileX === edgeClipRight) {
-                            if (tileX === edgeRight) {
-                              if (tileY === edgeClipTop) {
-                                if (tileY < 0) {
-
-                                }  else {
-
-                                }
-                              } else if (tileY === edgeClipBottom) {
-                                if (tileY === edgeBottom) {
-
-                                }  else {
-
-                                }
-                              } else {
-
-                              }
+                          } else if (tileX === edgeRight) {
+                            if (tileY === edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_LEFT,
+                                tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                            } else if (tileY === edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_LEFT,
+                                tileX, tileY, tileStepWidth, tileStepHeight);
                             } else {
-                              if (tileY === edgeClipTop) {
-
-                              } else if (tileY === edgeClipBottom) {
-
-                              } else {
-
-                              }
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_LEFT,
+                                tileX, tileY, tileStepWidth, tileHeight);
                             }
                           } else {
-                            if (tileX < 0) {
-                              if (tileY === edgeClipTop) {
-                                if (tileY < 0) {
-
-                                }  else {
-
-                                }
-                              } else if (tileY === edgeClipBottom) {
-                                if (tileY === edgeBottom) {
-
-                                }  else {
-
-                                }
-                              } else {
-
-                              }
-                            } else if (tileX === edgeRight) {
-                              if (tileY === edgeClipTop) {
-
-                              } else if (tileY === edgeClipBottom) {
-
-                              } else {
-
-                              }
+                            if (tileY === edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            } else if (tileY === edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
                             } else {
-                              if (tileY === edgeClipTop) {
-
-                              } else if (tileY === edgeClipBottom) {
-
-                              } else {
-
-                              }
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL,
+                                tileX, tileY, tileWidth, tileHeight);
+                            }
+                          }
+                        } else if (tileX === edgeClipLeft) {
+                          if (tileY === edgeClipTop) {
+                            if (tileY > edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_LEFT,
+                              tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                          } else if (tileY === edgeClipBottom) {
+                            if (tileY < edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_LEFT,
+                              tileX, tileY, tileStepWidth, tileStepHeight);
+                          } else {
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_LEFT,
+                              tileX, tileY, tileStepWidth, tileHeight);
+                          }
+                        } else if (tileX === edgeClipRight) {
+                          if (tileY === edgeClipTop) {
+                            if (tileY > edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_RIGHT,
+                              tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                          } else if (tileY === edgeClipBottom) {
+                            if (tileY < edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_RIGHT,
+                              tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
+                          } else {
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_RIGHT,
+                              tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
+                          }
+                        } else {
+                          if (tileY === edgeClipTop) {
+                            if (tileY > edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            }
+                          } else if (tileY === edgeClipBottom) {
+                            if (tileY < edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
                             }
                           }
                         }
@@ -426,41 +396,92 @@ export default (
                          tileX < newWidth && tileY < newHeight;
                          col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
                       if (col >= 0 && col < tileRowLen) {
-                        if (tileX < 0) {
-                          sX = tileStepWidth;
-                          tX = 0;
-                        } else {
-                          sX = 0;
-                          tX = tileX;
-                        }
-                        if (tileY < 0) {
-                          sY = tileStepHeight;
-                          tY = 0;
-                        } else {
-                          sY = tileY;
-                          tY = tileY;
-                        }
-                        w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
-                        h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
-                        // 剪切逻辑
-                        if (sX === edgeClipLeft) {
-                          if (sY === edgeClipTop) {
-
-                          } else if (sY === edgeClipBottom) {
-
+                        var tileCell = tileRow[col];
+                        if (tileX < edgeClipLeft || tileX > edgeClipRight || tileY < edgeClipTop || tileY > edgeClipBottom) {
+                          if (tileX === edgeLeft) {
+                            if (tileY === edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_RIGHT,
+                                tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                            } else if (tileY === edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_RIGHT,
+                                tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
+                            } else {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_RIGHT,
+                                tileX + tileStepWidth, tileY, tileStepWidth, tileHeight);
+                            }
+                          } else if (tileX === edgeRight) {
+                            if (tileY === edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_LEFT,
+                                tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                            } else if (tileY === edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_LEFT,
+                                tileX, tileY, tileStepWidth, tileStepHeight);
+                            } else {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_LEFT,
+                                tileX, tileY, tileStepWidth, tileHeight);
+                            }
+                          } else {
+                            if (tileY === edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            } else if (tileY === edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            } else {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL,
+                                tileX, tileY, tileWidth, tileHeight);
+                            }
                           }
-                        } else if (sX === edgeClipRight) {
-                          if (sY === edgeClipTop) {
-
-                          } else if (sY === edgeClipBottom) {
-
+                        } else if (tileX === edgeClipLeft) {
+                          if (tileY === edgeClipTop) {
+                            if (tileY > edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_LEFT,
+                              tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                          } else if (tileY === edgeClipBottom) {
+                            if (tileY < edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_LEFT,
+                              tileX, tileY, tileStepWidth, tileStepHeight);
+                          } else {
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_LEFT,
+                              tileX, tileY, tileStepWidth, tileHeight);
                           }
-                        } else if (sY === edgeClipTop) {
-
-                        } else if (sY === edgeClipBottom) {
-
+                        } else if (tileX === edgeClipRight) {
+                          if (tileY === edgeClipTop) {
+                            if (tileY > edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_RIGHT,
+                              tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                          } else if (tileY === edgeClipBottom) {
+                            if (tileY < edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_RIGHT,
+                              tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
+                          } else {
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_RIGHT,
+                              tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
+                          }
                         } else {
-
+                          if (tileY === edgeClipTop) {
+                            if (tileY > edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            }
+                          } else if (tileY === edgeClipBottom) {
+                            if (tileY < edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            }
+                          }
                         }
                       }
                     }
@@ -487,14 +508,14 @@ export default (
             }
           } else {
             cacheFore = renderContext.cacheFore;
+            cacheFore.clear();
             cacheFore.width = newWidth;
             cacheFore.height = newHeight;
           }
-          var fileLoader = self.findApplcation().getFileLoader();
-          var tileImg = self.tileImg;
-          var tileImgClip = self.tileImgClip;
+          var fileLoader = this.findApplication().getFileLoader();
+          var tileImg = this.tileImg;
+          var tileImgClip = this.tileImgClip;
           var tileDataLen = tileData.length;
-          var tX, tY, tW, tH, srcType;
           // 往上面绘制
           for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = -tileStepHeight;
                startTileX < newWidth;
@@ -507,30 +528,48 @@ export default (
                      tileX < newWidth && tileY < newHeight;
                      col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
                   if (col >= 0 && col < tileRowLen) {
-                    if (tileX < 0) {
-                      tX = 0;
+                    var tileCell = tileRow[col];
+                    if (tileX === edgeLeft) {
+                      if (tileY === edgeTop) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_RIGHT,
+                          tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                      } else if (tileY === edgeBottom) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_RIGHT,
+                          tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
+                      } else {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_RIGHT,
+                          tileX + tileStepWidth, tileY, tileStepWidth, tileHeight);
+                      }
+                    } else if (tileX === edgeRight) {
+                      if (tileY === edgeTop) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_LEFT,
+                          tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                      } else if (tileY === edgeBottom) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_LEFT,
+                          tileX, tileY, tileStepWidth, tileStepHeight);
+                      } else {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_LEFT,
+                          tileX, tileY, tileStepWidth, tileHeight);
+                      }
                     } else {
-                      tX = tileX;
+                      if (tileY === edgeTop) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                          tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                      } else if (tileY === edgeBottom) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                          tileX, tileY, tileWidth, tileStepHeight);
+                      } else {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL,
+                          tileX, tileY, tileWidth, tileHeight);
+                      }
                     }
-                    if (tileY < 0) {
-                      sY = tileStepHeight;
-                      tY = 0;
-                    } else {
-                      sY = tileY;
-                      tY = tileY;
-                    }
-                    tX = tileX < 0 ? 0 : tileX;
-                    tY = tileY < 0 ? 0 : tileY;
-                    w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
-                    h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
-                    // TODO 绘制
                   }
                 }
               }
             }
           }
           // 往下面绘制
-          for (var row = sRow + 1, startCol = sCol, startTileX = -tileStepWidth, startTileY = 0;
+          for (var row = sRow + 1, startCol = sCol, startTileX = -tileStepWidth, startTileY = tileStepHeight;
                startTileY < newHeight;
                row += 1, startCol += 1, startTileY += tileHeight) {
             if (row >= 0 && col < tileRowLen) {
@@ -541,24 +580,41 @@ export default (
                      tileX < newWidth && tileY < newHeight;
                      col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
                   if (col >= 0 && col < tileRowLen) {
-                    if (tileX < 0) {
-                      sX = tileStepWidth;
-                      tX = 0;
+                    var tileCell = tileRow[col];
+                    if (tileX === edgeLeft) {
+                      if (tileY === edgeTop) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_RIGHT,
+                          tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                      } else if (tileY === edgeBottom) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_RIGHT,
+                          tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
+                      } else {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_RIGHT,
+                          tileX + tileStepWidth, tileY, tileStepWidth, tileHeight);
+                      }
+                    } else if (tileX === edgeRight) {
+                      if (tileY === edgeTop) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_LEFT,
+                          tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                      } else if (tileY === edgeBottom) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_LEFT,
+                          tileX, tileY, tileStepWidth, tileStepHeight);
+                      } else {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_LEFT,
+                          tileX, tileY, tileStepWidth, tileHeight);
+                      }
                     } else {
-                      sX = 0;
-                      tX = tileX;
+                      if (tileY === edgeTop) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                          tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                      } else if (tileY === edgeBottom) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                          tileX, tileY, tileWidth, tileStepHeight);
+                      } else {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL,
+                          tileX, tileY, tileWidth, tileHeight);
+                      }
                     }
-                    if (tileY < 0) {
-                      sY = tileStepHeight;
-                      tY = 0;
-                    } else {
-                      sY = tileY;
-                      tY = tileY;
-                    }
-
-                    w = (tileX > edgeLeft && tileX < edgeRight) ? tileWidth : tileStepWidth;
-                    h = (tileY > edgeTop && tileY < edgeBottom) ? tileHeight : tileStepHeight;
-                    // TODO 绘制
                   }
                 }
               }
