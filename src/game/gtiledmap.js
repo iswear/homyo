@@ -44,17 +44,19 @@ export default (
           var y = this.containerTop - renderContext.y;
           var width = this.containerRight - this.containerLeft;
           var height = this.containerBottom - this.containerTop;
-          render.fillRect(-10, -10, 20, 20);
-          render.drawImageExt(renderContext.cacheFore.getCanvas(), x, y, width, height,
-            this.containerLeft, this.containerTop, width, height);
+          if (width > 0 && height > 0) {
+            render.drawImageExt(renderContext.cacheFore.getCanvas(), x, y, width, height,
+              this.containerLeft, this.containerTop, width, height);
+          }
         } else {
           var x = this.containerLeft - renderContext.x;
           var y = this.containerTop - renderContext.y;
           var width = this.containerRight - this.containerLeft;
           var height = this.containerBottom - this.containerTop;
-          render.fillRect(-10, -10, 20, 20);
-          render.drawImageExt(renderContext.cacheFore.getCanvas(), x, y, width, height,
-            this.containerLeft, this.containerTop, width, height);
+          if (width > 0 && height > 0) {
+            render.drawImageExt(renderContext.cacheFore.getCanvas(), x, y, width, height,
+              this.containerLeft, this.containerTop, width, height);
+          }
         }
       }
       function renderMapCache (renderContext) {

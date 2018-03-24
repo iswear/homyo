@@ -52,8 +52,8 @@ export default (
       function eventPreProcessDesktop (e) {
         var eArg = this._events[0];
         var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
-        var offsetX = e.pageX - (canvasViewOffset.left - win.pageXOffset - docEle.clientLeft);
-        var offsetY = e.pageY - (canvasViewOffset.top - win.pageYOffset - docEle.clientTop);
+        var offsetX = (e.pageX - (canvasViewOffset.left - win.pageXOffset - docEle.clientLeft)) * this._scaleX;
+        var offsetY = (e.pageY - (canvasViewOffset.top - win.pageYOffset - docEle.clientTop)) * this._scaleY;
         if (offsetX !== eArg.offsetX || offsetY !== eArg.offsetY || e.wheelDelta !== 0) {
           this.move = true;
         } else {
@@ -81,8 +81,8 @@ export default (
           this._events[touch.identifier] = eArg;
         }
         var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
-        var offsetX = e.pageX - (canvasViewOffset.left - win.pageXOffset - docEle.clientLeft);
-        var offsetY = e.pageY - (canvasViewOffset.top - win.pageYOffset - docEle.clientTop);
+        var offsetX = (e.pageX - (canvasViewOffset.left - win.pageXOffset - docEle.clientLeft)) * this._scaleX;
+        var offsetY = (e.pageY - (canvasViewOffset.top - win.pageYOffset - docEle.clientTop)) * this._scaleY;
         if (offsetX !== eArg.offsetX || offsetY !== eArg.offsetY || e.wheelDelta !== 0) {
           this.move = true;
         } else {
@@ -279,12 +279,12 @@ export default (
               break;
             }
           }
-          this._render.width = width
-          this._render.height = height
-          this._renderCache.width = width
-          this._renderCache.height = height
-          this._transform[0] = width / clientWidth;
-          this._transform[4] = height / clientHeight;
+          this._render.width = width;
+          this._render.height = height;
+          this._renderCache.width = width;
+          this._renderCache.height = height;
+          this._scaleX = width / clientWidth;
+          this._scaleY = height / clientHeight;
           this._needUpdateTranform = false;
           this.refresh();
         }
@@ -355,6 +355,8 @@ export default (
         this._clientHeight = this._render.clientHeight;
         this._needUpdateTranform = true;
         this._transform = [1, 0, 0, 0, 1, 0];
+        this._scaleX = 1;
+        this._scaleY = 1;
 
         functions.eventInit.call(this);
         functions.syncTransform.call(this);
