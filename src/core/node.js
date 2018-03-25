@@ -449,7 +449,7 @@ export default (
           rectInWorld.top = Math.min(Math.min(p1[1], p2[1]), Math.min(p3[1], p4[1]));
           rectInWorld.bottom = Math.max(Math.max(p1[1], p2[1]), Math.max(p3[1], p4[1]));
           rectInWorld.left = Math.min(Math.min(p1[0], p2[0]), Math.min(p3[0], p4[0]));
-          rectInWorld.right = Math.max(Math.max(p1[0], p2[0]), Math.min(p3[0], p4[0]));
+          rectInWorld.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
           rectInWorld.width = rectInWorld.right - rectInWorld.left;
           rectInWorld.height = rectInWorld.bottom - rectInWorld.top;
         }

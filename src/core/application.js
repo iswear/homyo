@@ -419,6 +419,9 @@ export default (
         rect.right = Math.min(renderZone.right, rect.right);
         rect.width = rect.right - rect.left;
         rect.height = rect.bottom - rect.top;
+        if (!(rect.width > 0 && rect.height > 0)) {
+          return;
+        }
         var dirtyZones = this._dirtyZones;
         var len = dirtyZones.length;
         while (true) {
