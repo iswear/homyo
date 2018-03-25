@@ -350,7 +350,7 @@ export default (
       var InnerApplication = LangUtil.extend(Notifier);
 
       InnerApplication.prototype.defScaleMode = 0;
-      InnerApplication.prototype.defEnableDirtyZone = false;
+      InnerApplication.prototype.defEnableDirtyZone = true;
       InnerApplication.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.defineNotifyProperty('scaleMode', LangUtil.checkAndGet(conf.scaleMode, this.defScaleMode));
@@ -435,7 +435,9 @@ export default (
               if (dirtyZone.right <= rect.left) { // x轴没有交叉
                 continue;
               } else { // x轴有交叉
-                if (!(dirtyZone.top <= rect.bottom || dirtyZone.bottom >= rect.top)) { // y轴有交叉
+                if (dirtyZone.top >= rect.bottom || dirtyZone.bottom <= rect.top) { // y轴无交叉
+                  continue;
+                } else {
                   rect.top = Math.min(dirtyZone.top, rect.top);
                   rect.bottom = Math.max(dirtyZone.bottom, rect.bottom);
                   rect.left = Math.min(dirtyZone.left, rect.left);
@@ -482,7 +484,7 @@ export default (
           if (this.enableDirtyZone) {
             // 重复检测受影响区域
             while (true) {
-              if (!root._checkDirtyZone(dirtyZones)) {
+              if (!root._checkDirtyZone(renderZone, dirtyZones)) {
                 break;
               }
             }

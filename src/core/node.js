@@ -37,7 +37,7 @@ export default (
           this._renderCtx.refresh = true;
           var app = this.findApplication();
           if (app) {
-            app.receiveDirtyZone(node);
+            app.receiveDirtyZone(this);
           }
         }
       }
@@ -47,7 +47,7 @@ export default (
           this._renderCtx.refresh = true;
           var app = this.findApplication();
           if (app) {
-            app.receiveDirtyZone(node);
+            app.receiveDirtyZone(this);
           }
         }
       }
@@ -468,11 +468,10 @@ export default (
         var result  = false;
         var reportCtx = this._reportCtx, wTransform = this._transform.wTransform, rectInWorld = this._rectInWorld;
         var report = reportCtx.origin || !(wTransform[0] === 1 && wTransform[1] === 0 && wTransform[3] === 0 && wTransform[4] === 0);
-        if (!reportCtx.current || !(rectInWorld.left >= renderZone.right || rectInWorld.right <= renderZone.left || rectInWorld.top >= renderZone.bottom || rectInWorld.bottom <= renderZone.top)) {
+        if (!reportCtx.current && !(rectInWorld.left >= renderZone.right || rectInWorld.right <= renderZone.left || rectInWorld.top >= renderZone.bottom || rectInWorld.bottom <= renderZone.top)) {
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
-            if (!(rectInWorld.bottom <= dirtyZone.top || rectInWorld.top >= dirtyZone.bottom ||
-                rectInWorld.left >= dirtyZone.right || rectInWorld.right <= dirtyZone.left)) {
+            if (!(rectInWorld.bottom <= dirtyZone.top || rectInWorld.top >= dirtyZone.bottom || rectInWorld.left >= dirtyZone.right || rectInWorld.right <= dirtyZone.left)) {
               if (report) {
                 functions.reportCurrentRect.call(this);
                 result = true;
@@ -489,7 +488,7 @@ export default (
           var layer = layers[i];
           if (layer) {
             for (var j = 0, len2 = layer.length; j < len2; ++j) {
-              result = result || layer._checkDirtyZone(renderZone, dirtyZones);
+              result = result || layer[j]._checkDirtyZone(renderZone, dirtyZones);
             }
           }
         }
@@ -501,7 +500,7 @@ export default (
         var alpha = this.alpha * parentAlpha;
         if (this.visible && alpha > 0) {
           if (this.needRender(renderZone)) {
-            var wTransform = transform.wTransform;
+            var wTransform = this._transform.wTransform;
             // 设置矩阵
             render.setTransform(wTransform[0], wTransform[3], wTransform[1], wTransform[4], wTransform[2], wTransform[5]);
             // 设置透明度
