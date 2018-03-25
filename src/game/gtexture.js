@@ -47,7 +47,7 @@ export default (
         if (!img.image) {
           loadImage.call(this, img.url);
         } else {
-          var rect = this.getRectInSelf();
+          var rect = this.getRectInLocal();
           render.drawImage(img.image, rect.left, rect.top);
         }
       }
@@ -56,7 +56,7 @@ export default (
         if (!img.image) {
           loadImage.call(this, img.url);
         } else {
-          var rect = this.getRectInSelf();
+          var rect = this.getRectInLocal();
           render.drawImageExt(img.image, img.x, img.y, img.width, img.height, rect.left, rect.top, img.width, img.height);
         }
       }

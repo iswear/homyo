@@ -45,11 +45,6 @@ export default (
           mat[3] * vector[0] + mat[4] * vector[1] + mat[5]
         ];
       },
-      isIdentityMat2d: function (mat) {
-        return mat[2] === 0 && mat[5] === 0 &&
-          mat[0] === 1 && mat[1] === 0 &&
-          mat[3] === 0 && mat[4] === 0;
-      },
       translate2d: function (mat, x, y) {
         // [
         //   1, 0, x,
@@ -105,39 +100,6 @@ export default (
           mat[4] / temp, -mat[1] / temp, (mat[1] * mat[5] - mat[2] * mat[4]) / temp,
           -mat[3] / temp, mat[0] / temp, (mat[3] * mat[2] - mat[0] * mat[5]) / temp
         ];
-      },
-      createIdentityMat3d: function () {
-        return [
-          1, 0, 0, 0,
-          0, 1, 0, 0,
-          0, 0, 1, 0,
-          0, 0, 0, 1
-        ];
-      },
-      copyMat3d: function (srcMat, desMat) {
-        for (var i = 0, len = srcMat.length; i < len; ++i) {
-          desMat[i] = srcMat[i];
-        }
-        return desMat;
-      },
-      restMat3d: function (mat) {
-        mat[0] = 1;
-        mat[1] = 0;
-        mat[2] = 0;
-        mat[3] = 0;
-        mat[4] = 0;
-        mat[5] = 1;
-        mat[6] = 0;
-        mat[7] = 0;
-        mat[8] = 0;
-        mat[9] = 0;
-        mat[10] = 1;
-        mat[11] = 0;
-        mat[12] = 0;
-        mat[13] = 0;
-        mat[14] = 0;
-        mat[15] = 1;
-        return mat;
       }
     };
 

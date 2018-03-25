@@ -132,7 +132,7 @@ export default (
       function eventTouchStartCanvas (e) {
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
-        var root = this.root;
+        var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
           this.postNotification('touchstart', this, [eArg]);
@@ -144,7 +144,7 @@ export default (
       function eventTouchMoveCanvas (e) {
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
-        var root = this.root;
+        var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
           if (eArg.move) {
@@ -158,7 +158,7 @@ export default (
       function eventTouchEndCanvas (e) {
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
-        var root = this.root;
+        var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
           this.postNotification('touchend', this, [eArg]);
@@ -170,7 +170,7 @@ export default (
       function eventTouchCancelCanvas (e) {
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
-        var root = this.root;
+        var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
           this.postNotification('touchend', this, [eArg]);
@@ -200,54 +200,54 @@ export default (
       function eventClickCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('click', this, [eArg]);
-        this.root._dispatchMouseTouchEvent('click', eArg);
+        this._root._dispatchMouseTouchEvent('click', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
       }
       function eventDblClickCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('dblclick', this, [eArg]);
-        this.root._dispatchMouseTouchEvent('dblclick', eArg);
+        this._root._dispatchMouseTouchEvent('dblclick', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
       }
       function eventContextMenuCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('contextmenu', this, [eArg]);
-        this.root._dispatchMouseTouchEvent('contextmenu', eArg);
+        this._root._dispatchMouseTouchEvent('contextmenu', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
       }
       function eventMouseDownCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('mousedown', this, [eArg]);
-        this.root._dispatchMouseTouchEvent('mousedown', eArg);
+        this._root._dispatchMouseTouchEvent('mousedown', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
       }
       function eventMouseMoveCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('mousemove', this, [eArg]);
-        this.root._dispatchMouseTouchEvent('mousemove', eArg);
+        this._root._dispatchMouseTouchEvent('mousemove', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
       }
       function eventMouseUpCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('mouseup', this, [eArg]);
-        this.root._dispatchMouseTouchEvent('mouseup', eArg);
+        this._root._dispatchMouseTouchEvent('mouseup', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
       }
       function eventMouseWheelCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('wheel', this, [eArg]);
-        this.root._dispatchMouseTouchEvent('wheel', eArg);
+        this._root._dispatchMouseTouchEvent('wheel', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
       }
       function checkRenderSize () {
-        var render = this._render;
+        var render = this._render, renderZone = this._renderZone;
         if (!this._needUpdateTranform) {
           if (render.clientWidth !== this._clientWidth || render.clientHeight !== this._clientHeight) {
             this._clientWidth = render.clientWidth;
@@ -279,10 +279,14 @@ export default (
               break;
             }
           }
-          this._render.width = width;
-          this._render.height = height;
-          this._renderCache.width = width;
-          this._renderCache.height = height;
+          render.width = width;
+          render.height = height;
+          renderZone.right = width;
+          renderZone.bottom = height;
+          renderZone.width = width;
+          renderZone.height = height;
+          // this._renderCache.width = width;
+          // this._renderCache.height = height;
           this._scaleX = width / clientWidth;
           this._scaleY = height / clientHeight;
           this._needUpdateTranform = false;
@@ -292,11 +296,21 @@ export default (
       function syncTransform () {
         this._needUpdateTranform = true;
       }
+      function syncNodesDirtyZoneCtx () {
+        if (this._root) {
+          if (this.enableDirtyZone) {
+            this._root._enableDirtyZone(true);
+          } else {
+            this._root._disableDirtyZone(true);
+          }
+        }
+      }
 
       return {
         eventInit: eventInit,
         syncTransform: syncTransform,
-        checkRenderSize: checkRenderSize
+        checkRenderSize: checkRenderSize,
+        syncNodesDirtyZoneCtx: syncNodesDirtyZoneCtx
       }
     })();
 
@@ -335,13 +349,27 @@ export default (
     var Application = (function () {
       var InnerApplication = LangUtil.extend(Notifier);
 
+      InnerApplication.prototype.defScaleMode = 0;
+      InnerApplication.prototype.defEnableDirtyZone = false;
       InnerApplication.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('root', LangUtil.checkAndGet(conf.root, null));
-        this.defineNotifyProperty('scaleMode', LangUtil.checkAndGet(conf.scaleMode, 0));
-        this.root.application = this;
+        this.defineNotifyProperty('scaleMode', LangUtil.checkAndGet(conf.scaleMode, this.defScaleMode));
+        this.defineNotifyProperty('enableDirtyZone', LangUtil.checkAndGet(conf.enableDirtyZone, this.defEnableDirtyZone));
+        this._root = LangUtil.checkAndGet(conf.root, null);
+        this._root.application = this;
+        // this._nodes = {};
+
         this._render = new CanvasRender({canvas: conf.canvas, width: LangUtil.checkAndGet(conf.width, undefined), height: LangUtil.checkAndGet(conf.height, undefined)});
-        this._renderCache = new CanvasRender({canvas: document.createElement('canvas')});
+        this._renderZone = {
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: 0,
+          height: 0
+        };
+        // this._renderCache = new CanvasRender({canvas: document.createElement('canvas')});
+        this._dirtyZones = [];
 
         this._prevLoopTime = 0;
         this._preCheckTime = 0;
@@ -353,15 +381,17 @@ export default (
 
         this._clientWidth = this._render.clientWidth;
         this._clientHeight = this._render.clientHeight;
-        this._needUpdateTranform = true;
-        this._transform = [1, 0, 0, 0, 1, 0];
         this._scaleX = 1;
         this._scaleY = 1;
+        this._needUpdateTranform = true;
+        this._transform = [1, 0, 0, 0, 1, 0];
 
         functions.eventInit.call(this);
         functions.syncTransform.call(this);
+        functions.syncNodesDirtyZoneCtx.call(this);
 
         this.addObserver('scaleModeChanged', functions.syncTransform, this, this);
+        this.addObserver('enableDirtyZoneChanged', functions.syncNodesDirtyZoneCtx, this, this);
       }
 
       InnerApplication.prototype.getAnimationManager = function () {
@@ -370,6 +400,56 @@ export default (
 
       InnerApplication.prototype.getFileLoader = function () {
         return this._fileLoader;
+      }
+
+      // InnerApplication.prototype.regNode = function (node) {
+      //   this._nodes[node._getId()] = node;
+      // }
+      //
+      // InnerApplication.prototype.unRegNode = function (node) {
+      //   delete this._nodes[node._getId()];
+      // }
+
+      InnerApplication.prototype.receiveDirtyZone = function (node) {
+        var rect = LangUtil.checkAndGet(node.getRectInWorld());
+        var renderZone = this._renderZone;
+        rect.top = Math.max(renderZone.top, rect.top);
+        rect.bottom = Math.min(renderZone.bottom, rect.bottom);
+        rect.left = Math.max(renderZone.left, rect.left);
+        rect.right = Math.min(renderZone.right, rect.right);
+        rect.width = rect.right - rect.left;
+        rect.height = rect.bottom - rect.top;
+        var dirtyZones = this._dirtyZones;
+        var len = dirtyZones.length;
+        while (true) {
+          if (len === 0) {
+            dirtyZones.push(rect);
+            return;
+          }
+          for (var i = 0; i < len; ++i) {
+            var dirtyZone = dirtyZones[i];
+            if (dirtyZone.left >= rect.right) { // x轴没有交叉
+              dirtyZones.splice(i, 0, rect);
+              return;
+            } else {
+              if (dirtyZone.right <= rect.left) { // x轴没有交叉
+                continue;
+              } else { // x轴有交叉
+                if (!(dirtyZone.top <= rect.bottom || dirtyZone.bottom >= rect.top)) { // y轴有交叉
+                  rect.top = Math.min(dirtyZone.top, rect.top);
+                  rect.bottom = Math.max(dirtyZone.bottom, rect.bottom);
+                  rect.left = Math.min(dirtyZone.left, rect.left);
+                  rect.right = Math.max(dirtyZone.right, rect.right);
+                  rect.width = rect.right - rect.left;
+                  rect.height = rect.bottom - rect.top;
+                  dirtyZones.splice(i, 1);
+                  len--;
+                  break;
+                }
+              }
+            }
+          }
+        }
       }
 
       InnerApplication.prototype.refresh = function () {
@@ -394,21 +474,40 @@ export default (
           this._preCheckTime += deltaTime;
         }
         if (this._refresh) {
+          var renderZone = this._renderZone, dirtyZones = this._dirtyZones, root = this._root, render = this._render;
           this._refresh = false;
-          this._render.setTransform(1, 0, 0, 1, 0, 0);
-          this._render.clear()
-          this.root._dispatchRender(this._render, 1, this._transform, this._transform, this._needUpdateTranform);
-          // this._renderCache.setTransform(1, 0, 0, 1, 0, 0);
-          // this._renderCache.clear();
-          // this.root._dispatchRender(this._renderCache, 1, this._transform, this._transform, this._needUpdateTranform);
-          // this._render.clear();
-          // this._render.drawImage(this._renderCache.getCanvas(), 0, 0);
+          // 同步最新的结点转换
+          root._syncTransform(this._transform, this._transform, this._needUpdateTranform);
+          // 重新计算脏矩形
+          if (this.enableDirtyZone) {
+            // 重复检测受影响区域
+            while (true) {
+              if (!root._checkDirtyZone(dirtyZones)) {
+                break;
+              }
+            }
+          } else {
+            // 画布区域加上
+            dirtyZones.push(renderZone);
+          }
+          // 清理脏矩形区域
+          for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+            var dirtyZone = dirtyZones[i];
+            render.clearRect(dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
+            console.log(dirtyZone);
+          }
+          // 重新绘制阶段
+          root._dispatchRender(render, 1, renderZone, dirtyZones);
+          // 清理脏矩形
+          dirtyZones.splice(0, dirtyZones.length);
+          // 矩阵回归到单位矩阵
+          render.setTransform(1, 0, 0, 1, 0, 0);
         }
       }
 
       InnerApplication.prototype.run = function () {
         if (this._timerTaskId === 0) {
-          if (this.root !== null) {
+          if (this._root !== null) {
             this._timerTaskId = TimerUtil.addAnimationTask(this.loop, this);
             this.postNotification('resize', this, [this._render.width, this._render.height]);
           }
@@ -421,18 +520,19 @@ export default (
       }
 
       InnerApplication.prototype.destroy = function () {
-        if (this.root) {
-          this.root.destroy();
-          this.root = null;
+        if (this._root) {
+          this._root.destroy();
+          this._root = null;
+          // this._nodes = null;
         }
         if (this._render) {
           this._render.destroy();
           this._render = null;
         }
-        if (his._renderCache) {
-          this._renderCache.destroy();
-          this._renderCache = null;
-        }
+        // if (his._renderCache) {
+        //   this._renderCache.destroy();
+        //   this._renderCache = null;
+        // }
         if (this._animationManager) {
           this._animationManager.destroy();
           this._animationManager = null;

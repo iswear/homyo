@@ -33,7 +33,7 @@ export default (
         if (this._renderBorderRadius < 0) { this._renderBorderRadius = 0; }
       }
       function renderClipAndBackground (sender, render) {
-        var rect = this.getRectInSelf();
+        var rect = this.getRectInLocal();
         var left = rect.left;
         var right = rect.right;
         var top = rect.top;
@@ -86,7 +86,7 @@ export default (
         }
       }
       function renderBorder (sender, render) {
-        var rect = this.getRectInSelf();
+        var rect = this.getRectInLocal();
         var left = rect.left;
         var right = rect.height;
         var top = rect.top;
@@ -120,9 +120,7 @@ export default (
       return {
         syncClipOrBackground: syncClipOrBackground,
         syncBorder: syncBorder,
-        syncBorderRadius: syncBorderRadius,
-        renderClipAndBackground: renderClipAndBackground,
-        renderBorder: renderBorder
+        syncBorderRadius: syncBorderRadius
       }
     })();
 

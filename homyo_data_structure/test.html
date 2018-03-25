@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<canvas id="a"></canvas>
+<script>
+    var begin;
+    window.onload = function () {
+      console.log((new Date()).getTime() - begin);
+    }
+
+    var canvas = document.getElementById('a');
+    var context = canvas.getContext('2d');
+
+    var b = 0;
+    begin = (new Date()).getTime();
+    for (var i = 0; i < 1000000; ++i) {
+      var a = i / 1000000;
+      if (a != b) {
+        b = a;
+      }
+    }
+    console.log((new Date()).getTime() - begin);
+
+    begin = (new Date()).getTime();
+    for (var i = 0; i < 1000000; ++i) {
+      context.setTransform(1, 0, 0, 0, 1, 0);
+    }
+    console.log((new Date()).getTime() - begin);
+
+    begin = (new Date()).getTime();
+
+</script>
+</body>
+</html>

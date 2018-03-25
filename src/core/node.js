@@ -12,19 +12,57 @@ export default (
   function () {
     var functions = (function () {
       function syncTransform () {
-        this._transform.needUpdateTransform = true;
+        this._transform.needUpdate = true;
       }
-      function syncRenderZone () {
-        this._rectInSelf.needUpdateRectInSelf = true;
+      function syncRectInLocal () {
+        this._rectInLocal.needUpdate = true;
+      }
+      function syncDirtyZoneCtx (sender, newVal, oldVal) {
+        if (oldVal) {
+          // oldVal.unRegNode(this);
+          if (oldVal.enableDirtyZone) {
+            this._disableDirtyZone(true);
+          }
+        }
+        if (newVal) {
+          // newVal.regNode(this);
+          if (newVal.enableDirtyZone) {
+            this._enableDirtyZone(true);
+          }
+        }
+      }
+      function reportOriginRect () {
+        if (!this._reportCtx.origin) {
+          this._reportCtx.origin = true;
+          this._renderCtx.refresh = true;
+          var app = this.findApplication();
+          if (app) {
+            app.receiveDirtyZone(node);
+          }
+        }
+      }
+      function reportCurrentRect () {
+        if (!this._reportCtx.current) {
+          this._reportCtx.current = true;
+          this._renderCtx.refresh = true;
+          var app = this.findApplication();
+          if (app) {
+            app.receiveDirtyZone(node);
+          }
+        }
       }
 
       return {
         syncTransform: syncTransform,
-        syncRenderZone: syncRenderZone
+        syncRectInLocal: syncRectInLocal,
+        syncDirtyZoneCtx: syncDirtyZoneCtx,
+        reportOriginRect: reportOriginRect,
+        reportCurrentRect: reportCurrentRect
       }
     })();
 
     var Node = (function () {
+      var id = 0;
       var InnerNode = LangUtil.extend(Notifier);
 
       InnerNode.prototype.defX = 0;
@@ -64,29 +102,44 @@ export default (
         this.defineNotifyProperty('parent', LangUtil.checkAndGet(conf.parent, null));
         this.defineNotifyProperty('application', LangUtil.checkAndGet(conf.application, null));
 
+        this._id = ++id;
         this._childNodes =  {count: 0, defLayer: LangUtil.checkAndGet(conf.defLayer, this.defLayer), nodeLayers: []};
-
         this._transform = {
-          needTransform: false,
-          needUpdateTransform: false,
+          needUpdate: false,
           lTransform: [0, 0, 0, 0, 0, 0],
           lReverseTransform: [0, 0, 0, 0, 0, 0],
           wTransform: [0, 0, 0, 0, 0, 0],
           wReverseTransform: [0, 0, 0, 0, 0, 0]
         };
-
-        this._rectInSelf = {
-          needUpdateRectInSelf: false,
+        this._rectInLocal = {
+          needUpdate: false,
           top: 0,
           bottom: 0,
           left: 0,
           right: 0,
           width: 0,
           height: 0
-        }
+        };
+        this._rectInWorld = {
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: 0,
+          height: 0
+        };
+        this._renderCtx = {
+          refresh: true
+        };
+        this._reportCtx = {
+          origin: false,
+          current: false
+        };
+
 
         functions.syncTransform.call(this);
-        functions.syncRenderZone.call(this);
+        functions.syncRectInLocal.call(this);
+        functions.syncDirtyZoneCtx.call(this, this.application, null);
 
         this.addObserver('xChanged', this.refresh, this, this);
         this.addObserver('yChanged', this.refresh, this, this);
@@ -111,14 +164,27 @@ export default (
         this.addObserver('inclineYChanged', functions.syncTransform, this, this);
         this.addObserver('parentChanged', functions.syncTransform, this, this);
 
-        this.addObserver('widthChanged', functions.syncRenderZone, this, this);
-        this.addObserver('heightChanged', functions.syncRenderZone, this, this);
-        this.addObserver('anchorXChanged', functions.syncRenderZone, this, this);
-        this.addObserver('anchorYChanged', functions.syncRenderZone, this, this);
+        this.addObserver('widthChanged', functions.syncRectInLocal, this, this);
+        this.addObserver('heightChanged', functions.syncRectInLocal, this, this);
+        this.addObserver('anchorXChanged', functions.syncRectInLocal, this, this);
+        this.addObserver('anchorYChanged', functions.syncRectInLocal, this, this);
+
+        this.addObserver('applicationChanged', functions.syncDirtyZoneCtx, this, this);
       }
 
-      InnerNode.prototype.getRectInSelf = function () {
-        return this._rectInSelf;
+      InnerNode.prototype.reportDirtyZone = function () {
+        var app = this.findApplication();
+        if (app) {
+          app.receiveDirtyZone(node);
+        }
+      }
+
+      InnerNode.prototype.getRectInLocal = function () {
+        return this._rectInLocal;
+      }
+
+      InnerNode.prototype.getRectInWorld = function () {
+        return this._rectInWorld;
       }
 
       InnerNode.prototype.getChildNode = function (layerIndex, nodeIndex) {
@@ -282,13 +348,20 @@ export default (
         return LangUtil.clone(this._transform.wReverseTransform);
       }
 
-      InnerNode.prototype.needRender = function () {
-        var renders = this.getObserverByName('render');
-        return renders && renders.length > 0;
+      InnerNode.prototype.needRender = function (renderZone) {
+        var rectInWorld = this._rectInWorld;
+        if (!this._renderCtx.refresh) {
+          return false;
+        } else if (rectInWorld.left >= renderZone.right || rectInWorld.right <= renderZone.left || rectInWorld.left >= renderZone.right || rectInWorld.bottom <= renderZone.left) {
+          return false;
+        } else {
+          var renders = this.getObserverByName('render');
+          return renders && renders.length > 0;
+        }
       }
 
       InnerNode.prototype.checkEventInteractZone = function (name, e, x, y) {
-        var rect = this.getRectInSelf();
+        var rect = this._rectInWorld;
         if (x >= rect.left && x <= rect.right &&
           y >= rect.top && y <= rect.bottom) {
           return true;
@@ -316,6 +389,7 @@ export default (
         var app = this.findApplication();
         if (app !== null) {
           app.refresh();
+          this._renderCtx.refresh = true;
         }
       }
 
@@ -340,71 +414,127 @@ export default (
         this.super('destroy');
       }
 
-      InnerNode.prototype._dispatchRender = function (render, parentAlpha, parentWTransform, parentWReverseTransform, parentUpdateTransform) {
-        var transform = this._transform, rectInSelf = this._rectInSelf;
-        if (rectInSelf.needUpdateRectInSelf) {
-          rectInSelf.width = Math.round(this.width);
-          rectInSelf.height = Math.round(this.height);
-          rectInSelf.top = Math.round(rectInSelf.height * (-this.anchorY));
-          rectInSelf.bottom = Math.round(rectInSelf.height + rectInSelf.top);
-          rectInSelf.left = Math.round(rectInSelf.width * (-this.anchorX));
-          rectInSelf.right = Math.round(rectInSelf.width + rectInSelf.left);
-          rectInSelf.needUpdateRectInSelf = false;
+      InnerNode.prototype._syncTransform = function (parentWTransform, parentWReverseTransform, parentUpdateTransform) {
+        var transform = this._transform, rectInLocal = this._rectInLocal, rectInWorld = this._rectInWorld;
+        var selfRectUpd = rectInLocal.needUpdate;
+        var transformUpd = transform.needUpdate;
+        var worldRectUpd = selfRectUpd || transformUpd || parentUpdateTransform;
+        if (selfRectUpd) {
+          rectInLocal.width = Math.round(this.width);
+          rectInLocal.height = Math.round(this.height);
+          rectInLocal.top = Math.round(rectInLocal.height * (-this.anchorY));
+          rectInLocal.bottom = Math.round(rectInLocal.height + rectInLocal.top);
+          rectInLocal.left = Math.round(rectInLocal.width * (-this.anchorX));
+          rectInLocal.right = Math.round(rectInLocal.width + rectInLocal.left);
+          rectInLocal.needUpdate = false;
         }
-        var needUpdateTransform = transform.needUpdateTransform;
-        if (needUpdateTransform) {
+        if (transformUpd) {
           transform.lTransform =
             MatrixUtil.incline2d(
               MatrixUtil.scale2d(
                 MatrixUtil.rotate2d(
                   MatrixUtil.translate2d(MatrixUtil.createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
           transform.lReverseTransform = MatrixUtil.reverse2d(transform.lTransform);
-          transform.needTransform = !MatrixUtil.isIdentityMat2d(transform.lTransform);
-          transform.needUpdateTransform = false;
+          transform.needUpdate = false;
         }
-        if (parentUpdateTransform || needUpdateTransform) {
+        if (parentUpdateTransform || transformUpd) {
           transform.wTransform = MatrixUtil.mulMat2d(parentWTransform, transform.lTransform);
           transform.wReverseTransform = MatrixUtil.mulMat2d(transform.lReverseTransform, parentWReverseTransform);
         }
-        this.postNotification('frame', this);
-        var alpha = this.alpha * parentAlpha
-        if (this.visible && alpha > 0) {
-          if (this.needRender()) {
-            // 设置矩阵
-            if (transform.needTransform) {
-              var wTransform = transform.wTransform
-              render.setTransform(wTransform[0], wTransform[3], wTransform[1], wTransform[4], wTransform[2], wTransform[5]);
+        if (worldRectUpd) {
+          var p1 = this.transformLVectorToW([rectInLocal.left, rectInLocal.top]);
+          var p2 = this.transformLVectorToW([rectInLocal.left, rectInLocal.bottom]);
+          var p3 = this.transformLVectorToW([rectInLocal.right, rectInLocal.top]);
+          var p4 = this.transformLVectorToW([rectInLocal.right, rectInLocal.bottom]);
+          rectInWorld.top = Math.min(Math.min(p1[1], p2[1]), Math.min(p3[1], p4[1]));
+          rectInWorld.bottom = Math.max(Math.max(p1[1], p2[1]), Math.max(p3[1], p4[1]));
+          rectInWorld.left = Math.min(Math.min(p1[0], p2[0]), Math.min(p3[0], p4[0]));
+          rectInWorld.right = Math.max(Math.max(p1[0], p2[0]), Math.min(p3[0], p4[0]));
+          rectInWorld.width = rectInWorld.right - rectInWorld.left;
+          rectInWorld.height = rectInWorld.bottom - rectInWorld.top;
+        }
+        var layers = this._childNodes.nodeLayers;
+        for (var i = 0, len = layers.length; i < len; ++i) {
+          var layer = layers[i];
+          if (layer) {
+            for (var j = 0, len2 = layer.length; j < len2; ++j) {
+              layer[j]._syncTransform(transform.wTransform, transform.wReverseTransform, parentUpdateTransform || transformUpd);
             }
+          }
+        }
+      }
+
+      InnerNode.prototype._checkDirtyZone = function (renderZone, dirtyZones) {
+        var result  = false;
+        var reportCtx = this._reportCtx, wTransform = this._transform.wTransform, rectInWorld = this._rectInWorld;
+        var report = reportCtx.origin || !(wTransform[0] === 1 && wTransform[1] === 0 && wTransform[3] === 0 && wTransform[4] === 0);
+        if (!reportCtx.current || !(rectInWorld.left >= renderZone.right || rectInWorld.right <= renderZone.left || rectInWorld.top >= renderZone.bottom || rectInWorld.bottom <= renderZone.top)) {
+          for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+            var dirtyZone = dirtyZones[i];
+            if (!(rectInWorld.bottom <= dirtyZone.top || rectInWorld.top >= dirtyZone.bottom ||
+                rectInWorld.left >= dirtyZone.right || rectInWorld.right <= dirtyZone.left)) {
+              if (report) {
+                functions.reportCurrentRect.call(this);
+                result = true;
+              } else {
+                this._renderCtx.refresh = true;
+              }
+              break;
+            }
+          }
+        }
+
+        var layers = this._childNodes.nodeLayers;
+        for (var i = 0, len = layers.length; i <len; ++i) {
+          var layer = layers[i];
+          if (layer) {
+            for (var j = 0, len2 = layer.length; j < len2; ++j) {
+              result = result || layer._checkDirtyZone(renderZone, dirtyZones);
+            }
+          }
+        }
+        return result;
+      }
+
+      InnerNode.prototype._dispatchRender = function (render, parentAlpha, renderZone, dirtyZones) {
+        this.postNotification('frame', this);
+        var alpha = this.alpha * parentAlpha;
+        if (this.visible && alpha > 0) {
+          if (this.needRender(renderZone)) {
+            var wTransform = transform.wTransform;
+            // 设置矩阵
+            render.setTransform(wTransform[0], wTransform[3], wTransform[1], wTransform[4], wTransform[2], wTransform[5]);
             // 设置透明度
-            render.alpha = alpha;
-            // 绘制自生
-            this.postNotification('render', this, [render]);
+            render.globalAlpha = alpha;
+            // 绘制自身
+            this.postNotification('render', this, [render, dirtyZones]);
             // 绘制子元素
             var layers = this._childNodes.nodeLayers;
             for (var i = 0, len = layers.length; i < len; ++i) {
               var layer = layers[i];
               if (layer) {
                 for (var j = 0, len2 = layer.length; j < len2; ++j ) {
-                  layer[j]._dispatchRender(render, alpha, transform.wTransform, transform.wReverseTransform, parentUpdateTransform || needUpdateTransform);
+                  layer[j]._dispatchRender(render, alpha, renderZone, dirtyZones);
                 }
               }
             }
-            render.restore()
+            render.restore();
           } else {
-            // 设置透明度
-            render.alpha = alpha;
             // 绘制子元素
             var layers = this._childNodes.nodeLayers;
             for (var i = 0, len = layers.length; i < len; ++i) {
               var layer = layers[i];
               if (layer) {
                 for (var j = 0, len2 = layer.length; j < len2; ++j ) {
-                  layer[j]._dispatchRender(render, alpha, transform.wTransform, transform.wReverseTransform, parentUpdateTransform || needUpdateTransform);
+                  layer[j]._dispatchRender(render, alpha, renderZone, dirtyZones);
                 }
               }
             }
           }
         }
+        this._reportCtx.origin = false;
+        this._reportCtx.current = false;
+        this._renderCtx.refresh = false;
       }
 
       InnerNode.prototype._dispatchMouseTouchEvent = function (name, e) {
@@ -451,6 +581,64 @@ export default (
           }
         } else {
           return false;
+        }
+      }
+
+      InnerNode.prototype._getId = function () {
+        return this._id;
+      }
+
+      InnerNode.prototype._enableDirtyZone = function (children) {
+        this.addObserver('xChanged', functions.reportOriginRect, this, this);
+        this.addObserver('yChanged', functions.reportOriginRect, this, this);
+        this.addObserver('rotateZChanged', functions.reportOriginRect, this, this);
+        this.addObserver('scaleXChanged', functions.reportOriginRect, this, this);
+        this.addObserver('scaleYChanged', functions.reportOriginRect, this, this);
+        this.addObserver('inclineXChanged', functions.reportOriginRect, this, this);
+        this.addObserver('inclineYChanged', functions.reportOriginRect, this, this);
+        this.addObserver('widthChanged', functions.reportOriginRect, this, this);
+        this.addObserver('heightChanged', functions.reportOriginRect, this, this);
+        this.addObserver('anchorXChanged', functions.reportOriginRect, this, this);
+        this.addObserver('anchorYChanged', functions.reportOriginRect, this, this);
+        this.addObserver('alphaChanged', functions.reportOriginRect, this, this);
+        this.addObserver('visibleChanged', functions.reportOriginRect, this, this);
+        if (children) {
+          var childNodes = this._childNodes;
+          for (var i = 0, len = childNodes.length; i < len; ++i) {
+            var childLayer = childNodes[i];
+            if (childLayer) {
+              for (var j = 0, len2 = childLayer.length; j < len2; ++j) {
+                childLayer[j]._enableDirtyZone(children);
+              }
+            }
+          }
+        }
+      }
+
+      InnerNode.prototype._disableDirtyZone = function (children) {
+        this.removeObserver('xChanged', functions.reportOriginRect, this, this);
+        this.removeObserver('yChanged', functions.reportOriginRect, this, this);
+        this.removeObserver('rotateZChanged', functions.reportOriginRect, this, this);
+        this.removeObserver('scaleXChanged', functions.reportOriginRect, this, this);
+        this.removeObserver('scaleYChanged', functions.reportOriginRect, this, this);
+        this.removeObserver('inclineXChanged', functions.reportOriginRect, this, this);
+        this.removeObserver('inclineYChanged', functions.reportOriginRect, this, this);
+        this.removeObserver('widthChanged', functions.reportOriginRect, this, this);
+        this.removeObserver('heightChanged', functions.reportOriginRect, this, this);
+        this.removeObserver('anchorXChanged', functions.reportOriginRect, this, this);
+        this.removeObserver('anchorYChanged', functions.reportOriginRect, this, this);
+        this.removeObserver('alphaChanged', functions.reportOriginRect, this, this);
+        this.removeObserver('visibleChanged', functions.reportOriginRect, this, this);
+        if (children) {
+          var childNodes = this._childNodes;
+          for (var i = 0, len = childNodes.length; i < len; ++i) {
+            var childLayer = childNodes[i];
+            if (childLayer) {
+              for (var j = 0, len2 = childLayer.length; j < len2; ++j) {
+                childLayer[j]._disableDirtyZone(children);
+              }
+            }
+          }
         }
       }
 

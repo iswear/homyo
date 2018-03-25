@@ -35,7 +35,7 @@ export default (
             this.height = image.height;
             img.needAdjustMapSize = false;
           }
-          var rect = this.getRectInSelf();
+          var rect = this.getRectInLocal();
           var left = rect.left < this.containerLeft ? this.containerLeft : rect.left;
           var top = rect.top < this.containerTop ? this.containerTop : rect.top;
           var width = (rect.right < this.containerRight ? rect.right : this.containerRight) - left;

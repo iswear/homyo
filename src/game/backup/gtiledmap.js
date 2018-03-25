@@ -25,7 +25,7 @@ export default (
           renderTiledMapCache.call(this);
           mapCache.cacheInvalid = false;
         }
-        var rect = this.getRectInSelf();
+        var rect = this.getRectInLocal();
         var left = rect.left < this.containerLeft ? this.containerLeft : rect.left;
         var top = rect.top < this.containerTop ? this.containerTop : rect.top;
         var width = (rect.right < this.containerRight ? rect.right : this.containerRight) - left;
@@ -39,7 +39,7 @@ export default (
         }
       }
       function renderTiledMapCache () {
-        var rect = this.getRectInSelf();
+        var rect = this.getRectInLocal();
         var left = rect.left < this.containerLeft ? this.containerLeft : rect.left;
         var top = rect.top < this.containerTop ? this.containerTop : rect.top;
         var right = rect.right < this.containerRight ? rect.right : this.containerRight;

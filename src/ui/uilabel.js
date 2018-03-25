@@ -33,7 +33,7 @@ export default (
         this._textRenderCache.cacheInvalid = true;
       }
       function renderLabelText (sender, render) {
-        var rect = this.getRectInSelf();
+        var rect = this.getRectInLocal();
         var left = rect.left;
         var top = rect.top;
         var width = rect.width;
@@ -41,7 +41,7 @@ export default (
 
         var renderCache = this._textRenderCache;
         if (renderCache.layoutInvalid) {
-          renderLabelTextLayout.call(this)
+          renderLabelTextLayout.call(this);
           renderCache.layoutInvalid = false;
         }
         if (renderCache.cacheInvalid) {
@@ -78,7 +78,7 @@ export default (
       function renderLabelTextLayout () {
         var renderCache = this._textRenderCache;
         if (this.textLineNum != 1) {
-          var rect = this.getRectInSelf();
+          var rect = this.getRectInLocal();
           var borderWidth = (this.borderWidth > 0 && this.borderColor !== null) ? this.borderWidth : 0;
           renderCache.layout = TextUtil.getTextLayoutInfo(this.text, this._font, rect.width - 2 * borderWidth);
         } else {
@@ -89,7 +89,7 @@ export default (
         }
       }
       function renderLabelTextCache () {
-        var rect = this.getRectInSelf();
+        var rect = this.getRectInLocal();
         var renderCache = this._textRenderCache;
         var layoutInfo = renderCache.layout;
         var lines = layoutInfo.lines;
@@ -124,10 +124,7 @@ export default (
         syncFont: syncFont,
         syncLabelText: syncLabelText,
         refreshTextRenderLayout: refreshTextRenderLayout,
-        refreshTextRenderCache: refreshTextRenderCache,
-        renderLabelText: renderLabelText,
-        renderLabelTextLayout: renderLabelTextLayout,
-        renderLabelTextCache: renderLabelTextCache
+        refreshTextRenderCache: refreshTextRenderCache
       }
     })();
 

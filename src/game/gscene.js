@@ -50,7 +50,7 @@ export default (
         if (this._needUpdateMapContainerZone) {
           var map = this.map;
           if (map) {
-            var rect = this.getRectInSelf();
+            var rect = this.getRectInLocal();
             var leftTop = map.transformPVectorToL([rect.left, rect.top]);
             var leftBottom = map.transformPVectorToL([rect.left, rect.bottom]);
             var rightTop = map.transformPVectorToL([rect.right, rect.top]);
