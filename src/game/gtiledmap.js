@@ -241,7 +241,6 @@ export default (
           newHeight = (eCol + eRow + 2) * tileStepHeight - newY;
           renderContext.width = newWidth;
           renderContext.height = newHeight;
-          console.log("size", newWidth, newHeight);
           renderContext.sizeValid = true;
         }
         var tileData = this.tileData;

@@ -187,6 +187,10 @@ export default (
         return this._rectInWorld;
       }
 
+      InnerNode.prototype.getRectDirty = function (renderZone) {
+        return LangUtil.clone(this._rectInWorld);
+      }
+
       InnerNode.prototype.getChildNode = function (layerIndex, nodeIndex) {
         var layer = this._childNodes.nodeLayers[layerIndex];
         if (layer) {
@@ -361,7 +365,7 @@ export default (
       }
 
       InnerNode.prototype.checkEventInteractZone = function (name, e, x, y) {
-        var rect = this._rectInWorld;
+        var rect = this._rectInLocal;
         if (x >= rect.left && x <= rect.right &&
           y >= rect.top && y <= rect.bottom) {
           return true;

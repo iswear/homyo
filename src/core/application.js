@@ -411,8 +411,8 @@ export default (
       // }
 
       InnerApplication.prototype.receiveDirtyZone = function (node) {
-        var rect = LangUtil.checkAndGet(node.getRectInWorld());
         var renderZone = this._renderZone;
+        var rect = node.getRectDirty(renderZone);
         rect.top = Math.max(renderZone.top, rect.top);
         rect.bottom = Math.min(renderZone.bottom, rect.bottom);
         rect.left = Math.max(renderZone.left, rect.left);

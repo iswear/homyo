@@ -87,12 +87,7 @@ export default (
       }
 
       return {
-        syncImg: syncImg,
-        syncImgRender: syncImgRender,
-        renderImg: renderImg,
-        renderImgClip: renderImgClip,
-        loadImage: loadImage,
-        loadImageFinished: loadImageFinished
+        syncImg: syncImg
       }
     })();
 
