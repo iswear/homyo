@@ -19,13 +19,11 @@ export default (
       }
       function syncDirtyZoneCtx (sender, newVal, oldVal) {
         if (oldVal) {
-          // oldVal.unRegNode(this);
           if (oldVal.enableDirtyZone) {
             this._disableDirtyZone(true);
           }
         }
         if (newVal) {
-          // newVal.regNode(this);
           if (newVal.enableDirtyZone) {
             this._enableDirtyZone(true);
           }
@@ -127,9 +125,6 @@ export default (
           right: 0,
           width: 0,
           height: 0
-        };
-        this._renderCtx = {
-          refresh: true
         };
         this._reportCtx = {
           origin: false,
@@ -391,7 +386,6 @@ export default (
         var app = this.findApplication();
         if (app !== null) {
           app.refresh();
-          this._renderCtx.refresh = true;
         }
       }
 
@@ -477,8 +471,6 @@ export default (
               if (report) {
                 functions.reportCurrentRect.call(this);
                 result = true;
-              } else {
-                this._renderCtx.refresh = true;
               }
               break;
             }
