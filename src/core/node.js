@@ -354,9 +354,7 @@ export default (
 
       InnerNode.prototype.needRender = function (renderZone) {
         var rectInWorld = this._rectInWorld;
-        if (!this._renderCtx.refresh) {
-          return false;
-        } else if (rectInWorld.left >= renderZone.right || rectInWorld.right <= renderZone.left || rectInWorld.left >= renderZone.right || rectInWorld.bottom <= renderZone.left) {
+        if (rectInWorld.left >= renderZone.right || rectInWorld.right <= renderZone.left || rectInWorld.top >= renderZone.bottom || rectInWorld.bottom <= renderZone.top) {
           return false;
         } else {
           var renders = this.getObserverByName('render');

@@ -350,7 +350,7 @@ export default (
       var InnerApplication = LangUtil.extend(Notifier);
 
       InnerApplication.prototype.defScaleMode = 0;
-      InnerApplication.prototype.defEnableDirtyZone = true;
+      InnerApplication.prototype.defEnableDirtyZone = false;
       InnerApplication.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.defineNotifyProperty('scaleMode', LangUtil.checkAndGet(conf.scaleMode, this.defScaleMode));
