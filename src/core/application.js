@@ -425,34 +425,25 @@ export default (
         var dirtyZones = this._dirtyZones;
         var len = dirtyZones.length;
         while (true) {
-          if (len === 0) {
-            dirtyZones.push(rect);
-            return;
-          }
+          var merge = false;
           for (var i = 0; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
-            if (dirtyZone.left >= rect.right) { // x轴没有交叉
-              dirtyZones.splice(i, 0, rect);
-              return;
+            if (rect.top >= dirtyZone.bottom || rect.bottom <= dirtyZone.top || rect.left >= dirtyZone.right || rect.right <= dirtyZone.left) {
+              continue;
             } else {
-              if (dirtyZone.right <= rect.left) { // x轴没有交叉
-                continue;
-              } else { // x轴有交叉
-                if (dirtyZone.top >= rect.bottom || dirtyZone.bottom <= rect.top) { // y轴无交叉
-                  continue;
-                } else {
-                  rect.top = Math.min(dirtyZone.top, rect.top);
-                  rect.bottom = Math.max(dirtyZone.bottom, rect.bottom);
-                  rect.left = Math.min(dirtyZone.left, rect.left);
-                  rect.right = Math.max(dirtyZone.right, rect.right);
-                  rect.width = rect.right - rect.left;
-                  rect.height = rect.bottom - rect.top;
-                  dirtyZones.splice(i, 1);
-                  len--;
-                  break;
-                }
-              }
+              merge = true;
+              rect.top = Math.min(dirtyZone.top, rect.top);
+              rect.bottom = Math.max(dirtyZone.bottom, rect.bottom);
+              rect.left = Math.min(dirtyZone.left, rect.left);
+              rect.right = Math.max(dirtyZone.right, rect.right);
+              rect.width = rect.right - rect.left;
+              rect.height = rect.bottom - rect.top;
+              dirtyZones.splice(i, 1);
+              len--;
             }
+          }
+          if (!merge) {
+            dirtyZones.push(rect);
           }
         }
       }

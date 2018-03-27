@@ -596,12 +596,12 @@ export default (
         this.addObserver('alphaChanged', functions.reportOriginRect, this, this);
         this.addObserver('visibleChanged', functions.reportOriginRect, this, this);
         if (children) {
-          var childNodes = this._childNodes;
-          for (var i = 0, len = childNodes.length; i < len; ++i) {
-            var childLayer = childNodes[i];
-            if (childLayer) {
-              for (var j = 0, len2 = childLayer.length; j < len2; ++j) {
-                childLayer[j]._enableDirtyZone(children);
+          var layers = this._childNodes;
+          for (var i = 0, len = layers.length; i < len; ++i) {
+            var layer = layers[i];
+            if (layer) {
+              for (var j = 0, len2 = layer.length; j < len2; ++j) {
+                layer[j]._enableDirtyZone(children);
               }
             }
           }
@@ -623,12 +623,12 @@ export default (
         this.removeObserver('alphaChanged', functions.reportOriginRect, this, this);
         this.removeObserver('visibleChanged', functions.reportOriginRect, this, this);
         if (children) {
-          var childNodes = this._childNodes;
-          for (var i = 0, len = childNodes.length; i < len; ++i) {
-            var childLayer = childNodes[i];
-            if (childLayer) {
-              for (var j = 0, len2 = childLayer.length; j < len2; ++j) {
-                childLayer[j]._disableDirtyZone(children);
+          var layers = this._childNodes;
+          for (var i = 0, len = layers.length; i < len; ++i) {
+            var layer = layers[i];
+            if (layer) {
+              for (var j = 0, len2 = layer.length; j < len2; ++j) {
+                layer[j]._disableDirtyZone(children);
               }
             }
           }
