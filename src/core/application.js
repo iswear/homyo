@@ -444,6 +444,7 @@ export default (
           }
           if (!merge) {
             dirtyZones.push(rect);
+            break;
           }
         }
       }
