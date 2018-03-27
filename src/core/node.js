@@ -461,7 +461,7 @@ export default (
       InnerNode.prototype._checkDirtyZone = function (renderZone, dirtyZones) {
         var result  = false;
         var reportCtx = this._reportCtx, wTransform = this._transform.wTransform, rectInWorld = this._rectInWorld;
-        var report = reportCtx.origin || !(wTransform[0] === 1 && wTransform[1] === 0 && wTransform[3] === 0 && wTransform[4] === 0);
+        var report = reportCtx.origin || !(wTransform[0] === 1 && wTransform[1] === 0 && wTransform[3] === 0 && wTransform[4] === 1);
         if (!reportCtx.current && !(rectInWorld.left >= renderZone.right || rectInWorld.right <= renderZone.left || rectInWorld.top >= renderZone.bottom || rectInWorld.bottom <= renderZone.top)) {
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
