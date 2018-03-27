@@ -32,7 +32,6 @@ export default (
       function reportOriginRect () {
         if (!this._reportCtx.origin) {
           this._reportCtx.origin = true;
-          this._renderCtx.refresh = true;
           var app = this.findApplication();
           if (app) {
             app.receiveDirtyZone(this);
@@ -42,7 +41,6 @@ export default (
       function reportCurrentRect () {
         if (!this._reportCtx.current) {
           this._reportCtx.current = true;
-          this._renderCtx.refresh = true;
           var app = this.findApplication();
           if (app) {
             app.receiveDirtyZone(this);
@@ -527,7 +525,6 @@ export default (
         }
         this._reportCtx.origin = false;
         this._reportCtx.current = false;
-        this._renderCtx.refresh = false;
       }
 
       InnerNode.prototype._dispatchMouseTouchEvent = function (name, e) {
