@@ -168,7 +168,7 @@ export default (
       InnerNode.prototype.reportDirtyZone = function () {
         var app = this.findApplication();
         if (app) {
-          app.receiveDirtyZone(node);
+          app.receiveDirtyZone(this);
         }
       }
 
@@ -180,7 +180,7 @@ export default (
         return this._rectInWorld;
       }
 
-      InnerNode.prototype.getRectDirty = function (renderZone) {
+      InnerNode.prototype.getRectDirty = function () {
         return LangUtil.clone(this._rectInWorld);
       }
 
