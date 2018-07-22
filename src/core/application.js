@@ -285,8 +285,6 @@ export default (
           renderZone.bottom = height;
           renderZone.width = width;
           renderZone.height = height;
-          // this._renderCache.width = width;
-          // this._renderCache.height = height;
           this._scaleX = width / clientWidth;
           this._scaleY = height / clientHeight;
           this._needUpdateTranform = false;
@@ -357,7 +355,6 @@ export default (
         this.defineNotifyProperty('enableDirtyZone', LangUtil.checkAndGet(conf.enableDirtyZone, this.defEnableDirtyZone));
         this._root = LangUtil.checkAndGet(conf.root, null);
         this._root.application = this;
-        // this._nodes = {};
 
         this._render = new CanvasRender({canvas: conf.canvas, width: LangUtil.checkAndGet(conf.width, undefined), height: LangUtil.checkAndGet(conf.height, undefined)});
         this._renderZone = {
@@ -368,7 +365,6 @@ export default (
           width: 0,
           height: 0
         };
-        // this._renderCache = new CanvasRender({canvas: document.createElement('canvas')});
         this._dirtyZones = [];
 
         this._prevLoopTime = 0;
@@ -401,14 +397,6 @@ export default (
       InnerApplication.prototype.getFileLoader = function () {
         return this._fileLoader;
       }
-
-      // InnerApplication.prototype.regNode = function (node) {
-      //   this._nodes[node._getId()] = node;
-      // }
-      //
-      // InnerApplication.prototype.unRegNode = function (node) {
-      //   delete this._nodes[node._getId()];
-      // }
 
       InnerApplication.prototype.receiveDirtyZone = function (node) {
         var renderZone = this._renderZone;
@@ -520,16 +508,11 @@ export default (
         if (this._root) {
           this._root.destroy();
           this._root = null;
-          // this._nodes = null;
         }
         if (this._render) {
           this._render.destroy();
           this._render = null;
         }
-        // if (his._renderCache) {
-        //   this._renderCache.destroy();
-        //   this._renderCache = null;
-        // }
         if (this._animationManager) {
           this._animationManager.destroy();
           this._animationManager = null;
