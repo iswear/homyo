@@ -247,17 +247,21 @@ export default (
         eArg.preventDefault();
       }
       function checkRenderSize () {
-        var render = this._render, renderZone = this._renderZone;
-        if (!this._needUpdateTranform) {
+        var render = this._render;
+        var renderZone = this._renderZone;
+        var transformCtx = this._transformCtx;
+        if (!transformCtx.needUpdate) {
           if (render.clientWidth !== this._clientWidth || render.clientHeight !== this._clientHeight) {
             this._clientWidth = render.clientWidth;
             this._clientHeight = render.clientHeight;
-            this._needUpdateTranform = true;
+            transformCtx.needUpdate = true;
           }
         }
-        if (this._needUpdateTranform) {
-          var width = render.width, height = render.height;
-          var clientWidth = render.clientWidth, clientHeight = render.clientHeight;
+        if (transformCtx.needUpdate) {
+          var width = render.width;
+          var height = render.height;
+          var clientWidth = render.clientWidth;
+          var clientHeight = render.clientHeight;
           switch (this.scaleMode) {
             case 1: {
               height = width * clientHeight / clientWidth;
@@ -285,14 +289,14 @@ export default (
           renderZone.bottom = height;
           renderZone.width = width;
           renderZone.height = height;
+          transformCtx.needUpdate = false;
           this._scaleX = width / clientWidth;
           this._scaleY = height / clientHeight;
-          this._needUpdateTranform = false;
           this.refresh();
         }
       }
       function syncTransform () {
-        this._needUpdateTranform = true;
+        this._transformCtx.needUpdate = true;
       }
       function syncNodesDirtyZoneCtx () {
         if (this._root) {
@@ -353,6 +357,7 @@ export default (
         this.super('init', [conf]);
         this.defineNotifyProperty('scaleMode', LangUtil.checkAndGet(conf.scaleMode, this.defScaleMode));
         this.defineNotifyProperty('enableDirtyZone', LangUtil.checkAndGet(conf.enableDirtyZone, this.defEnableDirtyZone));
+
         this._root = LangUtil.checkAndGet(conf.root, null);
         this._root.application = this;
 
@@ -379,8 +384,10 @@ export default (
         this._clientHeight = this._render.clientHeight;
         this._scaleX = 1;
         this._scaleY = 1;
-        this._needUpdateTranform = true;
-        this._transform = [1, 0, 0, 0, 1, 0];
+        this._transformCtx = {
+          needUpdate: true,
+          transform: [1, 0, 0, 0, 1, 0]
+        };
 
         functions.eventInit.call(this);
         functions.syncTransform.call(this);
@@ -398,43 +405,51 @@ export default (
         return this._fileLoader;
       }
 
-      InnerApplication.prototype.receiveDirtyZone = function (node) {
+      InnerApplication.prototype.receiveDirtyZone = function (node, dirtyZone) {
         var renderZone = this._renderZone;
-        var rect = node.getRectDirty(renderZone);
-        rect.top = Math.max(renderZone.top, rect.top);
-        rect.bottom = Math.min(renderZone.bottom, rect.bottom);
-        rect.left = Math.max(renderZone.left, rect.left);
-        rect.right = Math.min(renderZone.right, rect.right);
-        rect.width = rect.right - rect.left;
-        rect.height = rect.bottom - rect.top;
-        if (!(rect.width > 0 && rect.height > 0)) {
-          return;
+        var left = Math.max(renderZone.left, dirtyZone.left);
+        var right = Math.min(renderZone.right, dirtyZone.right);
+        var width = right - left;
+        if (width <= 0) {
+          return false;
+        }
+        var top = Math.max(renderZone.top, dirtyZone.top);
+        var bottom = Math.min(renderZone.bottom, dirtyZone.bottom);
+        var height = bottom - top;
+        if (height <= 0) {
+          return false;
         }
         var dirtyZones = this._dirtyZones;
-        var len = dirtyZones.length;
         while (true) {
-          var merge = false;
-          for (var i = 0; i < len; ++i) {
-            var dirtyZone = dirtyZones[i];
-            if (rect.top >= dirtyZone.bottom || rect.bottom <= dirtyZone.top || rect.left >= dirtyZone.right || rect.right <= dirtyZone.left) {
+          var insert = true;
+          for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+            var zone = dirtyZones[i];
+            if (zone.left >= right || zone.right <= left || zone.top >= bottom || zone.bottom <= bottom) {
               continue;
-            } else {
-              merge = true;
-              rect.top = Math.min(dirtyZone.top, rect.top);
-              rect.bottom = Math.max(dirtyZone.bottom, rect.bottom);
-              rect.left = Math.min(dirtyZone.left, rect.left);
-              rect.right = Math.max(dirtyZone.right, rect.right);
-              rect.width = rect.right - rect.left;
-              rect.height = rect.bottom - rect.top;
-              dirtyZones.splice(i, 1);
-              len--;
             }
+            left = Math.min(zone.left, left);
+            right = Math.max(zone.right, right);
+            top = Math.min(zone.top, top);
+            bottom = Math.max(zone.top, top);
+            width = right - left;
+            height = bottom - top;
+            insert = false;
+            dirtyZones.splice(i, 1);
+            break;
           }
-          if (!merge) {
-            dirtyZones.push(rect);
+          if (insert) {
+            dirtyZones.push({
+              top: top,
+              bottom: bottom,
+              left: left,
+              right: right,
+              width: width,
+              height: height
+            });
             break;
           }
         }
+        return true;
       }
 
       InnerApplication.prototype.refresh = function () {
@@ -447,7 +462,6 @@ export default (
           deltaTime = now - this._prevLoopTime;
           this._prevLoopTime = now;
           this._animationManager.run(deltaTime);
-
         } else {
           this._prevLoopTime = now;
         }
@@ -459,18 +473,18 @@ export default (
           this._preCheckTime += deltaTime;
         }
         if (this._refresh) {
-          var renderZone = this._renderZone, dirtyZones = this._dirtyZones, root = this._root, render = this._render;
+          var renderZone = this._renderZone;
+          var dirtyZones = this._dirtyZones;
+          var root = this._root;
+          var render = this._render;
+          var transformCtx = this._transformCtx;
           this._refresh = false;
           // 同步最新的结点转换
-          root._syncTransform(this._transform, this._transform, this._needUpdateTranform);
+          root._syncTransform(transformCtx.transform, transformCtx.transform, renderZone, transformCtx.needUpdate);
           // 重新计算脏矩形
           if (this.enableDirtyZone) {
             // 重复检测受影响区域
-            while (true) {
-              if (!root._checkDirtyZone(renderZone, dirtyZones)) {
-                break;
-              }
-            }
+            while (root._reportCurDirtyZone(this, dirtyZones)) { }
           } else {
             // 画布区域加上
             dirtyZones.push(renderZone);
@@ -479,7 +493,6 @@ export default (
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
             render.clearRect(dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
-            console.log(dirtyZone);
           }
           // 重新绘制阶段
           root._dispatchRender(render, 1, renderZone, dirtyZones);

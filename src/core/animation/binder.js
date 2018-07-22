@@ -32,7 +32,7 @@ export default (
 
       InnerBinder.prototype.execute = function (deltaTime) {
         var result = this.animation.execute(this, deltaTime);
-        if (this.fn != null) {
+        if (this.fn !== null) {
           this.fn.apply(this.target, [this, result]);
         }
         return result;

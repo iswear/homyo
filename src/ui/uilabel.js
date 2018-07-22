@@ -5,9 +5,8 @@
  */
 import LangUtil from '../utils/lang-util';
 import TextUtil from '../utils/text-util';
-import UINode from './uinode';
+import UINode from './uiview';
 import CanvasRender from '../core/render/canvas/canvas-render';
-
 
 export default (
   function () {
@@ -17,6 +16,7 @@ export default (
       function syncFont () {
         this._font = this.fontSize + 'px ' + this.fontFamily;
       }
+
       function syncLabelText () {
         if (this.text !== null && this.text.length > 0) {
           if (this.getObserverByAllParams('render', render_labelText, this, this) === null) {
@@ -26,12 +26,15 @@ export default (
           this.removeObserver('render', renderLabelText, this, this);
         }
       }
+
       function refreshTextRenderLayout () {
-        this._textRenderCache.layoutInvalid = true;
+        this._textCacheCtx.layoutInvalid = true;
       }
+
       function refreshTextRenderCache () {
-        this._textRenderCache.cacheInvalid = true;
+        this._textCacheCtx.renderInvalid = true;
       }
+
       function renderLabelText (sender, render) {
         var rect = this.getRectInLocal();
         var left = rect.left;
@@ -39,16 +42,16 @@ export default (
         var width = rect.width;
         var height = rect.height;
 
-        var renderCache = this._textRenderCache;
+        var renderCache = this._textCacheCtx;
         if (renderCache.layoutInvalid) {
           renderLabelTextLayout.call(this);
           renderCache.layoutInvalid = false;
         }
-        if (renderCache.cacheInvalid) {
+        if (renderCache.renderInvalid) {
           renderLabelTextCache.call(this);
-          renderCache.cacheInvalid = false;
+          renderCache.renderInvalid = false;
         }
-        var cacheRender = renderCache.cache;
+        var cacheRender = renderCache.render;
         var cacheWidth = cacheRender.width;
         var cacheHeight = cacheRender.height;
 
@@ -75,8 +78,9 @@ export default (
           render.drawImageExt(cacheRender.getCanvas(), 0, 0, srcWidth, srcHeight, desX, desY, srcWidth, srcHeight);
         }
       }
+
       function renderLabelTextLayout () {
-        var renderCache = this._textRenderCache;
+        var renderCache = this._textCacheCtx;
         if (this.textLineNum != 1) {
           var rect = this.getRectInLocal();
           var borderWidth = (this.borderWidth > 0 && this.borderColor !== null) ? this.borderWidth : 0;
@@ -88,15 +92,16 @@ export default (
           };
         }
       }
+
       function renderLabelTextCache () {
         var rect = this.getRectInLocal();
-        var renderCache = this._textRenderCache;
+        var renderCache = this._textCacheCtx;
         var layoutInfo = renderCache.layout;
         var lines = layoutInfo.lines;
         var lineHeight = LangUtil.checkAndGet(this.textLineHeight, 1.5 * this.fontSize);
         var lineNum = (this.textLineNum < 1 || this.textLineNum > lines.length) ? lines.length : this.textLineNum;
         var borderWidth = (this.borderWidth > 0 && this.borderColor !== null) ? this.borderWidth : 0;
-        var render = renderCache.cache;
+        var render = renderCache.render;
         render.width = (lineNum === 1) ? layoutInfo.width : (rect.width - 2 * borderWidth);
         render.height = lineHeight * lineNum + 1;
         render.clear();
@@ -149,11 +154,11 @@ export default (
         this.defineNotifyProperty('textRichInfo', LangUtil.checkAndGet(conf.textRichInfo, null));
 
         this._font = '';
-        this._textRenderCache = {
+        this._textCacheCtx = {
           layoutInvalid: true,
           layout: null,
-          cacheInvalid: true,
-          cache: new CanvasRender({canvas:doc.createElement('canvas')})
+          renderInvalid: true,
+          render: new CanvasRender({canvas:doc.createElement('canvas')})
         };
 
         functions.syncFont.call(this);

@@ -27,27 +27,6 @@ export default (
         this._models = [];
       }
 
-      // InnerGMap.prototype.getRectDirty = function (renderZone) {
-        // var p1 = this.transformLVectorToW([rectInLocal.left, rectInLocal.top]);
-        // var p2 = this.transformLVectorToW([rectInLocal.left, rectInLocal.bottom]);
-        // var p3 = this.transformLVectorToW([rectInLocal.right, rectInLocal.top]);
-        // var p4 = this.transformLVectorToW([rectInLocal.right, rectInLocal.bottom]);
-        // rectInWorld.top = Math.min(Math.min(p1[1], p2[1]), Math.min(p3[1], p4[1]));
-        // rectInWorld.bottom = Math.max(Math.max(p1[1], p2[1]), Math.max(p3[1], p4[1]));
-        // rectInWorld.left = Math.min(Math.min(p1[0], p2[0]), Math.min(p3[0], p4[0]));
-        // rectInWorld.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
-        // rectInWorld.width = rectInWorld.right - rectInWorld.left;
-        // rectInWorld.height = rectInWorld.bottom - rectInWorld.top;
-        // return {
-        //   top: ,
-        //   bottom: ,
-        //   left: ,
-        //   right: ,
-        //   width: ,
-        //   height:
-        // }
-      // }
-
       InnerGMap.prototype.checkEventInteractZone = function (name, e, x, y) {
         return true;
       }

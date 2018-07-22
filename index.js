@@ -15,7 +15,7 @@ import Core_Animation_PropertyAnimation from './src/core/animation/property-anim
 import Core_Render_CanvasRender from './src/core/render/canvas/canvas-render';
 import Core_Render_WebglRender from './src/core/render/webgl/webgl-render';
 
-import UI_Node from './src/ui/uinode';
+import UI_View from './src/ui/uiview';
 import UI_Label from './src/ui/uilabel';
 
 import G_Scene from './src/game/gscene';
@@ -63,7 +63,7 @@ export default (
       },
 
       ui: {
-        Node: UI_Node,
+        View: UI_View,
         Label: UI_Label
       },
 

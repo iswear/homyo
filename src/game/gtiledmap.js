@@ -22,15 +22,18 @@ export default (
       var BLOCK_BOTTOM_LEFT = 7;
       var BLOCK_BOTTOM_RIGHT = 8;
 
-      function syncVertexValid () {
-        this._renderContext.vertexValid = false;
+      function syncVertex () {
+        this._renderContext.vertexInvalid = true;
       }
-      function syncSizeValid () {
-        this._renderContext.sizeValid = false;
+
+      function syncSize () {
+        this._renderContext.sizeInvalid = true;
       }
-      function syncCacheValid () {
-        this._renderContext.cacheValid = false;
+
+      function syncCache () {
+        this._renderContext.cacheInvalid = false;
       }
+
       function renderMap (sender, render) {
         var renderContext = this._renderContext;
         this._renderContext.cacheFore.imageCount = 0;
@@ -59,6 +62,7 @@ export default (
           }
         }
       }
+
       function renderMapCache (renderContext) {
         if (this.tileType === 1) {
           renderMapCacheSquare.call(this, renderContext);
@@ -66,6 +70,7 @@ export default (
           renderMapCacheDiamond.call(this, renderContext);
         }
       }
+
       function renderMapBlock (render, fileLoader, tileImg, tileImgClip, tileCell, srcType, tX, tY, tW, tH) {
         var imgClip = tileImgClip[tileCell];
         if (imgClip) {
@@ -108,6 +113,7 @@ export default (
           }
         }
       }
+
       function renderMapCacheSquare (renderContext) {
         var tileWidth = this.tileWidth;
         var tileHeight = this.tileHeight;
@@ -123,20 +129,20 @@ export default (
         var newWidth = oldWidth;
         var newHeight = oldHeight;
 
-        if (!renderContext.vertexValid) {
+        if (renderContext.vertexInvalid) {
           newX = Math.floor(this.containerLeft / tileWidth) * tileWidth;
           newY = Math.floor(this.containerTop / tileHeight) * tileHeight;
           renderContext.x = newX;
           renderContext.y = newY;
-          renderContext.vertexValid = true;
+          renderContext.vertexInvalid = false;
         }
 
-        if (!renderContext.sizeValid) {
+        if (renderContext.sizeInvalid) {
           newWidth = Math.ceil(this.containerRight / tileWidth)  * tileWidth - newX;
           newHeight = Math.ceil(this.containerBottom / tileHeight) * tileHeight - newY;
           renderContext.width = newWidth;
           renderContext.height = newHeight;
-          renderContext.sizeValid = true;
+          renderContext.sizeInvalid = false;
         }
         var tileData = this.tileData;
         if (LangUtil.isNotArray(tileData)) {
@@ -209,6 +215,7 @@ export default (
           }
         }
       }
+
       function renderMapCacheDiamond(renderContext) {
         var tileWidth = this.tileWidth;
         var tileHeight = this.tileHeight;
@@ -229,19 +236,19 @@ export default (
         var newY = oldY;
         var newWidth = oldWidth;
         var newHeight = oldHeight;
-        if (!renderContext.vertexValid) {
+        if (renderContext.vertexInvalid) {
           newX = (sCol - sRow - 1) * tileStepWidth;
           newY = (sCol + sRow) * tileStepHeight;
           renderContext.x = newX;
           renderContext.y = newY;
-          renderContext.vertexValid = true;
+          renderContext.vertexInvalid = false;
         }
-        if (!renderContext.sizeValid) {
+        if (renderContext.sizeInvalid) {
           newWidth = (eCol - eRow + 1) * tileStepWidth - newX;
           newHeight = (eCol + eRow + 2) * tileStepHeight - newY;
           renderContext.width = newWidth;
           renderContext.height = newHeight;
-          renderContext.sizeValid = true;
+          renderContext.sizeInvalid = false;
         }
         var tileData = this.tileData;
         if (LangUtil.isNotArray(tileData)) {
@@ -632,9 +639,9 @@ export default (
       }
 
       return {
-        syncVertexValid: syncVertexValid,
-        syncSizeValid: syncSizeValid,
-        syncCacheValid: syncCacheValid,
+        syncVertex: syncVertex,
+        syncSize: syncSize,
+        syncCache: syncCache,
         renderMap: renderMap
       }
     })();
@@ -652,45 +659,45 @@ export default (
         this.defineNotifyProperty('tileData', LangUtil.checkAndGet(conf.tileData, {}));
 
         this._renderContext = {
-          vertexValid: false,
+          vertexInvalid: true,
           x: 0,
           y: 0,
-          sizeValid: false,
+          sizeInvalid: true,
           width: 0,
           height: 0,
           cacheInit: false,
-          cacheValid: false,
+          cacheInvalid: true,
           cacheFore: new CanvasRender({canvas: doc.createElement('canvas')}),
           cacheBack: new CanvasRender({canvas: doc.createElement('canvas')})
         }
 
-        this.addObserver('tileTypeChanged', functions.syncVertexValid, this, this);
-        this.addObserver('tileWidthChanged', functions.syncVertexValid, this, this);
-        this.addObserver('tileHeightChanged', functions.syncVertexValid, this, this);
-        this.addObserver('containerTopChanged', functions.syncVertexValid, this, this);
-        this.addObserver('containerLeftChanged', functions.syncVertexValid, this, this);
+        this.addObserver('tileTypeChanged', functions.syncVertex, this, this);
+        this.addObserver('tileWidthChanged', functions.syncVertex, this, this);
+        this.addObserver('tileHeightChanged', functions.syncVertex, this, this);
+        this.addObserver('containerTopChanged', functions.syncVertex, this, this);
+        this.addObserver('containerLeftChanged', functions.syncVertex, this, this);
 
-        this.addObserver('tileWidthChanged', functions.syncSizeValid, this, this);
-        this.addObserver('tileHeightChanged', functions.syncSizeValid, this, this);
-        this.addObserver('containerTopChanged', functions.syncSizeValid, this, this);
-        this.addObserver('containerBottomChanged', functions.syncSizeValid, this, this);
-        this.addObserver('containerLeftChanged', functions.syncSizeValid, this, this);
-        this.addObserver('containerRightChanged', functions.syncSizeValid, this, this);
+        this.addObserver('tileWidthChanged', functions.syncSize, this, this);
+        this.addObserver('tileHeightChanged', functions.syncSize, this, this);
+        this.addObserver('containerTopChanged', functions.syncSize, this, this);
+        this.addObserver('containerBottomChanged', functions.syncSize, this, this);
+        this.addObserver('containerLeftChanged', functions.syncSize, this, this);
+        this.addObserver('containerRightChanged', functions.syncSize, this, this);
 
-        this.addObserver('tileTypeChanged', functions.syncCacheValid, this, this);
-        this.addObserver('tileWidthChanged', functions.syncCacheValid, this, this);
-        this.addObserver('tileHeightChanged', functions.syncCacheValid, this, this);
-        this.addObserver('containerTopChanged', functions.syncCacheValid, this, this);
-        this.addObserver('containerBottomChanged', functions.syncCacheValid, this, this);
-        this.addObserver('containerLeftChanged', functions.syncCacheValid, this, this);
-        this.addObserver('containerRightChanged', functions.syncCacheValid, this, this);
+        this.addObserver('tileTypeChanged', functions.syncCache, this, this);
+        this.addObserver('tileWidthChanged', functions.syncCache, this, this);
+        this.addObserver('tileHeightChanged', functions.syncCache, this, this);
+        this.addObserver('containerTopChanged', functions.syncCache, this, this);
+        this.addObserver('containerBottomChanged', functions.syncCache, this, this);
+        this.addObserver('containerLeftChanged', functions.syncCache, this, this);
+        this.addObserver('containerRightChanged', functions.syncCache, this, this);
 
         this.addObserver('render', functions.renderMap, this, this);
       }
 
       InnerGTiledMap.prototype.invalidAndRefresh = function () {
         this._renderContext.init = false;
-        this._renderContext.valid = false;
+        this._renderContext.Invalid = true;
         this.refresh();
       }
 
