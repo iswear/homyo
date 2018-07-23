@@ -13,8 +13,15 @@ export default (
     var doc = document;
 
     var functions = (function () {
+      function syncBorderRadius () {
+        this._clipBorderRadius = Math.ceil(this.borderRadius + this.borderWidth / 2);
+        if (this._renderBorderRadius < 0) {
+          this._renderBorderRadius = 0;
+        }
+      }
+
       function syncBackgroundRender () {
-        if (this.clipable || this.backgroundColor != null) {
+        if (this.enableClip || this.backgroundColor != null) {
           if (this.getObserverByAllParams('render', renderClipAndBackground, this, this) === null) {
             this.addObserver('render', renderClipAndBackground, this, this, -Infinity);
           }
@@ -32,19 +39,12 @@ export default (
           this.removeObserver('render', renderBorder, this, this);
         }
       }
-
-      function syncBorderRadius () {
-        this._clipBorderRadius = Math.ceil(this.borderRadius + this.borderWidth / 2);
-        if (this._renderBorderRadius < 0) {
-          this._renderBorderRadius = 0;
-        }
-      }
       
       function syncBorderRenderCache () {
         this._borderCacheCtx.renderInvalid = true;
       }
       
-      function renderClipAndBackground (sender, render, dirtyZones, global) {
+      function renderBackground (sender, render, dirtyZones, global) {
         if (global) {
           var rect = this.getRectInLocal();
           var left = rect.left;
@@ -54,7 +54,7 @@ export default (
           if (this.borderRadius === 0) {
             render.beginPath();
             render.rect(left, top, rect.width, rect.height);
-            if (this.clipable) {
+            if (this.enableClip) {
               render.clip();
             }
             if (this.backgroundColor !== null) {
@@ -62,7 +62,7 @@ export default (
               render.fill();
             }
           } else {
-            if (this.clipable) {
+            if (this.enableClip) {
               var radius = this._clipBorderRadius;
               render.beginPath();
               render.moveTo(left, top + radius);
@@ -102,6 +102,10 @@ export default (
         }
       }
 
+      function renderBackgroundCache (sender, render) {
+
+      }
+
       function renderBorder (sender, render, dirtyZones, global) {
         if (this._borderCacheCtx.renderInvalid) {
           this._borderCacheCtx.renderInvalid = false;
@@ -113,6 +117,7 @@ export default (
         } else {
           var rectInWorld = this.getRectInWorld();
           // TODO!!!
+
         }
       }
       
@@ -163,34 +168,42 @@ export default (
       var InnerUIView = LangUtil.extend(Node);
 
       InnerUIView.prototype.defVisible = true;
-      InnerUIView.prototype.defClipable = false;
+      InnerUIView.prototype.defEnableClip = false;
       InnerUIView.prototype.defBackgroundColor = null;
       InnerUIView.prototype.defBorderColor = null;
       InnerUIView.prototype.defBorderWidth = 0;
       InnerUIView.prototype.defBorderRadius = 0;
       InnerUIView.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('clipable', LangUtil.checkAndGet(conf.clipable, this.defClipable));
+        this.defineNotifyProperty('enableClip', LangUtil.checkAndGet(conf.enableClip, this.defEnableClip));
         this.defineNotifyProperty('backgroundColor', LangUtil.checkAndGet(conf.backgroundColor, this.defBackgroundColor));
         this.defineNotifyProperty('borderColor', LangUtil.checkAndGet(conf.borderColor, this.defBorderColor));
         this.defineNotifyProperty('borderWidth', LangUtil.checkAndGet(conf.borderWidth, this.defBorderWidth));
         this.defineNotifyProperty('borderRadius', LangUtil.checkAndGet(conf.borderRadius, this.defBorderRadius));
 
-        this._clipBorderRadius = 0;
+        this._borderAdjustCtx = {
+          radius: 0,
+        };
         this._borderCacheCtx = {
           renderInvalid: true,
-          render: new CanvasRender({canvas: doc.createElement('canvas')})
+          render: null
+        };
+        this._backgroundCacheCtx = {
+          renderInvalid: true,
+          render: null
         };
 
-        functions.syncBackground.call(this);
-        functions.syncBorder.call(this);
         functions.syncBorderRadius.call(this);
+        functions.syncBackgroundRender.call(this);
+        functions.syncBorderRender.call(this);
         functions.syncBorderRenderCache.call(this);
 
+        this.addObserver('widthChanged', functions.syncBorderRadius, this, this);
+        this.addObserver('heightChanged', functions.syncBorderRadius, this, this);
         this.addObserver('borderWidthChanged', functions.syncBorderRadius, this, this);
         this.addObserver('borderRadiusChanged', functions.syncBorderRadius, this, this);
 
-        this.addObserver('clipableChanged', functions.syncBackgroundRender, this, this);
+        this.addObserver('enableClipChanged', functions.syncBackgroundRender, this, this);
         this.addObserver('backgroundColorChanged', functions.syncBackgroundRender, this, this);
 
         this.addObserver('borderColorChanged', functions.syncBorderRender, this, this);
@@ -203,7 +216,7 @@ export default (
         this.addObserver('borderWidthChanged', functions.syncBorderRenderCache, this, this);
         this.addObserver('borderRadiusChanged', functions.syncBorderRenderCache, this, this);
 
-        this.addObserver('clipableChanged', this.refresh, this, this);
+        this.addObserver('enableClipChanged', this.refresh, this, this);
         this.addObserver('backgroundColorChanged', this.refresh, this, this);
         this.addObserver('borderColorChanged', this.refresh, this, this);
         this.addObserver('borderWidthChanged', this.refresh, this, this);
