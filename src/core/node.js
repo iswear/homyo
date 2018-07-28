@@ -488,7 +488,6 @@ export default (
                 }
               }
             }
-            render.restore();
           } else {
             // 绘制子元素
             var layers = this._childNodes.nodeLayers;
