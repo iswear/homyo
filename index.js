@@ -15,7 +15,7 @@ import Core_Animation_PropertyAnimation from './src/core/animation/property-anim
 import Core_Render_CanvasRender from './src/core/render/canvas/canvas-render';
 import Core_Render_WebglRender from './src/core/render/webgl/webgl-render';
 
-import UI_View from './src/ui/uiview';
+import UI_View from './src/ui/uiview_backup';
 import UI_Label from './src/ui/uilabel';
 
 import G_Scene from './src/game/gscene';

@@ -110,6 +110,12 @@ export default (
       function isNotFunction (val) {
         return !isFunction(val);
       }
+      function getMaxInteger() {
+        return 9007199254740991;
+      }
+      function getMinInteger() {
+        return -9007199254740991
+      }
       function clone (val) {
         if (util.isArray(val)) {
           var rArr = [];

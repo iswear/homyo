@@ -5,7 +5,7 @@
  */
 import LangUtil from '../utils/lang-util';
 import TextUtil from '../utils/text-util';
-import UINode from './uiview';
+import UINode from './uiview_backup';
 import CanvasRender from '../core/render/canvas/canvas-render';
 
 export default (
