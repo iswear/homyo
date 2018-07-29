@@ -26,50 +26,28 @@ export default (
         }
       }
 
-      function syncBackgroundBorderPathCtx() {
-        var rect = this.getRectInLocal();
+      function syncBackgroundBorderRender() {
         var ctx = this._backgroundBorderCtx;
-        ctx.borderOffset = this.borderWidth / 2;
-        ctx.borderRadius = this.borderRadius;
-        ctx.backgroundOffset = this.borderOffset;
-        ctx.backgroundRadius = this.borderRadius;
-        ctx.clipOffset = this.borderWidth;
-        ctx.clipRadius = this.borderRadius > ctx.borderOffset ? (this.borderRadius - ctx.borderOffset) : 0;
-        if (rect.width !== ctx.renderWidth || rect.height !== ctx.renderHeight) {
-
-        }
-      }
-
-      function syncBackgroundBorderCacheCtx() {
-
-      }
-      
-      function syncBackgroundBorderCtx() {
-        ctx.renderInvalid = true;
         if (this.backgroundColor === null && (this.borderColor === null || this.borderWidth <= 0)) {
           this.removeObserver('render', renderBackgroundAndBorder, this, this);
           ctx.render = null;
         } else {
-          if (ctx === null) {
-            if (this.getObserverByAllParams('render', renderBackgroundAndBorder, this, this) === null) {
-              this.addObserver('render', renderBackgroundAndBorder, this, this, LangUtil.getMinInteger());
-            }
-            ctx.renderWidth =
-            ctx.render = new
-          }
-        }
-
-
-
           if (this.getObserverByAllParams('render', renderBackgroundAndBorder, this, this) === null) {
             this.addObserver('render', renderBackgroundAndBorder, this, this, LangUtil.getMinInteger());
-            ctx.render = null;
+          }
+          if (ctx.render === null) {
+            ctx.width = this.width;
+            ctx.height = this.height;
+            ctx.render = new CanvasRender({canvas: document.createElement('canvas'), width: ctx.width, height: ctx.height})
           }
         }
+      }
 
+      function syncBackgroundBorderRenderInvalid() {
+        this.renderInvalid = true;
       }
       
-      function renderClipSave() {
+      function renderClipSave(sender, render, dirtyZones) {
 
       }
 
@@ -85,11 +63,10 @@ export default (
 
       }
 
-
       return {
         syncClipRender: syncClipRender,
         syncBackgroundBorderRender: syncBackgroundBorderRender,
-        syncBackgroundBorderCtx: syncBackgroundBorderCtx
+        syncBackgroundBorderRenderInvalid: syncBackgroundBorderRenderInvalid
       }
     })();
 
