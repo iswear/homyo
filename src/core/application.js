@@ -8,7 +8,7 @@ import LangUtil from '../utils/lang-util';
 import TimerUtil from '../utils/timer-util';
 import EventUtil from '../utils/event-util';
 import PlatformUtil from '../utils/platform-util';
-import GeometryUtil from '../utils/geometry-utils';
+import GeometryUtil from '../utils/geometry-util';
 import Notifier from './notifier';
 import CanvasRender from './render/canvas/canvas-render';
 import AnimationManager from './animation/manager';
@@ -408,45 +408,35 @@ export default (
 
       InnerApplication.prototype.receiveDirtyZone = function (node, dirtyZone) {
         var renderZone = this._renderZone;
-        var left = Math.max(renderZone.left, dirtyZone.left);
-        var right = Math.min(renderZone.right, dirtyZone.right);
-        var width = right - left;
-        if (width <= 0) {
+        if (GeometryUtil.isRectNotCross(renderZone, dirtyZone)) {
           return false;
         }
-        var top = Math.max(renderZone.top, dirtyZone.top);
-        var bottom = Math.min(renderZone.bottom, dirtyZone.bottom);
-        var height = bottom - top;
-        if (height <= 0) {
-          return false;
-        }
+        dirtyZone.left = Math.max(renderZone.left, dirtyZone.left);
+        dirtyZone.right = Math.min(renderZone.right, dirtyZone.right);
+        dirtyZone.top = Math.max(renderZone.top, dirtyZone.top);
+        dirtyZone.bottom = Math.min(renderZone.top, dirtyZone.bottom);
+        dirtyZone.width = dirtyZone.right - dirtyZone.left;
+        dirtyZone.height = dirtyZone.bottom - dirtyZone.top;
         var dirtyZones = this._dirtyZones;
         while (true) {
           var insert = true;
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var zone = dirtyZones[i];
-            if (zone.left >= right || zone.right <= left || zone.top >= bottom || zone.bottom <= bottom) {
+            if (GeometryUtil.isRectNotCross(zone, dirtyZone)) {
               continue;
             }
-            left = Math.min(zone.left, left);
-            right = Math.max(zone.right, right);
-            top = Math.min(zone.top, top);
-            bottom = Math.max(zone.top, top);
-            width = right - left;
-            height = bottom - top;
+            dirtyZone.left = Math.min(zone.left, left);
+            dirtyZone.right = Math.max(zone.right, right);
+            dirtyZone.top = Math.min(zone.top, top);
+            dirtyZone.bottom = Math.max(zone.top, top);
+            dirtyZone.width = right - left;
+            dirtyZone.height = bottom - top;
             insert = false;
             dirtyZones.splice(i, 1);
             break;
           }
           if (insert) {
-            dirtyZones.push({
-              top: top,
-              bottom: bottom,
-              left: left,
-              right: right,
-              width: width,
-              height: height
-            });
+            dirtyZones.push(dirtyZone);
             break;
           }
         }

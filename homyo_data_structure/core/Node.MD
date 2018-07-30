@@ -19,7 +19,7 @@ public class NodeConfig {
     private Integer height;
     private Double anchorX;
     private Double anchorY;
-    private Double alpha;
+    private Double alpha;NODE
     private Boolean visible;
     private Boolean interactive;
 }

@@ -27,7 +27,7 @@ export default (
         this._models = [];
       }
 
-      InnerGMap.prototype.checkEventInteractZone = function (name, e, x, y) {
+      InnerGMap.prototype.checkEventTrigger = function (name, e, x, y) {
         return true;
       }
 

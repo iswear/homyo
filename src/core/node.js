@@ -7,6 +7,7 @@ import LangUtil from '../utils/lang-util';
 import Notifier from './notifier';
 
 import MatrixUtil from '../utils/matrix-util';
+import GeometryUtil from '../utils/geometry-util';
 
 export default (
   function () {
@@ -39,9 +40,10 @@ export default (
       InnerNode.prototype.defAnchorX = 0;
       InnerNode.prototype.defAnchorY = 0;
       InnerNode.prototype.defAlpha = 1;
-      InnerNode.prototype.defVisible = true;
+      InnerNode.prototype.defVisible = false;
       InnerNode.prototype.defCursor = 'default';
-      InnerNode.prototype.defInteractive = true;
+      InnerNode.prototype.defInteractive = false;
+      InnerNode.prototype.defClip = false;
       InnerNode.prototype.defLayer = 0;
 
       InnerNode.prototype.init = function (conf) {
@@ -61,6 +63,7 @@ export default (
         this.defineNotifyProperty('visible', LangUtil.checkAndGet(conf.visible, this.defVisible));
         this.defineNotifyProperty('cursor', LangUtil.checkAndGet(conf.cursor, this.defCursor));
         this.defineNotifyProperty('interactive', LangUtil.checkAndGet(conf.interactive, this.defInteractive));
+        this.defineNotifyProperty('clip', LangUtil.checkAndGet(conf.clip, this.defClip));
         this.defineNotifyProperty('parent', LangUtil.checkAndGet(conf.parent, null));
         this.defineNotifyProperty('application', LangUtil.checkAndGet(conf.application, null));
 
@@ -302,10 +305,19 @@ export default (
         return renders && renders.length > 0;
       }
 
-      InnerNode.prototype.checkEventInteractZone = function (name, e, x, y) {
+      InnerNode.prototype.renderClipPath = function (render) {
+        var rect = this.getRectInLocal();
+        render.beginPath();
+        render.moveTo(rect.left, rect.top);
+        render.lineTo(rect.right, rect.top);
+        render.lineTo(rect.right, rect.bottom);
+        render.lineTo(rect.left, rect.bottom);
+        render.closePath();
+      }
+
+      InnerNode.prototype.checkEventTrigger = function (name, e, x, y) {
         var rect = this._rectInLocal;
-        if (x >= rect.left && x <= rect.right &&
-          y >= rect.top && y <= rect.bottom) {
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
           return true;
         } else {
           return false;
@@ -396,7 +408,7 @@ export default (
           rectInWorld.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
           rectInWorld.width = rectInWorld.right - rectInWorld.left;
           rectInWorld.height = rectInWorld.bottom - rectInWorld.top;
-          if (rectInWorld.top >= renderZone.bottom || rectInWorld.bottom <= renderZone.top || rectInWorld.left >= renderZone.right || rectInWorld.bottom <= renderZone.top) {
+          if (GeometryUtil.isRectNotCross(rectInWorld, renderZone)) {
             this._dirtyZoneCtx.inRenderZone = false;
           } else {
             this._dirtyZoneCtx.inRenderZone = true;
@@ -445,7 +457,7 @@ export default (
             } else if (!(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 0)) {
               for (var i = 0, len = dirtyZones.length; i < len; ++i) {
                 var dirtyZone = dirtyZones[i];
-                if (!(dirtyZone.left >= rectInWorld.right || dirtyZone.right <= rectInWorld.left || dirtyZone.top >= rectInWorld.bottom || dirtyZone.bottom <= rectInWorld.top)) {
+                if (GeometryUtil.isRectCross(dirtyZone, rectInWorld)) {
                   result = app.receiveDirtyZone(this, LangUtil.clone(rectInWorld));
                   dirtyZoneCtx.curReported = true;
                   break;
@@ -471,41 +483,66 @@ export default (
         var dirtyZoneCtx = this._dirtyZoneCtx;
         var alpha = this.alpha * parentAlpha;
         if (this.visible && alpha > 0) {
-          if (dirtyZoneCtx.inRenderZone && this.needRender(renderZone)) {
+          if (dirtyZoneCtx.inRenderZone) {
             var wTransform = this._transformCtx.wTransform;
-            // 设置矩阵
-            render.setTransform(wTransform[0], wTransform[3], wTransform[1], wTransform[4], wTransform[2], wTransform[5]);
-            // 设置透明度
-            render.globalAlpha = alpha;
-            // 绘制自身
-            if (dirtyZoneCtx.curReported) {
-              this.postNotification('render', this, [render, null]);
-            } else {
-              var rect = this.getRectInWorld();
-              var crossDirtyZones = [];
-              for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-                var dirtyZone = dirtyZones[i];
+            if (this.needRender(renderZone)) {
+              // 设置矩阵
+              render.setTransform(wTransform[0], wTransform[3], wTransform[1], wTransform[4], wTransform[2], wTransform[5]);
+              // 设置裁剪
+              if (this.clip) {
+                this.renderClipPath(render);
+                render.clip();
               }
-              this.postNotification('render', this, [render, crossDirtyZones]);
+              // 设置透明度
+              render.globalAlpha = alpha;
+              // 绘制自身
+              if (dirtyZoneCtx.curReported) {
+                this.postNotification('render', this, [render, null]);
+              } else {
+                var rectInWorld = this.getRectInWorld();
+                var crossDirtyZones = [];
+                for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+                  var dirtyZone = dirtyZones[i];
+                  if (GeometryUtil.isRectCross(rectInWorld, dirtyZone)) {
+                    crossDirtyZones.push(dirtyZone);
+                  }
+                }
+                if (crossDirtyZones.length > 0) {
+                  this.postNotification('render', this, [render, crossDirtyZones]);
+                }
+              }
+            } else {
+              // 设置裁剪
+              if (this.clip) {
+                render.setTransform(wTransform[0], wTransform[3], wTransform[1], wTransform[4], wTransform[2], wTransform[5]);
+                this.renderClipPath(render);
+                render.clip();
+              }
             }
             // 绘制子元素
             var layers = this._childNodes.nodeLayers;
             for (var i = 0, len = layers.length; i < len; ++i) {
               var layer = layers[i];
               if (layer) {
-                for (var j = 0, len2 = layer.length; j < len2; ++j ) {
+                for (var j = 0, len2 = layer.length; j < len2; ++j) {
                   layer[j]._dispatchRender(render, alpha, renderZone, dirtyZones);
                 }
               }
             }
+            // 还原裁剪
+            if (this.clip) {
+              render.restore();
+            }
           } else {
-            // 绘制子元素
-            var layers = this._childNodes.nodeLayers;
-            for (var i = 0, len = layers.length; i < len; ++i) {
-              var layer = layers[i];
-              if (layer) {
-                for (var j = 0, len2 = layer.length; j < len2; ++j ) {
-                  layer[j]._dispatchRender(render, alpha, renderZone, dirtyZones);
+            if (!this.clip) {
+              // 绘制子元素
+              var layers = this._childNodes.nodeLayers;
+              for (var i = 0, len = layers.length; i < len; ++i) {
+                var layer = layers[i];
+                if (layer) {
+                  for (var j = 0, len2 = layer.length; j < len2; ++j) {
+                    layer[j]._dispatchRender(render, alpha, renderZone, dirtyZones);
+                  }
                 }
               }
             }
@@ -518,7 +555,7 @@ export default (
       InnerNode.prototype._dispatchMouseTouchEvent = function (name, e) {
         if (this.visible) {
           var lPoint = this.transformWVectorToL([e.offsetX, e.offsetY]);
-          var result = this.checkEventInteractZone(name, e, lPoint[0], lPoint[1]);
+          var result = this.checkEventTrigger(name, e, lPoint[0], lPoint[1]);
 
           if (e.skip) {
             e.skip = false;
