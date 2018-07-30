@@ -15,12 +15,14 @@ export default (
       function defaultInitFn (conf) {
         
       }
+
       /**
        * 缺省销毁函数
        */
       function defaultDestroyFn() {
         
       }
+
       /**
        * 继承父级调用解决方案
        * @param fnName 函数名
@@ -47,6 +49,7 @@ export default (
         this.__super_ = null;
         return ret;
       }
+
       function extend (base) {
         var obj = function (conf) {
           this.init(conf)
@@ -68,54 +71,71 @@ export default (
         }
         return obj;
       }
+
       function isUndefined (val) {
         return val === undefined;
       }
+
       function isNotUndefined (val) {
         return !isUndefined(val);
       }
+
       function isBoolean (val) {
         return typeof val === 'boolean';
       }
+
       function isNotBoolean (val) {
         return !isBoolean(val);
       }
+
       function isNumber (val) {
         return typeof val === 'number' && !isNaN(val);
       }
+
       function isNotNumber (val) {
         return !isNumber(val);
       }
+
       function isString (val) {
         return typeof val === 'string';
       }
+
       function isNotString (val) {
         return !isNotString(val);
       }
+
       function isArray (val) {
         return val instanceof Array;
       }
+
       function isNotArray (val) {
         return !isArray(val);
       }
+
       function isObject (val) {
         return typeof val === 'object';
       }
+
       function isNotObject (val) {
         return !isObject(val);
       }
+
       function isFunction (val) {
         return typeof val === 'function';
       }
+
       function isNotFunction (val) {
         return !isFunction(val);
       }
+
       function getMaxInteger() {
         return 9007199254740991;
       }
+
       function getMinInteger() {
         return -9007199254740991
       }
+
       function clone (val) {
         if (util.isArray(val)) {
           var rArr = [];
@@ -135,6 +155,7 @@ export default (
           return val;
         }
       }
+
       function checkAndGet (val, defVal) {
         return isUndefined(val) ? defVal : val;
       }
@@ -157,6 +178,8 @@ export default (
         isNotFunction: isNotFunction,
         clone: clone,
         checkAndGet: checkAndGet,
+        getMaxInteger: getMaxInteger,
+        getMinInteger: getMinInteger
       }
     })();
 

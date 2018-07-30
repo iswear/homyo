@@ -8,6 +8,7 @@ import LangUtil from '../utils/lang-util';
 import TimerUtil from '../utils/timer-util';
 import EventUtil from '../utils/event-util';
 import PlatformUtil from '../utils/platform-util';
+import GeometryUtil from '../utils/geometry-utils';
 import Notifier from './notifier';
 import CanvasRender from './render/canvas/canvas-render';
 import AnimationManager from './animation/manager';

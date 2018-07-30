@@ -27,7 +27,7 @@ export default (
       }
 
       function syncBackgroundBorderRender() {
-        var ctx = this._backgroundBorderCtx;
+        var ctx = this._backgroundBorderCacheCtx;
         if (this.backgroundColor === null && (this.borderColor === null || this.borderWidth <= 0)) {
           this.removeObserver('render', renderBackgroundAndBorder, this, this);
           ctx.render = null;
@@ -36,31 +36,109 @@ export default (
             this.addObserver('render', renderBackgroundAndBorder, this, this, LangUtil.getMinInteger());
           }
           if (ctx.render === null) {
-            ctx.width = this.width;
-            ctx.height = this.height;
+            var rect = this.getRectInLocal();
+            ctx.width = rect.width;
+            ctx.height = rect.height;
             ctx.render = new CanvasRender({canvas: document.createElement('canvas'), width: ctx.width, height: ctx.height})
           }
         }
       }
 
       function syncBackgroundBorderRenderInvalid() {
-        this.renderInvalid = true;
+        var ctx = this._backgroundBorderCacheCtx;
+        ctx.renderInvalid = true;
       }
       
-      function renderClipSave(sender, render, dirtyZones) {
-
+      function renderClipSave(sender, render, dirtyZones, global) {
+        var ctx = this._backgroundBorderCacheCtx;
+        var rect = this.getRectInLocal();
+        if (ctx.clipRadius > 0) {
+          renderRadiusPath(render, rect.left, rect.top, rect.right, rect.bottom, ctx.clipOffset, ctx.clipRadius);
+        } else {
+          renderRectPath(render, rect.left, rect.top, rect.right, rect.bottom, ctx.clipOffset);
+        }
+        render.clip();
       }
 
-      function renderClipStore() {
-
+      function renderClipStore(sender, render, dirtyZones, global) {
+        render.restore();
       }
       
-      function renderBackgroundAndBorder() {
-
+      function renderBackgroundAndBorder(sender, render, dirtyZones, global) {
+        var ctx = this._backgroundBorderCacheCtx;
+        if (ctx.renderInvalid && ctx.render !== null) {
+          renderBackgroundAndBorderCache.call(this, ctx.render);
+          ctx.renderInvalid = false;
+        }
+        var rect = this.getRectInLocal();
+        if (global) {
+          render.drawImage(ctx.render.getCanvas(), rect.left, rect.top);
+        } else {
+          
+        }
       }
       
-      function renderBackgroundAndBorderCache() {
+      function renderBackgroundAndBorderCache(render) {
+        var ctx = this._backgroundBorderCacheCtx;
+        ctx.borderOffset = this.borderWidth / 2;
+        ctx.borderRadius = this.borderRadius;
+        ctx.backgroundOffset = ctx.borderOffset;
+        ctx.backgroundRadius = this.borderRadius;
+        ctx.clipOffset = this.borderWidth;
+        ctx.clipRadius = this.borderRadius < ctx.borderOffset ? 0 : (this.borderRadius - ctx.borderOffset);
+        var rect = this.getRectInLocal();
+        if (ctx.renderWidth !== rect.width || ctx.renderHeight !== rect.height) {
+          ctx.renderWidth = rect.width;
+          ctx.renderHeight = rect.height;
+          ctx.render.width = ctx.renderWidth;
+          ctx.render.height = ctx.renderHeight;
+        } else {
+          ctx.render.clear();
+        }
+        if (ctx.borderRadius > 0) {
+          renderRadiusPath(render, 0, 0, rect.width, rect.height, ctx.borderOffset, ctx.borderRadius);
+        } else {
+          renderRectPath(render, 0, 0, rect.width, rect.height, ctx.borderOffset);
+        }
+        if (this.backgroundColor !== null) {
+          render.fillStyle = this.backgroundColor;
+          render.fill();
+        }
+        if (this.borderColor != null && this.borderWidth > 0) {
+          render.lineWidth = this.borderWidth;
+          render.strokeStyle = this.borderColor;
+          render.stroke();
+        }
+      }
 
+      function renderRectPath(render, left, top, right, bottom, offset) {
+        left = left + offset;
+        top = top + offset;
+        right = right - offset;
+        bottom = bottom - offset;
+        render.beginPath();
+        render.moveTo(left, top);
+        render.lineTo(right, top);
+        render.lineTo(right, bottom);
+        render.lineTo(left, bottom);
+        render.closePath();
+      }
+
+      function renderRadiusPath(render, left, top, right, bottom, offset, radius) {
+        left = left + offset;
+        top = top + offset;
+        right = right - offset;
+        bottom = bottom - offset;
+        render.beginPath();
+        render.moveTo(left, top + radius);
+        render.arcTo(left, top, left + radius, top, radius);
+        render.lineTo(right - radius, top);
+        render.arcTo(right, top, right, top + radius, radius);
+        render.lineTo(right, bottom - radius);
+        render.arcTo(right, bottom, right - radius, bottom, radius);
+        render.lineTo(left + radius, bottom);
+        render.arcTo(left, bottom, left, bottom - radius, radius);
+        render.closePath();
       }
 
       return {
@@ -86,7 +164,7 @@ export default (
         this.defineNotifyProperty('borderColor', LangUtil.checkAndGet(conf.borderColor, this.defBorderColor));
         this.defineNotifyProperty('borderRadius', LangUtil.checkAndGet(conf.borderRadius, this.defBorderRadius));
 
-        this._backgroundBorderCtx = {
+        this._backgroundBorderCacheCtx = {
           borderOffset: 0,
           borderRadius: 0,
           backgroundOffset: 0,
@@ -99,14 +177,22 @@ export default (
           render: null
         };
 
+        functions.syncClipRender.call(this);
+        functions.syncBackgroundBorderRender.call(this);
+        functions.syncBackgroundBorderRenderInvalid.call(this);
+
         this.addObserver('enableClipChanged', functions.syncClipRender, this, this);
 
-        this.addObserver('widthChanged', functions.syncBackgroundBorderCtx, this, this);
-        this.addObserver('heightChanged', functions.syncBackgroundBorderCtx, this, this);
-        this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderCtx, this, this);
-        this.addObserver('borderWidthChanged', functions.syncBackgroundBorderCtx, this, this);
-        this.addObserver('borderColorChanged', functions.syncBackgroundBorderCtx, this, this);
-        this.addObserver('borderRadiusChanged',functions.syncBackgroundBorderCtx, this, this);
+        this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRender, this, this);
+        this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRender, this, this);
+        this.addObserver('borderColorChanged', functions.syncBackgroundBorderRender, this, this);
+
+        this.addObserver('widthChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
+        this.addObserver('heightChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
+        this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
+        this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
+        this.addObserver('borderColorChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
+        this.addObserver('borderRadiusChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
       }
 
     })();

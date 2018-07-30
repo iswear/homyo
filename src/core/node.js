@@ -444,6 +444,7 @@ export default (
               dirtyZoneCtx.curReported = true;
             } else if (!(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 0)) {
               for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+                var dirtyZone = dirtyZones[i];
                 if (!(dirtyZone.left >= rectInWorld.right || dirtyZone.right <= rectInWorld.left || dirtyZone.top >= rectInWorld.bottom || dirtyZone.bottom <= rectInWorld.top)) {
                   result = app.receiveDirtyZone(this, LangUtil.clone(rectInWorld));
                   dirtyZoneCtx.curReported = true;
@@ -477,14 +478,23 @@ export default (
             // 设置透明度
             render.globalAlpha = alpha;
             // 绘制自身
-            this.postNotification('render', this, [render, dirtyZones]);
+            if (dirtyZoneCtx.curReported) {
+              this.postNotification('render', this, [render, null]);
+            } else {
+              var rect = this.getRectInWorld();
+              var crossDirtyZones = [];
+              for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+                var dirtyZone = dirtyZones[i];
+              }
+              this.postNotification('render', this, [render, crossDirtyZones]);
+            }
             // 绘制子元素
             var layers = this._childNodes.nodeLayers;
             for (var i = 0, len = layers.length; i < len; ++i) {
               var layer = layers[i];
               if (layer) {
                 for (var j = 0, len2 = layer.length; j < len2; ++j ) {
-                  layer[j]._dispatchRender(render, alpha, renderZone, dirtyZones, dirtyZoneCtx.curReported);
+                  layer[j]._dispatchRender(render, alpha, renderZone, dirtyZones);
                 }
               }
             }
@@ -495,7 +505,7 @@ export default (
               var layer = layers[i];
               if (layer) {
                 for (var j = 0, len2 = layer.length; j < len2; ++j ) {
-                  layer[j]._dispatchRender(render, alpha, renderZone, dirtyZones, dirtyZoneCtx.curReported);
+                  layer[j]._dispatchRender(render, alpha, renderZone, dirtyZones);
                 }
               }
             }
