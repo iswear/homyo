@@ -12,13 +12,28 @@ import GeometryUtil from '../utils/geometry-util';
 export default (
   function () {
     var functions = (function () {
+      function syncClipRender () {
+
+      }
+
       function syncTransform () {
         this._transformCtx.needUpdate = true;
       }
+
       function syncRectInLocal () {
         this._rectInLocal.needUpdate = true;
       }
+      
+      function renderClipSave () {
+        
+      }
+      
+      function renderClipStore () {
+        
+      }
+
       return {
+        syncClipRender: syncClipRender,
         syncTransform: syncTransform,
         syncRectInLocal: syncRectInLocal
       }
@@ -99,22 +114,11 @@ export default (
           curReported: false
         };
 
+        functions.syncClipRender.call(this);
         functions.syncTransform.call(this);
         functions.syncRectInLocal.call(this);
 
-        this.addObserver('xChanged', this.refresh, this, this);
-        this.addObserver('yChanged', this.refresh, this, this);
-        this.addObserver('rotateZChanged', this.refresh, this, this);
-        this.addObserver('scaleXChanged', this.refresh, this, this);
-        this.addObserver('scaleYChanged', this.refresh, this, this);
-        this.addObserver('inclineXChanged', this.refresh, this, this);
-        this.addObserver('inclineYChanged', this.refresh, this, this);
-        this.addObserver('widthChanged', this.refresh, this, this);
-        this.addObserver('heightChanged', this.refresh, this, this);
-        this.addObserver('anchorXChanged', this.refresh, this, this);
-        this.addObserver('anchorYChanged', this.refresh, this, this);
-        this.addObserver('alphaChanged', this.refresh, this, this);
-        this.addObserver('visibleChanged', this.refresh, this, this);
+        this.addObserver('clipChanged', functions.syncClipRender, this, this);
 
         this.addObserver('xChanged', functions.syncTransform, this, this);
         this.addObserver('yChanged', functions.syncTransform, this, this);
@@ -129,6 +133,20 @@ export default (
         this.addObserver('heightChanged', functions.syncRectInLocal, this, this);
         this.addObserver('anchorXChanged', functions.syncRectInLocal, this, this);
         this.addObserver('anchorYChanged', functions.syncRectInLocal, this, this);
+
+        this.addObserver('xChanged', this.refresh, this, this);
+        this.addObserver('yChanged', this.refresh, this, this);
+        this.addObserver('rotateZChanged', this.refresh, this, this);
+        this.addObserver('scaleXChanged', this.refresh, this, this);
+        this.addObserver('scaleYChanged', this.refresh, this, this);
+        this.addObserver('inclineXChanged', this.refresh, this, this);
+        this.addObserver('inclineYChanged', this.refresh, this, this);
+        this.addObserver('widthChanged', this.refresh, this, this);
+        this.addObserver('heightChanged', this.refresh, this, this);
+        this.addObserver('anchorXChanged', this.refresh, this, this);
+        this.addObserver('anchorYChanged', this.refresh, this, this);
+        this.addObserver('alphaChanged', this.refresh, this, this);
+        this.addObserver('visibleChanged', this.refresh, this, this);
       }
 
       InnerNode.prototype.getRectInLocal = function () {

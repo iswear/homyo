@@ -17,6 +17,7 @@ import FileLoader from './io/file-loader';
 export default (
   function () {
     var win = window;
+
     var docEle = document.documentElement;
 
     var functions = (function () {
