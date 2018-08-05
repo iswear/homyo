@@ -78,10 +78,13 @@ export default (
       InnerGScene.prototype.defAnchorY = 0;
       InnerGScene.prototype.init = function (conf) {
         this.super('init', [ conf ]);
-        this.defineNotifyProperty('map', LangUtil.checkAndGet(conf.map, null));
         this.defineNotifyProperty('contentOffsetX', LangUtil.checkAndGet(conf.contentOffsetX, 0));
         this.defineNotifyProperty('contentOffsetY', LangUtil.checkAndGet(conf.contentOffsetY, 0));
 
+        this._map = ;
+        /*
+        this.defineNotifyProperty('map', LangUtil.checkAndGet(conf.map, null));
+        */
         this._needUpdateMapContainerZone = true;
 
         functions.syncMap.call(this);
@@ -92,6 +95,14 @@ export default (
         this.addObserver('heightChanged', functions.syncContainerZone, this, this);
         this.addObserver('anchorXChanged', functions.syncContainerZone, this, this);
         this.addObserver('anchorYChanged', functions.syncContainerZone, this, this);
+      }
+      
+      InnerGScene.prototype.getMap = function () {
+        return this._map;
+      }
+      
+      InnerGScene.prototype.loadMap = function (conf) {
+        // TODO!!!
       }
 
       InnerGScene.prototype.destroy = function () {

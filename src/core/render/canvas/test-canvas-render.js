@@ -206,8 +206,8 @@ export default (
         jishuAdd('drawImage');
       }
 
-      InnerCanvasRender.prototype.drawImageExt = function (img, sx, sy, swidth, sheight, x, y, width, height) {
-        this.$context.drawImage(img, sx, sy, swidth, sheight, x, y, width, height);
+      InnerCanvasRender.prototype.drawImageExt = function (img, sx, sy, sWidth, sHeight, x, y, width, height) {
+        this.$context.drawImage(img, sx, sy, sWidth, sHeight, x, y, width, height);
         jishuAdd('drawImageExt');
       }
 

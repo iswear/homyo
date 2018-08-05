@@ -3,9 +3,9 @@
  * Author: iswear(471291492@qq.com)
  * Date: 2017/8/15
  */
-import LangUtil from '../utils/lang-util';
-import GMap from './gmap';
-import CanvasRender from '../core/render/canvas/canvas-render';
+import LangUtil from '../../utils/lang-util';
+import GMap from './g-map';
+import CanvasRender from '../../core/render/canvas/canvas-render';
 
 export default (
   function () {

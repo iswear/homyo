@@ -3,10 +3,10 @@
  * Author: iswear(471291492@qq.com)
  * Date: 2017/8/15
  */
-import LangUtil from '../utils/lang-util';
-import Notifier from '../core/notifier';
-import GUtil from './gutil';
-import GNode from './gnode';
+import LangUtil from '../../utils/lang-util';
+import Notifier from '../../core/notifier';
+import GUtil from '../g-util';
+import GNode from '../g-texture-node';
 
 export default (
   function () {
@@ -24,12 +24,14 @@ export default (
         }
         return node;
       }
+
       function createNodes (conf) {
         if (conf) {
           this._nodeMap = {};
           this._node = createNode.call(this, conf);
         }
       }
+
       function compileActions (actions) {
         this._actions = {};
         if (actions) {R
@@ -58,6 +60,7 @@ export default (
           }
         }
       }
+
       function runAction () {
         var context = this._actionsContext;
         if (context.runningAct) {
@@ -70,6 +73,7 @@ export default (
           }
         }
       }
+
       function runActionProgress (binder, deltaTime, finish) {
         if (finish) {
           var context = this._actionsContext;
@@ -82,45 +86,10 @@ export default (
 
       return {
         createNodes: createNodes,
-        compileActions: compileActions,
-        runActionProgress: runActionProgress
+        compileActions: compileActions
       }
     })();
 
-    /**
-     * var exampleConf = {
-     *   id: '模型id',
-     *   name: '模型名称',
-     *   root: {
-     *     id: '',
-     *     name: '',
-     *     node: {
-     *       x: '',
-     *       y: '' ...
-     *     },
-     *     ctrl: {
-     *       height: ''
-     *     },
-     *     children: [
-     *       {
-     *         node: {},
-     *         info: {},
-     *         ctrl: {},
-     *         children: []
-     *       }
-     *     ]
-     *   },
-     *   actions: [
-     *     {
-     *       id: '',
-     *       name: '',
-     *       frames: {
-     *
-     *       }
-     *     }
-     *   ]
-     * }
-     */
     var GModel = (function () {
       var InnerGModel = LangUtil.extend(Notifier);
 

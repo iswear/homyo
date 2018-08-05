@@ -16,7 +16,7 @@ export default (
     var charWidthDicts = {};
 
     var util = (function () {
-      function getCharWidthDict(font) {
+      function getCharWidthDict (font) {
         if (charWidthDicts[font]) {
           return charWidthDicts[font];
         } else {
@@ -123,22 +123,23 @@ export default (
         }
       }
 
-      return {
-        getTextLayoutWidth: function (text, font) {
-          var charWidthDict = getCharWidthDict(font);
-          var textWidth = 0;
-          var curChar = null;
-          for (var i = 0, len = text.length; i < len; ++i) {
-            curChar = text[i];
-            if (curChar > '~') {
-              textWidth += charWidthDict["zh"];
-            } else {
-              textWidth += charWidthDict[text[i]] ? charWidthDict[text[i]] : charWidthDict[" "];
-            }
+      function getTextLayoutWidth (text, font) {
+        var charWidthDict = getCharWidthDict(font);
+        var textWidth = 0;
+        var curChar = null;
+        for (var i = 0, len = text.length; i < len; ++i) {
+          curChar = text[i];
+          if (curChar > '~') {
+            textWidth += charWidthDict["zh"];
+          } else {
+            textWidth += charWidthDict[text[i]] ? charWidthDict[text[i]] : charWidthDict[" "];
           }
-          return Math.ceil(textWidth);
-        },
-        getTextLayoutInfo: function (text, font, maxWidth) {
+        }
+        return Math.ceil(textWidth);
+      }
+
+      function getTextLayoutInfo (text, font, maxWidth) {
+        if (maxWidth > 0) {
           if (text && text.length > 0) {
             var charWidthDict = getCharWidthDict(font);
             var length = text.length;
@@ -185,7 +186,7 @@ export default (
                 }
               }
             }
-            if(startCharIndex < length) {
+            if (startCharIndex < length) {
               textArr.push(text.substr(startCharIndex, length));
             }
             return {
@@ -195,7 +196,16 @@ export default (
           } else {
             return [];
           }
+        } else {
+          return {
+            width: getTextLayoutWidth(text, font),
+            lines: [text]
+          }
         }
+      }
+
+      return {
+        getTextLayoutInfo: getTextLayoutInfo
       }
     })();
 

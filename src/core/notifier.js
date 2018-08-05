@@ -51,8 +51,7 @@ export default (
           observers = [];
           this._observers[name] = observers;
         }
-        var order = order ? order : 0;
-        var observer;
+        var order = order ? order : 1;
         var newObserver = {
           fn: fn,
           target: target,
@@ -60,7 +59,7 @@ export default (
           order: order
         };
         for (var i = 0, len = observers.length; i < len; ++i) {
-          observer = observers[i];
+          var observer = observers[i];
           if (observer.order > order) {
             observers.splice(i, 0, newObserver);
             return;

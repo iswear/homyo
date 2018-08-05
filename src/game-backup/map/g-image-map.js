@@ -3,8 +3,8 @@
  * Author: iswear(471291492@qq.com)
  * Date: 2017/8/18
  */
-import LangUtil from '../utils/lang-util';
-import GMap from './gmap';
+import LangUtil from '../../utils/lang-util';
+import GMap from './g-map';
 
 export default (
   function () {
@@ -22,6 +22,7 @@ export default (
         }
         this.render();
       }
+
       function renderImg (sender, render) {
         var img = this._img;
         var image = this.findApplication().getFileLoader().loadImageAsync(
@@ -43,6 +44,7 @@ export default (
           render.drawImageExt(image, left, top, width, height, left, top, width, height);
         }
       }
+
       function imageLoadFinished (url, success) {
         this.refresh();
       }
@@ -72,7 +74,7 @@ export default (
         this.addObserver('imgChanged', functions.syncImg, this, this);
       }
 
-      return InnerGImageMap
+      return InnerGImageMap;
     })();
 
     return GImageMap;

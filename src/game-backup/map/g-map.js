@@ -4,8 +4,8 @@
  * Date: 2017/8/15
  */
 
-import LangUtil from '../utils/lang-util';
-import Node from '../core/node';
+import LangUtil from '../../utils/lang-util';
+import Node from '../../core/node';
 
 export default (
   function () {
@@ -31,13 +31,9 @@ export default (
         return true;
       }
 
-      InnerGMap.prototype.addModel = function (model, x, y, layerIndex) {
+      InnerGMap.prototype.addModel = function (model, x, y, layerIndex) { }
 
-      }
-
-      InnerGMap.prototype.removeModel = function (model, x, y, layerIndex) {
-
-      }
+      InnerGMap.prototype.removeModel = function (model, x, y, layerIndex) { }
 
       return InnerGMap;
     })();
