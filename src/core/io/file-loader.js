@@ -9,6 +9,7 @@ import Notifier from '../notifier';
 export default (
   function () {
     var doc = document;
+
     var FileLoader = (function () {
       var InnerFileLoader = LangUtil.extend(Notifier);
 

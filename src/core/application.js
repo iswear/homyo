@@ -17,7 +17,6 @@ import FileLoader from './io/file-loader';
 export default (
   function () {
     var win = window;
-
     var docEle = document.documentElement;
 
     var functions = (function () {
@@ -51,6 +50,7 @@ export default (
           EventUtil.addEventListener(canvas, 'wheel', this, eventMouseWheelCanvas);
         }
       }
+
       function eventPreProcessDesktop (e) {
         var eArg = this._events[0];
         var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
@@ -76,6 +76,7 @@ export default (
         eArg.offsetY = offsetY;
         return eArg;
       }
+
       function eventPreProcessMobile (e, touch) {
         var eArg = this._events[touch.identifier];
         if (!eArg) {
@@ -100,6 +101,7 @@ export default (
         eArg.offsetY = offsetY;
         return eArg;
       }
+
       function eventTouchStartDoc (e) {
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
@@ -107,6 +109,7 @@ export default (
           this.postNotification('touchstart', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
         }
       }
+
       function eventTouchMoveDoc (e) {
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
@@ -117,6 +120,7 @@ export default (
           }
         }
       }
+
       function eventTouchEndDoc (e) {
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
@@ -124,6 +128,7 @@ export default (
           this.postNotification('touchend', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
         }
       }
+
       function eventTouchCancelDoc (e) {
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
@@ -131,6 +136,7 @@ export default (
           this.postNotification('touchcancel', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
         }
       }
+
       function eventTouchStartCanvas (e) {
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
@@ -143,6 +149,7 @@ export default (
           eArg.preventDefault();
         }
       }
+
       function eventTouchMoveCanvas (e) {
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
@@ -157,6 +164,7 @@ export default (
           eArg.preventDefault();
         }
       }
+
       function eventTouchEndCanvas (e) {
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
@@ -169,6 +177,7 @@ export default (
           eArg.preventDefault();
         }
       }
+
       function eventTouchCancelCanvas (e) {
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
@@ -181,24 +190,31 @@ export default (
           eArg.preventDefault();
         }
       }
+
       function eventKeyDownDoc (e) {
         this.postNotification('keydown', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
+
       function eventKeyPressDoc (e) {
         this.postNotification('keypress', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
+
       function eventKeyUpDoc (e) {
         this.postNotification('keyup', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
+
       function eventMouseDownDoc (e) {
         this.postNotification('mousedown', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
+
       function eventMouseMoveDoc (e) {
         this.postNotification('mousemove', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
+
       function eventMouseUpDoc (e) {
         this.postNotification('mouseup', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
+
       function eventClickCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('click', this, [eArg]);
@@ -206,6 +222,7 @@ export default (
         eArg.stopPropagation();
         eArg.preventDefault();
       }
+
       function eventDblClickCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('dblclick', this, [eArg]);
@@ -213,6 +230,7 @@ export default (
         eArg.stopPropagation();
         eArg.preventDefault();
       }
+
       function eventContextMenuCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('contextmenu', this, [eArg]);
@@ -220,6 +238,7 @@ export default (
         eArg.stopPropagation();
         eArg.preventDefault();
       }
+
       function eventMouseDownCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('mousedown', this, [eArg]);
@@ -227,6 +246,7 @@ export default (
         eArg.stopPropagation();
         eArg.preventDefault();
       }
+
       function eventMouseMoveCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('mousemove', this, [eArg]);
@@ -234,6 +254,7 @@ export default (
         eArg.stopPropagation();
         eArg.preventDefault();
       }
+
       function eventMouseUpCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('mouseup', this, [eArg]);
@@ -241,6 +262,7 @@ export default (
         eArg.stopPropagation();
         eArg.preventDefault();
       }
+
       function eventMouseWheelCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
         this.postNotification('wheel', this, [eArg]);
@@ -248,6 +270,7 @@ export default (
         eArg.stopPropagation();
         eArg.preventDefault();
       }
+
       function checkRenderSize () {
         var render = this._render;
         var renderZone = this._renderZone;
@@ -297,9 +320,11 @@ export default (
           this.refresh();
         }
       }
+
       function syncTransform () {
         this._transformCtx.needUpdate = true;
       }
+
       function syncNodesDirtyZoneCtx () {
         if (this._root) {
           if (this.enableDirtyZone) {
