@@ -95,18 +95,23 @@ export default (
       }
 
       function loadImageSuccess (image) {
-        if (this._imageCtx.progress !== 2) {
-          this._imageCtx.progress = 2;
+        var ctx = this._imageCtx;
+        if (ctx.progress !== 2) {
+          ctx.progress = 2;
           if (LangUtil.isString(this.image)) {
             this.width = image.width;
             this.height = image.height;
+            ctx.x = 0;
+            ctx.y = 0;
+            ctx.width = image.width;
+            ctx.height = image.height;
           } else {
             this.width = this.image.width;
             this.height = this.image.height;
-            this._imageCtx.x = this.image.x;
-            this._imageCtx.y = this.image.y;
-            this._imageCtx.width = this.image.width;
-            this._imageCtx.height = this.image.height;
+            ctx.x = this.image.x;
+            ctx.y = this.image.y;
+            ctx.width = this.image.width;
+            ctx.height = this.image.height;
           }
           this.refresh();
         }

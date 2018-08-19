@@ -4,6 +4,7 @@
  * Date: 2017/8/18
  */
 import LangUtil from '../../utils/lang-util';
+import GeometryUtil from '../../utils/geometry-util';
 import GMap from './g-map';
 
 export default (
@@ -38,22 +39,15 @@ export default (
         var image = loadImage.call(this);
         if (image !== null) {
           var mapRectInLocal = this.getMapRectInLocal();
-          var offsetLeft = this.mapX - mapRectInLocal.left;
-          var offsetTop = this.mapY - mapRectInLocal.top;
-
-          var ctx = this._backgroundImageCtx;
-          var desRect = {
-            left: this.mapX + mapRectInLocal.left,
-            top: this.mapY + mapRectInLocal.top,
-
-            width: ctx.width,
-            height: ctx.height
-          };
+          var offsetLeft = - mapRectInLocal.left;
+          var offsetTop = - mapRectInLocal.top;
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
+            var crossRect = GeometryUtil.getRectCross(mapRectInLocal, dirtyZone);
             render.drawImageExt(image,
-              dirtyZone.left + offsetLeft, dirtyZone.top + offsetTop, dirtyZone.width, dirtyZone.height,
-              dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
+              crossRect.left + offsetLeft, crossRect.top + offsetTop, crossRect.width, crossRect.height,
+              crossRect.left, crossRect.top, crossRect.width, crossRect.height
+            );
           }
         }
       }
@@ -61,16 +55,17 @@ export default (
       function renderBackgroundImageClip (sender, render, dirtyZones) {
         var image = loadImage.call(this);
         if (image !== null) {
-          var mapRectInLocal = this.getMapRectInLocal();
-          var rectInLocal = this.getRectInLocal();
           var ctx = this._backgroundImageCtx;
-          var offsetLeft = ;
-          var offsetTop = ;
+          var mapRectInLocal = this.getMapRectInLocal();
+          var offsetLeft = ctx.x - mapRectInLocal.left;
+          var offsetTop = ctx.y - mapRectInLocal.top;
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
+            var crossRect = GeometryUtil.getRectCross(mapRectInLocal, dirtyZone);
             render.drawImageExt(image,
-              dirtyZone.left + offsetLeft, dirtyZone.top + offsetTop, dirtyZone.width, dirtyZone.height,
-              dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
+              crossRect.left + offsetLeft, crossRect.top + offsetTop, crossRect.width, crossRect.height,
+              crossRect.left, crossRect.top, crossRect.width, crossRect.height
+            );
           }
         }
       }
@@ -105,18 +100,23 @@ export default (
       }
 
       function loadImageSuccess (image) {
-        if (this._backgroundImageCtx.progress !== 2) {
-          this._backgroundImageCtx.progress = 2;
+        var ctx = this._backgroundImageCtx;
+        if (ctx.progress !== 2) {
+          ctx.progress = 2;
           if (LangUtil.isString(this.backgroundImage)) {
             this.mapWidth = image.width;
             this.mapHeight = image.height;
+            ctx.x = 0;
+            ctx.y = 0;
+            ctx.width = image.width;
+            ctx.height = image.height;
           } else {
             this.mapWidth = this.backgroundImage.width;
             this.mapHeight = this.backgroundImage.height;
-            this._backgroundImageCtx.x = this.backgroundImage.x;
-            this._backgroundImageCtx.y = this.backgroundImage.y;
-            this._backgroundImageCtx.width = this.backgroundImage.width;
-            this._backgroundImageCtx.height = this.backgroundImage.height;
+            ctx.x = this.backgroundImage.x;
+            ctx.y = this.backgroundImage.y;
+            ctx.width = this.backgroundImage.width;
+            ctx.height = this.backgroundImage.height;
           }
           this.refresh();
         }
@@ -139,6 +139,8 @@ export default (
       InnerGImageMap.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.defineNotifyProperty('backgroundImage', LangUtil.checkAndGet(conf.backgroundImage, null));
+        this.defineNotifyProperty('backgroundScrollX', LangUtil.checkAndGet(conf.backgroundScrollX, false));
+        this.defineNotifyProperty('backgroundScrollY', LangUtil.checkAndGet(conf.backgroundScrollY, false));
 
         this._backgroundImageCtx = {
           x: 0,
@@ -153,6 +155,8 @@ export default (
         functions.syncBackgroundImageContext.call(this);
 
         this.addObserver('backgroundImageChanged', this.refresh, this, this);
+        this.addObserver('backgroundScrollXChanged', this.refresh, this, this);
+        this.addObserver('backgroundScrollYChanged', this.refresh, this, this);
 
         this.addObserver('backgroundImageChanged', functions.syncBackgroundImageRender, this, this);
         this.addObserver('backgroundImageChanged', functions.syncBackgroundImageContext, this, this);
