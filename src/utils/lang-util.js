@@ -128,14 +128,6 @@ export default (
         return !isFunction(val);
       }
 
-      function getMaxInteger() {
-        return 9007199254740991;
-      }
-
-      function getMinInteger() {
-        return -9007199254740991
-      }
-
       function clone (val) {
         if (util.isArray(val)) {
           var rArr = [];
@@ -177,9 +169,7 @@ export default (
         isFunction: isFunction,
         isNotFunction: isNotFunction,
         clone: clone,
-        checkAndGet: checkAndGet,
-        getMaxInteger: getMaxInteger,
-        getMinInteger: getMinInteger
+        checkAndGet: checkAndGet
       }
     })();
 

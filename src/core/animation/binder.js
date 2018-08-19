@@ -51,6 +51,7 @@ export default (
         this.animation = null;
         this.fn = null;
         this.target = null;
+        this.loop = null;
         this.super('destroy');
       }
 

@@ -325,21 +325,10 @@ export default (
         this._transformCtx.needUpdate = true;
       }
 
-      function syncNodesDirtyZoneCtx () {
-        if (this._root) {
-          if (this.enableDirtyZone) {
-            this._root._enableDirtyZone(true);
-          } else {
-            this._root._disableDirtyZone(true);
-          }
-        }
-      }
-
       return {
         eventInit: eventInit,
         syncTransform: syncTransform,
-        checkRenderSize: checkRenderSize,
-        syncNodesDirtyZoneCtx: syncNodesDirtyZoneCtx
+        checkRenderSize: checkRenderSize
       }
     })();
 
@@ -383,7 +372,6 @@ export default (
       InnerApplication.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.defineNotifyProperty('scaleMode', LangUtil.checkAndGet(conf.scaleMode, this.defScaleMode));
-        this.defineNotifyProperty('enableDirtyZone', LangUtil.checkAndGet(conf.enableDirtyZone, this.defEnableDirtyZone));
 
         this._root = LangUtil.checkAndGet(conf.root, null);
         this._root.application = this;
@@ -418,10 +406,8 @@ export default (
 
         functions.eventInit.call(this);
         functions.syncTransform.call(this);
-        functions.syncNodesDirtyZoneCtx.call(this);
 
         this.addObserver('scaleModeChanged', functions.syncTransform, this, this);
-        this.addObserver('enableDirtyZoneChanged', functions.syncNodesDirtyZoneCtx, this, this);
       }
 
       InnerApplication.prototype.getAnimationManager = function () {

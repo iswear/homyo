@@ -76,13 +76,17 @@ export default (
       }
 
       function loadImage () {
-        var fileLoader = this.findApplication().getFileLoader();
         var ctx = this._backgroundImageCtx;
-        if (ctx.progress === 0) {
-          return fileLoader.loadImageAsync(ctx.url, loadImageFinished, this);
-        } else if (ctx.progress === 2) {
-          return fileLoader.loadImageAsync(ctx.url, loadImageFinished, this);
+        var fileLoader = this.findApplication().getFileLoader();
+        var image = fileLoader.loadImageAsync(ctx.url);
+        if (image !== null) {
+          loadImageSuccess.call(this, image);
+          return image;
         } else {
+          if (ctx.progress === 0) {
+            fileLoader.loadImageAsync(ctx.url, loadImageFinished, this);
+            ctx.progress = 1;
+          }
           return null;
         }
       }

@@ -143,6 +143,7 @@ export default (
         this.addObserver('parentChanged', functions.syncTransform, this, this);
 
         this.addObserver('clipChanged', functions.syncClipRender, this, this);
+
         this.addObserver('widthChanged', functions.syncRectInLocal, this, this);
         this.addObserver('heightChanged', functions.syncRectInLocal, this, this);
         this.addObserver('anchorXChanged', functions.syncRectInLocal, this, this);

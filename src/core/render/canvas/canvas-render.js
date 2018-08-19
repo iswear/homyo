@@ -14,6 +14,7 @@ export default (
           return this.$context[name];
         }
       }
+
       function contextPropertySetter (name) {
         return function (val) {
           if (this.$context[name] !== val) {
@@ -21,11 +22,13 @@ export default (
           }
         }
       }
+
       function canvasPropertyGetter (name) {
         return function () {
           return this.$canvas[name];
         }
       }
+
       function canvasPropertySetter (name) {
         return function (val) {
           if (this.$canvas[name] !== val) {

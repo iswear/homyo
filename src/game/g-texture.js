@@ -25,12 +25,12 @@ export default (
         if (this.image !== null && this.image !== '') {
           var ctx = this._imageCtx;
           var image = this.image;
-          ctx.progress = 0;
           if (LangUtil.isString(image)) {
             ctx.url = image;
           } else {
             ctx.url = image.url;
           }
+          ctx.progress = 0;
         }
       }
 
@@ -66,14 +66,17 @@ export default (
       }
 
       function loadImage () {
-        var fileLoader = this.findApplication().getFileLoader();
         var ctx = this._imageCtx;
+        var fileLoader = this.findApplication().getFileLoader();
         var image = fileLoader.loadImageAsync(ctx.url);
         if (image !== null) {
-          loadImageSuccess(image);
+          loadImageSuccess.call(this, image);
           return image;
         } else {
-          fileLoader.loadImageAsync(ctx.url, loadImageFinished, this);
+          if (ctx.progress === 0) {
+            fileLoader.loadImageAsync(ctx.url, loadImageFinished, this);
+            ctx.progress = 1;
+          }
           return null;
         }
       }

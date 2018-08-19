@@ -15,12 +15,22 @@ export default (
 
     var functions = (function () {
       function syncTextRender () {
-        if (this.text !== null && this.text.length > 0) {
+        var ctx = this._textCacheCtx;
+        if (this.text === null || this.text.trim().length === 0) {
+          this.removeObserver('render', renderLabelText, this, this);
+          ctx.render = null;
+        } else {
           if (this.getObserverByAllParams('render', renderLabelText, this, this) === null) {
             this.addObserver('render', renderLabelText, this, this);
           }
-        } else {
-          this.removeObserver('render', renderLabelText, this, this);
+          if (ctx.render === null) {
+            ctx.renderInvalid = true;
+            ctx.render = new CanvasRender({
+              canvas: doc.createElement('canvas'),
+              width: this.width,
+              height: this.height
+            });
+          }
         }
       }
 
@@ -52,19 +62,20 @@ export default (
         }
 
         var rect = this.getRectInLocal();
-        var left = rect.left;
-        var top = rect.top;
         var width = rect.width;
         var height = rect.height;
-
-        var cacheRender = renderCache.render;
-        var cacheWidth = cacheRender.width;
-        var cacheHeight = cacheRender.height;
 
         var contentWidth = width - this.borderWidth * 2;
         var contentHeight = height - this.borderWidth * 2;
 
         if (contentWidth > 0 && contentHeight > 0) {
+          var left = rect.left;
+          var top = rect.top;
+
+          var cacheRender = renderCache.render;
+          var cacheWidth = cacheRender.width;
+          var cacheHeight = cacheRender.height;
+
           var desRect = {
             left: 0,
             top: 0,
@@ -89,12 +100,15 @@ export default (
             desRect.top = top + this.borderWidth + Math.ceil((contentHeight - cacheHeight) / 2);
           }
           desRect.bottom = desRect.top + cacheHeight;
+          var offsetLeft = - desRect.left;
+          var offsetTop = - desRect.top;
+          var cacheCanvas = cacheRender.getCanvas();
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
             var crossRect = GeometryUtil.getRectCross(desRect, dirtyZone);
             if (crossRect !== null) {
-              render.drawImageExt(cacheRender.getCanvas(),
-                crossRect.left - desRect.left, crossRect.top - desRect.top, crossRect.width, crossRect.height,
+              render.drawImageExt(cacheCanvas,
+                crossRect.left + offsetLeft, crossRect.top + offsetTop, crossRect.width, crossRect.height,
                 crossRect.left, crossRect.top, crossRect.width, crossRect.height);
             }
           }
@@ -124,9 +138,14 @@ export default (
         var lineHeight = LangUtil.checkAndGet(this.textLineHeight, 1.5 * this.fontSize);
         var lineNum = (this.textLineNum < 1 || this.textLineNum > lines.length) ? lines.length : this.textLineNum;
         var render = renderCache.render;
-        render.width = (lineNum === 1) ? layoutInfo.width : (rect.width - 2 * this.borderWidth);
-        render.height = lineHeight * lineNum + 1;
-        render.clear();
+        var renderWidth = (lineNum === 1) ? layoutInfo.width : (rect.width - 2 * this.borderWidth);
+        var renderHeight = lineHeight * lineNum + 1;
+        if (render.width !== render.width || render.height !== renderHeight) {
+          render.width = renderWidth;
+          render.height = renderHeight;
+        } else {
+          render.clear();
+        }
         render.textBaseline = 'middle';
         var tx = 0, ty = lineHeight / 2;
         if (this.textHorAlign < 0) {
@@ -173,7 +192,6 @@ export default (
         this.defineNotifyProperty('textVerAlign', LangUtil.checkAndGet(conf.textVerAlign, this.defTextVerAlign));
         this.defineNotifyProperty('textLineHeight', LangUtil.checkAndGet(conf.textLineHeight, undefined));
         this.defineNotifyProperty('textLineNum', LangUtil.checkAndGet(conf.textLineNum, 1));
-        this.defineNotifyProperty('textRichInfo', LangUtil.checkAndGet(conf.textRichInfo, null));
 
         this._textCacheCtx = {
           fontInvalid: true,
@@ -181,11 +199,13 @@ export default (
           layoutInvalid: true,
           layout: null,
           renderInvalid: true,
-          render: new CanvasRender({canvas:doc.createElement('canvas')})
+          render: null
         };
 
-        functions.syncFont.call(this);
-        functions.syncLabelText.call(this);
+        functions.syncTextRender.call(this);
+        functions.syncTextFontInvalid.call(this);
+        functions.syncTextLayoutInvalid.call(this);
+        functions.syncTextRenderInvalid.call(this);
 
         this.addObserver('textChanged', this.refresh, this, this);
         this.addObserver('fontSizeChanged', this.refresh, this, this);
@@ -195,7 +215,6 @@ export default (
         this.addObserver('textVerAlignChanged', this.refresh, this, this);
         this.addObserver('textLineHeightChanged', this.refresh, this, this);
         this.addObserver('textLineNumChanged', this.refresh, this, this);
-        this.addObserver('textRichInfo', this.refresh, this, this);
 
         this.addObserver('textChanged', functions.syncTextRender, this, this);
 
@@ -215,7 +234,6 @@ export default (
         this.addObserver('textHorAlignChanged', functions.syncTextRenderInvalid, this, this);
         this.addObserver('textLineHeightChanged', functions.syncTextRenderInvalid, this, this);
         this.addObserver('textLineNumChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('textRichInfoChanged', functions.syncTextRenderInvalid, this, this);
       }
 
       return InnerUILabel;

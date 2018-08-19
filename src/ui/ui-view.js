@@ -19,10 +19,15 @@ export default (
           ctx.render = null;
         } else {
           if (this.getObserverByAllParams('render', renderBackgroundAndBorder, this, this) === null) {
-            this.addObserver('render', renderBackgroundAndBorder, this, this, LangUtil.getMinInteger());
+            this.addObserver('render', renderBackgroundAndBorder, this, this, -Infinity);
           }
           if (ctx.render === null) {
-            ctx.render = new CanvasRender({canvas: doc.createElement('canvas'), width: rect.width, height: rect.height})
+            ctx.renderInvalid = true;
+            ctx.render = new CanvasRender({
+              canvas: doc.createElement('canvas'),
+              width: this.width,
+              height: this.height
+            });
           }
         }
       }
@@ -33,15 +38,18 @@ export default (
       
       function renderBackgroundAndBorder(sender, render, dirtyZones) {
         var ctx = this._backgroundBorderCacheCtx;
-        if (ctx.renderInvalid && ctx.render !== null) {
+        if (ctx.renderInvalid) {
           renderBackgroundAndBorderCache.call(this, ctx.render);
           ctx.renderInvalid = false;
         }
         var rectInLocal = this.getRectInLocal();
+        var cacheCanvas = ctx.render.getCanvas();
+        var offsetLeft = - rectInLocal.left;
+        var offsetTop = - rectInLocal.top;
         for (var i = 0, len = dirtyZones.length; i < len; ++i) {
           var dirtyZone = dirtyZones[i];
-          render.drawImageExt(ctx.render.getCanvas(),
-            dirtyZone.left - rectInLocal.left, dirtyZone.top - rectInLocal.top, dirtyZone.width, dirtyZone.height,
+          render.drawImageExt(cacheCanvas,
+            dirtyZone.left + offsetLeft, dirtyZone.top + offsetTop, dirtyZone.width, dirtyZone.height,
             dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
         }      
       }
@@ -143,6 +151,11 @@ export default (
 
         functions.syncBackgroundBorderRender.call(this);
         functions.syncBackgroundBorderRenderInvalid.call(this);
+
+        this.addObserver('backgroundColorChanged', this.refresh, this, this);
+        this.addObserver('borderWidthChanged', this.refresh, this, this);
+        this.addObserver('borderColorChanged', this.refresh, this, this);
+        this.addObserver('borderRadiusChanged', this.refresh, this, this);
 
         this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRender, this, this);
         this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRender, this, this);
