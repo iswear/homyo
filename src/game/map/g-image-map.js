@@ -104,15 +104,11 @@ export default (
         if (ctx.progress !== 2) {
           ctx.progress = 2;
           if (LangUtil.isString(this.backgroundImage)) {
-            this.mapWidth = image.width;
-            this.mapHeight = image.height;
             ctx.x = 0;
             ctx.y = 0;
             ctx.width = image.width;
             ctx.height = image.height;
           } else {
-            this.mapWidth = this.backgroundImage.width;
-            this.mapHeight = this.backgroundImage.height;
             ctx.x = this.backgroundImage.x;
             ctx.y = this.backgroundImage.y;
             ctx.width = this.backgroundImage.width;
