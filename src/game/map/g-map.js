@@ -86,7 +86,7 @@ export default (
       }
 
       InnerGMap.prototype.getMapRectInLocal = function () {
-        var rect = LangUtil.clone(this._mapNode.getRectInLocal());
+        var rect = this._mapNode.getRectInLocal();
         rect.left += this.mapX;
         rect.top += this.mapY;
         rect.right += this.mapX;
@@ -95,7 +95,7 @@ export default (
       }
 
       InnerGMap.prototype.getMapRectInWorld = function () {
-        return this._mapNode.getRectInWorld();
+        return LangUtil.clone(this._mapNode.getRectInWorld());
       }
 
       InnerGMap.prototype.addModel = function (model) {

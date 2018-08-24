@@ -151,11 +151,11 @@ export default (
       }
 
       InnerNode.prototype.getRectInLocal = function () {
-        return this._rectInLocal;
+        return LangUtil.clone(this._rectInLocal);
       }
 
       InnerNode.prototype.getRectInWorld = function () {
-        return this._rectInWorld;
+        return LangUtil.clone(this._rectInWorld);
       }
 
       InnerNode.prototype.getChildNode = function (layerIndex, nodeIndex) {

@@ -21,7 +21,7 @@ export default (
           }
         }
       }
-      
+
       function syncBackgroundImageContext () {
         if (this.backgroundImage !== null && this.backgroundImage !== '') {
           var ctx = this._backgroundImageCtx;

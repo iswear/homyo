@@ -20,7 +20,7 @@ import ui_label from './src/ui/ui-label';
 import g_scene from './src/game/g-scene';
 import g_map from './src/game/map/g-map';
 import g_image_map from './src/game/map/g-image-map';
-import g_tiled_map from './src/game/map/g-tiled-map';
+import g_tiled_map from './src/game/map/g-tile-map';
 import g_model from './src/game/model/g-model';
 import g_texture from './src/game/g-texture';
 import g_texture_node from './src/game/g-texture-node';
