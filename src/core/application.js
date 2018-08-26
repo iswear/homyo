@@ -20,37 +20,6 @@ export default (
     var docEle = document.documentElement;
 
     var functions = (function () {
-      function eventInit () {
-        var canvas = this._render.getCanvas();
-        var doc = document;
-        if (PlatformUtil.isMobile) {
-          EventUtil.addEventListener(doc, 'touchstart', this, eventTouchStartDoc);
-          EventUtil.addEventListener(doc, 'touchmove', this, eventTouchMoveDoc);
-          EventUtil.addEventListener(doc, 'touchend', this, eventTouchEndDoc);
-          EventUtil.addEventListener(doc, 'touchcancel', this, eventTouchCancelDoc);
-          EventUtil.addEventListener(canvas, 'touchstart', this, eventTouchStartCanvas);
-          EventUtil.addEventListener(canvas, 'touchmove', this, eventTouchMoveCanvas);
-          EventUtil.addEventListener(canvas, 'touchend', this, eventTouchEndCanvas);
-          EventUtil.addEventListener(canvas, 'touchcancel', this, eventTouchCancelCanvas);
-        } else {
-          this._events.push(new Event());
-          EventUtil.addEventListener(doc, 'keydown', this, eventKeyDownDoc);
-          EventUtil.addEventListener(doc, 'keypress', this, eventKeyPressDoc);
-          EventUtil.addEventListener(doc, 'keyup', this, eventKeyUpDoc);
-          EventUtil.addEventListener(doc, 'mousedown', this, eventMouseDownDoc);
-          EventUtil.addEventListener(doc, 'mousemove', this, eventMouseMoveDoc);
-          EventUtil.addEventListener(doc, 'mouseup', this, eventMouseUpDoc);
-          EventUtil.addEventListener(canvas, 'click', this, eventClickCanvas);
-          EventUtil.addEventListener(canvas, 'dblclick', this, eventDblClickCanvas);
-          EventUtil.addEventListener(canvas, 'contextmenu', this, eventContextMenuCanvas);
-          EventUtil.addEventListener(canvas, 'mousedown', this, eventMouseDownCanvas);
-          EventUtil.addEventListener(canvas, 'mousemove', this, eventMouseMoveCanvas);
-          EventUtil.addEventListener(canvas, 'mouseup', this, eventMouseUpCanvas);
-          EventUtil.addEventListener(canvas, 'mousewheel', this, eventMouseWheelCanvas);
-          EventUtil.addEventListener(canvas, 'wheel', this, eventMouseWheelCanvas);
-        }
-      }
-
       function eventPreProcessDesktop (e) {
         var eArg = this._events[0];
         var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
@@ -271,7 +240,42 @@ export default (
         eArg.preventDefault();
       }
 
-      function checkRenderSize () {
+      function initEvent () {
+        var canvas = this._render.getCanvas();
+        var doc = document;
+        if (PlatformUtil.isMobile) {
+          EventUtil.addEventListener(doc, 'touchstart', this, eventTouchStartDoc);
+          EventUtil.addEventListener(doc, 'touchmove', this, eventTouchMoveDoc);
+          EventUtil.addEventListener(doc, 'touchend', this, eventTouchEndDoc);
+          EventUtil.addEventListener(doc, 'touchcancel', this, eventTouchCancelDoc);
+          EventUtil.addEventListener(canvas, 'touchstart', this, eventTouchStartCanvas);
+          EventUtil.addEventListener(canvas, 'touchmove', this, eventTouchMoveCanvas);
+          EventUtil.addEventListener(canvas, 'touchend', this, eventTouchEndCanvas);
+          EventUtil.addEventListener(canvas, 'touchcancel', this, eventTouchCancelCanvas);
+        } else {
+          this._events.push(new Event());
+          EventUtil.addEventListener(doc, 'keydown', this, eventKeyDownDoc);
+          EventUtil.addEventListener(doc, 'keypress', this, eventKeyPressDoc);
+          EventUtil.addEventListener(doc, 'keyup', this, eventKeyUpDoc);
+          EventUtil.addEventListener(doc, 'mousedown', this, eventMouseDownDoc);
+          EventUtil.addEventListener(doc, 'mousemove', this, eventMouseMoveDoc);
+          EventUtil.addEventListener(doc, 'mouseup', this, eventMouseUpDoc);
+          EventUtil.addEventListener(canvas, 'click', this, eventClickCanvas);
+          EventUtil.addEventListener(canvas, 'dblclick', this, eventDblClickCanvas);
+          EventUtil.addEventListener(canvas, 'contextmenu', this, eventContextMenuCanvas);
+          EventUtil.addEventListener(canvas, 'mousedown', this, eventMouseDownCanvas);
+          EventUtil.addEventListener(canvas, 'mousemove', this, eventMouseMoveCanvas);
+          EventUtil.addEventListener(canvas, 'mouseup', this, eventMouseUpCanvas);
+          EventUtil.addEventListener(canvas, 'mousewheel', this, eventMouseWheelCanvas);
+          EventUtil.addEventListener(canvas, 'wheel', this, eventMouseWheelCanvas);
+        }
+      }
+
+      function syncTransform () {
+        this._transformCtx.needUpdate = true;
+      }
+
+      function syncRenderSize () {
         var render = this._render;
         var renderZone = this._renderZone;
         var transformCtx = this._transformCtx;
@@ -321,14 +325,19 @@ export default (
         }
       }
 
-      function syncTransform () {
-        this._transformCtx.needUpdate = true;
+      function loadImageFinished (url, success) {
+        if (success) {
+          if (this._loaderCtx.images[url] && this._loaderCtx.images[url].refresh) {
+            this.refresh();
+          }
+        }
       }
 
       return {
-        eventInit: eventInit,
+        initEvent: initEvent,
         syncTransform: syncTransform,
-        checkRenderSize: checkRenderSize
+        syncRenderSize: syncRenderSize,
+        loadImageFinished: loadImageFinished
       }
     })();
 
@@ -392,8 +401,16 @@ export default (
         this._refresh = true;
         this._timerTaskId = 0;
         this._events = [];
-        this._animationManager = new AnimationManager({});
-        this._fileLoader = new FileLoader({});
+
+        this._animationCtx = {
+          manager: new AnimationManager({})
+        };
+        this._loaderCtx = {
+          images: {},
+          audios: {},
+          videos: {},
+          loader: new FileLoader({})
+        };
 
         this._clientWidth = this._render.clientWidth;
         this._clientHeight = this._render.clientHeight;
@@ -404,18 +421,44 @@ export default (
           transform: [1, 0, 0, 0, 1, 0]
         };
 
-        functions.eventInit.call(this);
+        functions.initEvent.call(this);
         functions.syncTransform.call(this);
 
         this.addObserver('scaleModeChanged', functions.syncTransform, this, this);
       }
 
-      InnerApplication.prototype.getAnimationManager = function () {
-        return this._animationManager;
+      InnerApplication.prototype.runNodeAnimation = function (node, animation, fn, target, loop) {
+        this._animationCtx.manager.addAnimation(node, animation, fn, target, loop);
       }
 
-      InnerApplication.prototype.getFileLoader = function () {
-        return this._fileLoader;
+      InnerApplication.prototype.stopNodeAnimation = function (node, animation) {
+        this._animationCtx.manager.removeAnimationByNodeAndAnimation(node, animation);
+      }
+
+      InnerApplication.prototype.stopNodeAllAnimation = function (node) {
+        this._animationCtx.manager.removeAnimationByNode(node);
+      }
+
+      InnerApplication.prototype.loadImage = function (url, refresh) {
+        var loaderCtx = this._loaderCtx;
+        var loader = loaderCtx.loader;
+        if (loaderCtx.images[url]) {
+          loaderCtx.images[url].refresh |= refresh;
+          var image = loader.loadImageAsync(url);
+          return image;
+        } else {
+          loaderCtx.images[url] = {refresh: refresh};
+          var image = loader.loadImageAsync(url, functions.loadImageFinished, this);
+          return image;
+        }
+      }
+
+      InnerApplication.prototype.loadAudio = function (url) {
+        return this._loaderCtx.loader.loadAudioAsync(url);
+      }
+
+      InnerApplication.prototype.loadVideo = function (url) {
+        return this._loaderCtx.loader.loadVideoAsync(url);
       }
 
       InnerApplication.prototype.receiveDirtyZone = function (node, dirtyZone) {
@@ -471,7 +514,7 @@ export default (
         // 每半秒钟检测是否需要变换
         if (this._preCheckTime > 500) {
           this._preCheckTime = 0;
-          functions.checkRenderSize.call(this);
+          functions.syncRenderSize.call(this);
         } else {
           this._preCheckTime += deltaTime;
         }
@@ -529,13 +572,13 @@ export default (
           this._render.destroy();
           this._render = null;
         }
-        if (this._animationManager) {
-          this._animationManager.destroy();
-          this._animationManager = null;
+        if (this._animationCtx) {
+          this._animationCtx.manager.destroy();
+          this._animationCtx = null;
         }
-        if (this._fileLoader) {
-          this._fileLoader.destroy();
-          this._fileLoader = null;
+        if (this._loaderCtx) {
+          this._loaderCtx.loader.destroy();
+          this._loaderCtx = null;
         }
         this.super('destroy');
       }

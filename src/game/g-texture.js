@@ -25,12 +25,12 @@ export default (
         if (this.image !== null && this.image !== '') {
           var ctx = this._imageCtx;
           var image = this.image;
+          ctx.invalid = true;
           if (LangUtil.isString(image)) {
             ctx.url = image;
           } else {
             ctx.url = image.url;
           }
-          ctx.progress = 0;
         }
       }
 
@@ -67,37 +67,8 @@ export default (
 
       function loadImage () {
         var ctx = this._imageCtx;
-        var fileLoader = this.findApplication().getFileLoader();
-        var image = fileLoader.loadImageAsync(ctx.url);
-        if (image !== null) {
-          loadImageSuccess.call(this, image);
-          return image;
-        } else {
-          if (ctx.progress === 0) {
-            fileLoader.loadImageAsync(ctx.url, loadImageFinished, this);
-            ctx.progress = 1;
-          }
-          return null;
-        }
-      }
-
-      function loadImageFinished (url, success) {
-        if (success) {
-          var image = this.findApplication().getFileLoader().loadImageAsync(url);
-          if (image !== null) {
-            loadImageSuccess.call(this, image);
-          } else {
-            loadImageFailed.call(this);
-          }
-        } else {
-          loadImageFailed.call(this);
-        }
-      }
-
-      function loadImageSuccess (image) {
-        var ctx = this._imageCtx;
-        if (ctx.progress !== 2) {
-          ctx.progress = 2;
+        var image = this.findApplication().loadImage(ctx.url, true);
+        if (ctx.invalid && image !== null) {
           if (LangUtil.isString(this.image)) {
             this.width = image.width;
             this.height = image.height;
@@ -113,12 +84,9 @@ export default (
             ctx.width = this.image.width;
             ctx.height = this.image.height;
           }
-          this.refresh();
+          ctx.invalid = false;
         }
-      }
-
-      function loadImageFailed () {
-        this._imageCtx.progress = 3;
+        return image;
       }
 
       return {
@@ -138,12 +106,12 @@ export default (
         this.defineNotifyProperty('image', LangUtil.checkAndGet(conf.image, this.defImage));
 
         this._imageCtx = {
+          invalid: true,
+          url: null,
           x: 0,
           y: 0,
           width: 0,
-          height: 0,
-          url: null,
-          progress: 0
+          height: 0
         };
 
         functions.syncImageRender.call(this);

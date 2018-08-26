@@ -26,7 +26,7 @@ export default (
         this._paused = false;
       }
 
-      InnerManager.prototype.addAnimationBinder = function (node, animation, fn, target, loop) {
+      InnerManager.prototype.addAnimation = function (node, animation, fn, target, loop) {
         this._aniBinders.push(new Binder({
           node: node,
           animation: animation,
@@ -36,7 +36,7 @@ export default (
         }));
       }
 
-      InnerManager.prototype.removeAnimationBinderByNode = function (node) {
+      InnerManager.prototype.removeAnimationByNode = function (node) {
         var binders = this._aniBinders;
         for (var i = 0, len = binders.length; i < len; ++i) {
           var binder = binders[i];
@@ -48,7 +48,7 @@ export default (
         }
       }
 
-      InnerManager.prototype.removeAnimationBinderByNodeAndAnimation = function (node, animation) {
+      InnerManager.prototype.removeAnimationByNodeAndAnimation = function (node, animation) {
         var binders = this._aniBinders;
         for (var i = 0, len = binders.length; i < len; ++i) {
           var binder = binders[i];

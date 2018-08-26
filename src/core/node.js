@@ -258,14 +258,14 @@ export default (
       InnerNode.prototype.runAnimation = function (animation, fn, target, loop) {
         const application = this.findApplication()
         if (application) {
-          application.getAnimationManager().addAnimationBinder(this, animation, fn, target, loop);
+          application.runNodeAnimation(this, animation, fn, target, loop);
         }
       }
 
       InnerNode.prototype.stopAnimation = function (animation) {
         const application = this.findApplication()
         if (application) {
-          application.getAnimationManager().removeAnimationBinderByNodeAndAnimation(this, animation);
+          application.stopNodeAnimation(this, animation);
         }
       }
 
@@ -283,7 +283,7 @@ export default (
               }
             }
           }
-          application.getAnimationManager().removeAnimationBinderByNode(this);
+          application.stopNodeAllAnimation(this);
         }
       }
 
@@ -396,6 +396,7 @@ export default (
       }
 
       InnerNode.prototype._syncTransform = function (parentWTransform, parentWReverseTransform, renderZone, parentUpdateTransform) {
+        this.postNotification('frame', this);
         var transformCtx = this._transformCtx;
         var rectInLocal = this._rectInLocal;
         var rectInWorld = this._rectInWorld;
@@ -439,7 +440,6 @@ export default (
           }
         }
 
-        this.postNotification('frame', this);
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
           var layer = layers[i];

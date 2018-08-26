@@ -41,7 +41,7 @@ export default (
       function renderSquareMap (sender, render, dirtyZones) {
         var ctx = this._tileCacheCtx;
         if (ctx.foreInvalid) {
-          renderSquareMapCache.call(this);
+          renderSquareMapCache.call(this, ctx);
           ctx.foreInvalid = false;
         }
         for (var i = 0, len = dirtyZones.length; i < len; ++i) {
@@ -51,19 +51,10 @@ export default (
       
       function renderDiamondMap (sender, render, dirtyZones) {
         var ctx = this._tileCacheCtx;
-        if (ctx.offsetInvalid) {
-
-          ctx.offsetInvalid = false;
-        }
-        if (ctx.sizeInvalid) {
-
-          ctx.sizeInvalid = false;
-        }
         if (ctx.foreInvalid) {
-          renderDiamondMapCache.call(this);
+          renderDiamondMapCache.call(this, ctx);
           ctx.foreInvalid = false;
         }
-        var offsetLeft, offsetTop;
         for (var i = 0, len = dirtyZones.length; i < len; ++i) {
 
         }
@@ -107,23 +98,79 @@ export default (
 
         var sRow = newX / tileWidth;
         var sCol = newY / tileHeight;
+        var foreRender = ctx.backRender;
+        var backRender = ctx.foreRender;
 
         if (ctx.backInvalid) {
-          var loader = this.findApplication().getFileLoader();
-          var foreRender = ctx.foreRender;
-          if (newWidth !== oldWidth || newHeight !== oldHeight) {
+          if (foreRender.width !== newWidth || foreRender.height !== newHeight) {
             foreRender.width = newWidth;
             foreRender.height = newHeight;
+          } else {
+            foreRender.clear();
           }
 
+          var application = this.findApplication();
           var tileImage = this.tileImage;
           var tileImageClip = this.tileImageClip;
-          var tileDataLen = tileData.length;
-          for (var row = sRow, tileY = 0; tileY < newHeight && row < tileDataLen; row += 1, tileY += stepRow) {
+          for (var row = sRow, tileY = 0, tileDataLen = tileData.length; tileY < newHeight && row < tileDataLen; row += 1, tileY += stepRow) {
             var tileRow = tileData[row];
-            if (LangUtil.isArray(tileRow)) {
-              var tileRowLen = tileRow.length;
-              for (var col = sCol, tileX = 0; tileX < newWidth && col < tileRowLen; col += 1, tileX += stepCol) {
+            for (var col = sCol, tileX = 0, tileRowLen = tileRow.length; tileX < newWidth && col < tileRowLen; col += 1, tileX += stepCol) {
+              var tileCell = tileRow[col];
+              if (tileCell === 0) {
+                continue;
+              }
+              var imageClip = tileImageClip[tileCell];
+              if (imageClip) {
+                var image = tileImage[imageClip.imageId];
+                if (image) {
+                  var img = application.loadImage(image.url, true);
+                  if (img !== null) {
+                    foreRender.drawImageExt(img, image.x, image.y, image.width, image.height, tileX, tileY, tileWidth, tileHeight);
+                  }
+                }
+              }
+            }
+          }
+          ctx.foreRender = foreRender;
+          ctx.backRender = backRender;
+          ctx.backInvalid = false;
+        } else {
+          if (newWidth !== oldWidth || newHeight !== oldHeight || newX !== oldX || newY !== oldY) {
+            if (foreRender.width !== newWidth || newHeight !== oldHeight) {
+              foreRender.width = newWidth;
+              foreRender.height = newHeight;
+            } else {
+              foreRender.clear();
+            }
+
+            var clipWidth = Math.min(newWidth + newX, oldWidth + oldX) - Math.max(newX, oldX);
+            var clipHeight = Math.min(newHeight + newY, oldHeight + oldY) - Math.max(newY, oldY);
+            var clip = clipWidth > 0 && clipHeight > 0;
+            var clipSrcLeft = 0;
+            var clipSrcTop = 0;
+            var clipTarLeft = 0;
+            var clipTarTop = 0;
+            if (clip) {
+              clipSrcLeft = (newX > oldX) ? (newX - oldX) : 0;
+              clipSrcTop = (newY > oldY) ? (newY - oldY) : 0;
+              clipTarLeft = (newX < oldX) ? (oldX - newX) : 0;
+              clipTarTop = (newY < oldY) ? (oldY - newY) : 0;
+              foreRender.drawImageExt(backRender.getCanvas(),
+                clipSrcLeft, clipSrcTop, clipWidth, clipHeight,
+                clipTarLeft, clipTarTop, clipWidth, clipHeight);
+            }
+
+            var application = this.findApplication();
+            var tileImage = this.tileImage;
+            var tileImageClip = this.tileImageClip;
+            var clipTarRight = clipWidth + clipTarLeft;
+            var clipTarBottom = clipHeight + clipTarTop;
+            for (var row = sRow, tileY = 0, tileDataLen = tileData.length; tileY < newHeight && row < tileDataLen; row += 1, tileY += stepRow) {
+              var tileRow = tileData[row];
+              for (var col = sCol, tileX = 0, tileRowLen = tileRow.length; tileX < newWidth && col < tileRowLen; col += 1, tileX += stepCol) {
+                if (!(clip && tileX >= clipTarLeft && tileX < clipTarRight && tileY >= clipTarTop && tileY < clipTarBottom)) {
+                  continue;
+                }
                 var tileCell = tileRow[col];
                 if (tileCell === 0) {
                   continue;
@@ -132,32 +179,49 @@ export default (
                 if (imageClip) {
                   var image = tileImage[imageClip.imageId];
                   if (image) {
-                    // TODO: draw block
-
+                    var img = application.loadImage(image.url, true);
+                    if (img !== null) {
+                      foreRender.drawImageExt(img, image.x, image.y, image.width, image.height, tileX, tileY, tileWidth, tileHeight);
+                    }
                   }
                 }
               }
             }
-          }
-          ctx.backInvalid = false;
-        } else {
-          if (newWidth !== oldWidth || newHeight !== oldHeight || newX !== oldX || newY !== oldY) {
-            var clipWidth = Math.min(newWidth + newX, oldWidth + oldX) - Math.max(newX, oldX);
-            var clipHeight = Math.min(newHeight + newY, oldHeight + oldY) - Math.max(newY, oldY);
-            var clip = clipWidth > 0 && clipHeight > 0;
-            var foreRender = ctx.foreRender;
-            var backRender = ctx.backRender;
-            foreRender.width = newWidth;
-            foreRender.height = newHeight;
-            if (clip) {
-              // TODO: draw block
-            }
+            ctx.foreRender = foreRender;
+            ctx.backRender = backRender;
+            ctx.backInvalid = false;
           }
         }
+        ctx.foreInvalid = false;
       }
       
       function renderDiamondMapCache (ctx) {
-        
+        var rect = this.getRectInLocal();
+        var mapRect = this.getMapRectInLocal();
+        var tileWidth = this.tileWidth;
+        var tileHeight = this.tileHeight;
+        var oldX = ctx.x;
+        var oldY = ctx.y;
+        var oldWidth = ctx.width;
+        var oldHeight = ctx.height;
+        var newX = oldX;
+        var newY = oldY;
+        var newWidth = oldWidth;
+        var newHeight = oldHeight;
+
+        var sRow = Math.floor((rect.left - mapRect.left) / tileHeight);
+        var sCol = Math.floor((rect.left - mapRect.left) / tileHeight);
+        var eRow = Math.floor();
+        var eCol = Math.floor();
+
+        if (ctx.offsetInvalid) {
+
+        }
+
+        if (ctx.sizeInvalid) {
+
+        }
+
       }
 
       return {
@@ -173,6 +237,9 @@ export default (
       InnerGTiledMap.prototype.defaultTileHeight = 50;
       InnerGTiledMap.prototype.init = function (conf) {
         this.super('init', [conf]);
+
+        this.defineNotifyProperty('rows', LangUtil.checkAndGet());
+        this.defineNotifyProperty('cols', LangUtil.checkAndGet());
         this.defineNotifyProperty('tileType', LangUtil.checkAndGet(conf.tileType, this.defaultTileType));
         this.defineNotifyProperty('tileWidth', LangUtil.checkAndGet(conf.tileWidth, this.defaultTileWidth));
         this.defineNotifyProperty('tileHeight', LangUtil.checkAndGet(conf.tileHeight, this.defaultTileHeight));
@@ -190,9 +257,9 @@ export default (
           foreInvalid: true,
           foreRender: new CanvasRender({canvas: doc.createElement('canvas')}),
           backInvalid: true,
-          backRender: new CanvasRender({canvas: doc.createElement('canvas')}),
-          progress: {}
+          backRender: new CanvasRender({canvas: doc.createElement('canvas')})
         };
+
       }
 
       return InnerGTiledMap;
