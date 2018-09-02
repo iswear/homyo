@@ -298,14 +298,7 @@ export default (
               }
               var tileCell = tileRow[col];
               if (!tileCell) {
-                continue;var foreRender = ctx.backRender;
-                var backRender = ctx.foreRender;
-                if (foreRender.width !== newWidth && foreRender.height !== newHeight) {
-                  foreRender.width = newWidth;
-                  foreRender.height = newHeight;
-                } else {
-                  foreRender.clear();
-                }
+                continue;
               }
               var imageClip = tileImageClip[tileCell];
               if (imageClip) {
@@ -410,7 +403,7 @@ export default (
                 if (image) {
                   var img = application.loadImage(image, true);
                   if (img !== null) {
-                    // todo!!! diamond tile render
+                    // todo! diamond tile render
                   }
                 }
               }
