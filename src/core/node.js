@@ -25,14 +25,14 @@ export default (
         this._transformCtx.needUpdate = true;
       }
       
-      function syncRectInLocal () {
-        this._rectInLocal.needUpdate = true;
+      function syncZoneInLocal () {
+        this._zoneInLocal.needUpdate = true;
       }
       
       return {
         syncClipRender: syncClipRender,
         syncTransform: syncTransform,
-        syncRectInLocal: syncRectInLocal
+        syncZoneInLocal: syncZoneInLocal
       }
     })();
 
@@ -92,7 +92,7 @@ export default (
           wTransform: [0, 0, 0, 0, 0, 0],
           wReverseTransform: [0, 0, 0, 0, 0, 0]
         };
-        this._rectInLocal = {
+        this._zoneInLocal = {
           needUpdate: false,
           top: 0,
           bottom: 0,
@@ -101,7 +101,7 @@ export default (
           width: 0,
           height: 0
         };
-        this._rectInWorld = {
+        this._zoneInWorld = {
           top: 0,
           bottom: 0,
           left: 0,
@@ -117,7 +117,7 @@ export default (
 
         functions.syncClipRender.call(this);
         functions.syncTransform.call(this);
-        functions.syncRectInLocal.call(this);
+        functions.syncZoneInLocal.call(this);
 
         this.addObserver('xChanged', this.refresh, this, this);
         this.addObserver('yChanged', this.refresh, this, this);
@@ -144,18 +144,18 @@ export default (
 
         this.addObserver('clipChanged', functions.syncClipRender, this, this);
 
-        this.addObserver('widthChanged', functions.syncRectInLocal, this, this);
-        this.addObserver('heightChanged', functions.syncRectInLocal, this, this);
-        this.addObserver('anchorXChanged', functions.syncRectInLocal, this, this);
-        this.addObserver('anchorYChanged', functions.syncRectInLocal, this, this);
+        this.addObserver('widthChanged', functions.syncZoneInLocal, this, this);
+        this.addObserver('heightChanged', functions.syncZoneInLocal, this, this);
+        this.addObserver('anchorXChanged', functions.syncZoneInLocal, this, this);
+        this.addObserver('anchorYChanged', functions.syncZoneInLocal, this, this);
       }
 
-      InnerNode.prototype.getRectInLocal = function () {
-        return LangUtil.clone(this._rectInLocal);
+      InnerNode.prototype.getZoneInLocal = function () {
+        return LangUtil.clone(this._zoneInLocal);
       }
 
-      InnerNode.prototype.getRectInWorld = function () {
-        return LangUtil.clone(this._rectInWorld);
+      InnerNode.prototype.getZoneInWorld = function () {
+        return LangUtil.clone(this._zoneInWorld);
       }
 
       InnerNode.prototype.getChildNode = function (layerIndex, nodeIndex) {
@@ -320,12 +320,12 @@ export default (
       }
 
       InnerNode.prototype.startClip = function (render) {
-        var rect = this._rectInLocal;
+        var zone = this._zoneInLocal;
         render.beginPath();
-        render.moveTo(rect.left, rect.top);
-        render.lineTo(rect.right, rect.top);
-        render.lineTo(rect.right, rect.bottom);
-        render.lineTo(rect.left, rect.bottom);
+        render.moveTo(zone.left, zone.top);
+        render.lineTo(zone.right, zone.top);
+        render.lineTo(zone.right, zone.bottom);
+        render.lineTo(zone.left, zone.bottom);
         render.closePath();
         render.clip();
       }
@@ -340,8 +340,8 @@ export default (
       }
 
       InnerNode.prototype.checkEventTrigger = function (name, e, x, y) {
-        var rect = this._rectInLocal;
-        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+        var zone = this._zoneInLocal;
+        if (x >= zone.left && x <= zone.right && y >= zone.top && y <= zone.bottom) {
           return true;
         } else {
           return false;
@@ -398,16 +398,16 @@ export default (
       InnerNode.prototype._syncTransform = function (parentWTransform, parentWReverseTransform, renderZone, parentUpdateTransform) {
         this.postNotification('frame', this);
         var transformCtx = this._transformCtx;
-        var rectInLocal = this._rectInLocal;
-        var rectInWorld = this._rectInWorld;
-        if (rectInLocal.needUpdate) {
-          rectInLocal.width = Math.round(this.width);
-          rectInLocal.height = Math.round(this.height);
-          rectInLocal.top = Math.round(rectInLocal.height * (-this.anchorY));
-          rectInLocal.bottom = Math.round(rectInLocal.height + rectInLocal.top);
-          rectInLocal.left = Math.round(rectInLocal.width * (-this.anchorX));
-          rectInLocal.right = Math.round(rectInLocal.width + rectInLocal.left);
-          rectInLocal.needUpdate = false;
+        var zoneInLocal = this._zoneInLocal;
+        var zoneInWorld = this._zoneInWorld;
+        if (zoneInLocal.needUpdate) {
+          zoneInLocal.width = Math.round(this.width);
+          zoneInLocal.height = Math.round(this.height);
+          zoneInLocal.top = Math.round(zoneInLocal.height * (-this.anchorY));
+          zoneInLocal.bottom = Math.round(zoneInLocal.height + zoneInLocal.top);
+          zoneInLocal.left = Math.round(zoneInLocal.width * (-this.anchorX));
+          zoneInLocal.right = Math.round(zoneInLocal.width + zoneInLocal.left);
+          zoneInLocal.needUpdate = false;
         }
         if (transformCtx.needUpdate) {
           transformCtx.lTransform =
@@ -422,18 +422,18 @@ export default (
           transformCtx.wTransform = MatrixUtil.mulMat2d(parentWTransform, transformCtx.lTransform);
           transformCtx.wReverseTransform = MatrixUtil.mulMat2d(transformCtx.lReverseTransform, parentWReverseTransform);
         }
-        if (rectInLocal.needUpdate || transformCtx.needUpdate || parentUpdateTransform) {
-          var p1 = this.transformLVectorToW([rectInLocal.left, rectInLocal.top]);
-          var p2 = this.transformLVectorToW([rectInLocal.left, rectInLocal.bottom]);
-          var p3 = this.transformLVectorToW([rectInLocal.right, rectInLocal.top]);
-          var p4 = this.transformLVectorToW([rectInLocal.right, rectInLocal.bottom]);
-          rectInWorld.top = Math.min(Math.min(p1[1], p2[1]), Math.min(p3[1], p4[1]));
-          rectInWorld.bottom = Math.max(Math.max(p1[1], p2[1]), Math.max(p3[1], p4[1]));
-          rectInWorld.left = Math.min(Math.min(p1[0], p2[0]), Math.min(p3[0], p4[0]));
-          rectInWorld.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
-          rectInWorld.width = rectInWorld.right - rectInWorld.left;
-          rectInWorld.height = rectInWorld.bottom - rectInWorld.top;
-          if (GeometryUtil.isRectNotCross(rectInWorld, renderZone)) {
+        if (zoneInLocal.needUpdate || transformCtx.needUpdate || parentUpdateTransform) {
+          var p1 = this.transformLVectorToW([zoneInLocal.left, zoneInLocal.top]);
+          var p2 = this.transformLVectorToW([zoneInLocal.left, zoneInLocal.bottom]);
+          var p3 = this.transformLVectorToW([zoneInLocal.right, zoneInLocal.top]);
+          var p4 = this.transformLVectorToW([zoneInLocal.right, zoneInLocal.bottom]);
+          zoneInWorld.top = Math.min(Math.min(p1[1], p2[1]), Math.min(p3[1], p4[1]));
+          zoneInWorld.bottom = Math.max(Math.max(p1[1], p2[1]), Math.max(p3[1], p4[1]));
+          zoneInWorld.left = Math.min(Math.min(p1[0], p2[0]), Math.min(p3[0], p4[0]));
+          zoneInWorld.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
+          zoneInWorld.width = zoneInWorld.right - zoneInWorld.left;
+          zoneInWorld.height = zoneInWorld.bottom - zoneInWorld.top;
+          if (GeometryUtil.isZoneCross(zoneInWorld, renderZone)) {
             this._dirtyZoneCtx.inRenderZone = false;
           } else {
             this._dirtyZoneCtx.inRenderZone = true;
@@ -455,7 +455,7 @@ export default (
         var dirtyZoneCtx = this._dirtyZoneCtx;
         if (dirtyZoneCtx.inRenderZone && !dirtyZoneCtx.oriReported) {
           this.oriReported = true;
-          app.receiveDirtyZone(this, LangUtil.clone(this._rectInWorld));
+          app.receiveDirtyZone(this, LangUtil.clone(this._zoneInWorld));
         }
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
@@ -471,18 +471,18 @@ export default (
       InnerNode.prototype._reportCurDirtyZone = function (app, dirtyZones) {
         var result = false;
         var dirtyZoneCtx = this._dirtyZoneCtx;
-        var rectInWorld = this._rectInWorld;
+        var zoneInWorld = this._zoneInWorld;
         if (dirtyZoneCtx.inRenderZone) {
           if (!dirtyZoneCtx.curReported) {
             var wTrans = this._transformCtx.wTransform;
             if (dirtyZoneCtx.oriReported) {
-              result = app.receiveDirtyZone(this, LangUtil.clone(rectInWorld));
+              result = app.receiveDirtyZone(this, LangUtil.clone(zoneInWorld));
               dirtyZoneCtx.curReported = true;
             } else if (!(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 0)) {
               for (var i = 0, len = dirtyZones.length; i < len; ++i) {
                 var dirtyZone = dirtyZones[i];
-                if (GeometryUtil.isRectCross(dirtyZone, rectInWorld)) {
-                  result = app.receiveDirtyZone(this, LangUtil.clone(rectInWorld));
+                if (GeometryUtil.isZoneCross(dirtyZone, zoneInWorld)) {
+                  result = app.receiveDirtyZone(this, LangUtil.clone(zoneInWorld));
                   dirtyZoneCtx.curReported = true;
                   break;
                 }
@@ -517,14 +517,14 @@ export default (
               render.globalAplha = alpha;
               // 绘制自身
               if (dirtyZoneCtx.curReported) {
-                this.postNotification('render', this, [render, [this._rectInLocal]]);
+                this.postNotification('render', this, [render, [this._zoneInWorld]]);
                 this._dispatchChildrenRender(render, alpha, renderZone, dirtyZones);
                 this.stopClip();
               } else {
-                var rectInWorld = this._rectInWorld;
+                var zoneInWorld = this._zoneInWorld;
                 var crossDirtyZones = [];
                 for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-                  var crossDirtyZone = GeometryUtil.getRectCross(rectInWorld, dirtyZones[i]);
+                  var crossDirtyZone = GeometryUtil.getZoneCross(zoneInWorld, dirtyZones[i]);
                   if (crossDirtyZone !== null) {
                     crossDirtyZone.left -= w[4];
                     crossDirtyZone.right -= w[4];
@@ -550,12 +550,12 @@ export default (
                 render.globalAplha = alpha;
                 // 绘制自身
                 if (dirtyZoneCtx.curReported) {
-                  this.postNotification('render', this, [render, [this._rectInLocal]]);
+                  this.postNotification('render', this, [render, [this._zoneInLocal]]);
                 } else {
-                  var rectInWorld = this._rectInWorld;
+                  var zoneInWorld = this._zoneInWorld;
                   var crossDirtyZones = [];
                   for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-                    var crossDirtyZone = GeometryUtil.getRectCross(rectInWorld, dirtyZones[i]);
+                    var crossDirtyZone = GeometryUtil.getZoneCross(zoneInWorld, dirtyZones[i]);
                     if (crossDirtyZone !== null) {
                       crossDirtyZone.left -= w[4];
                       crossDirtyZone.right -= w[4];

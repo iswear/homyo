@@ -7,23 +7,23 @@
 export default (
   function () {
     var util = (function() {
-      function isRectCross(rect1, rect2) {
-        return !isRectNotCross(rect1, rect2);
+      function isZoneCross(zone1, zone2) {
+        return !isRectNotCross(zone1, zone2);
       }
 
-      function isRectNotCross(rect1, rect2) {
-        return rect1.left >= rect2.right || rect1.right <= rect2.left || rect1.top >= rect1.bottom || rect1.bottom <= rect2.top;
+      function isZoneNotCross(zone1, zone2) {
+        return zone1.left >= zone2.right || zone1.right <= zone2.left || zone1.top >= zone2.bottom || zone1.bottom <= zone2.top;
       }
 
-      function getRectCross(rect1, rect2) {
-        var left = Math.max(rect1.left, rect2.left);
-        var right = Math.min(rect1.right, rect2.right);
+      function getZoneCross(zone1, zone2) {
+        var left = Math.max(zone1.left, zone2.left);
+        var right = Math.min(zone1.right, zone2.right);
         var width = right - left;
         if (width <= 0) {
           return null;
         }
-        var top = Math.max(rect1.top, rect2.top);
-        var bottom = Math.min(rect1.bottom, rect2.bottom);
+        var top = Math.max(zone1.top, zone2.top);
+        var bottom = Math.min(zone1.bottom, zone2.bottom);
         var height = bottom - top;
         if (height <= 0) {
           return null;
@@ -39,9 +39,9 @@ export default (
       }
       
       return {
-        isRectCross: isRectCross,
-        isRectNotCross: isRectNotCross,
-        getRectCross: getRectCross
+        isZoneCross: isZoneCross,
+        isZoneNotCross: isZoneNotCross,
+        getZoneCross: getZoneCross
       }
     })();
 

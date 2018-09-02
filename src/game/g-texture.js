@@ -37,9 +37,9 @@ export default (
       function renderImage (sender, render, dirtyZones) {
         var image = loadImage.call(this);
         if (image !== null) {
-          var rectInLocal = this.getRectInLocal();
-          var offsetLeft = - rectInLocal.left;
-          var offsetTop = - rectInLocal.top;
+          var zoneInLocal = this.getZoneInLocal();
+          var offsetLeft = - zoneInLocal.left;
+          var offsetTop = - zoneInLocal.top;
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
             render.drawImageExt(image,
@@ -52,10 +52,10 @@ export default (
       function renderImageClip (sender, render, dirtyZones) {
         var image = loadImage.call(this);
         if (image !== null) {
-          var rectInLocal = this.getRectInLocal();
+          var zoneInLocal = this.getZoneInLocal();
           var ctx = this._imageCtx;
-          var offsetLeft = ctx.x - rectInLocal.left;
-          var offsetTop = ctx.y - rectInLocal.top;
+          var offsetLeft = ctx.x - zoneInLocal.left;
+          var offsetTop = ctx.y - zoneInLocal.top;
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
             render.drawImageExt(image,
