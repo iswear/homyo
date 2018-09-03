@@ -379,8 +379,8 @@ export default (
           var tileImage = this.tileImage;
           var tileImageClip = this.tileImageClip;
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
-            startY < newHeight;
-            startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
+               startTileY < newHeight;
+               startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
             if (startRow < 0 || startCol >= colCount) {
               break;
             }
@@ -403,7 +403,34 @@ export default (
                 if (image) {
                   var img = application.loadImage(image, true);
                   if (img !== null) {
-                    // todo! diamond tile render
+                    var srcX = image.x;
+                    var srcY = image.y;
+                    var srcWidth = image.width;
+                    var srcHeight = image.height;
+                    var desX = tileX;
+                    var desY = tileY;
+                    var desWidth = tileWidth;
+                    var desHeight = tileHeight;
+                    if (desX < 0) {
+                      srcX += image.width / 2;
+                      srcWidth -= image.width / 2;
+                      desX += halfTileWidth;
+                      desWidth -= halfTileWidth;
+                    } else if (desX + tileWidth > newWidth) {
+                      srcWidth -= image.width / 2;
+                      desWidth -= halfTileWidth;
+                    }
+                    if (desY < 0) {
+                      srcY += image.height / 2;
+                      srcHeight -= image.height / 2;
+                      desY += halfTileHeight;
+                      desHeight -= halfTileHeight;
+                    } else if (desY + tileHeight > newWidth) {
+                      srcHeight -= image.height / 2;
+                      desHeight -= halfTileHeight;
+                    }
+                    foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
+                      desX, desY, desWidth, desHeight);
                   }
                 }
               }
@@ -441,8 +468,8 @@ export default (
           var tileImage = this.tileImage;
           var tileImageClip = this.tileImageClip;
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
-            startY < newHeight;
-            startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
+               startTileY < newHeight;
+               startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
             if (startRow < 0 || startCol >= colCount) {
               break;
             }
@@ -465,7 +492,68 @@ export default (
                 if (image) {
                   var img = application.loadImage(image, true);
                   if (img !== null) {
-                    // todo!!! diamond tile render
+                    var halfImageWidth = image.width / 2;
+                    var halfImageHeight = image.height / 2;
+                    var srcX = image.x;
+                    var srcY = image.y;
+                    var srcWidth = image.width;
+                    var srcHeight = image.height;
+                    var desX = tileX;
+                    var desY = tileY;
+                    var desWidth = tileWidth;
+                    var desHeight = tileHeight;
+                    if (desX < 0) {
+                      srcX += halfImageWidth;
+                      srcWidth -= halfImageWidth;
+                      desX += halfTileWidth;
+                      desWidth -= halfTileHeight;
+                    } else if (desX + tileWidth > newWidth) {
+                      srcWidth -= halfImageWidth;
+                      desWidth -= halfTileWidth;
+                    }
+                    if (desY < 0) {
+                      srcY += halfImageHeight;
+                      srcHeight -= halfImageHeight;
+                      desY += halfTileHeight;
+                      desHeight -= halfTileHeight;
+                    } else if (desY + tileHeight > newHeight) {
+                      srcHeight -= halfImageHeight;
+                      desHeight -= halfTileHeight;
+                    }
+                    if (clip) {
+                      if (tileY + desHeight <= clipTarTop) {
+                        foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
+                          desX, desY, desWidth, desHeight);
+                      } else if (tileY >= clipTarBottom) {
+                        foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
+                          desX, desY, desWidth, desHeight);
+                      } else {
+                        if (tileX + desWidth <= clipTarLeft) {
+                          foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
+                            desX, desY, desWidth, desHeight);
+                        } else if (tileX >= clipTarRight) {
+                          foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
+                            desX, desY, desWidth, desHeight);
+                        } else {
+                          if (tileY + halfTileHeight === clipTarTop) {
+                            if (tileX + halfTileWidth === clipTarLeft) {
+                              foreRender.drawImageExt(img, )
+                            } else if (tileX + halfTileWidth === clipTarRight) {
+
+                            } else {
+
+                            }
+                          } else if (tileY + halfTileHeight === clipTarBottom && clipTarBottom !== newHeight) {
+
+                          } else {
+
+                          }
+                        }
+                      }
+                    } else {
+                      foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
+                        desX, desY, desWidth, desHeight);
+                    }
                   }
                 }
               }
