@@ -521,29 +521,24 @@ export default (
                       desHeight -= halfTileHeight;
                     }
                     if (clip) {
-                      if (tileY + desHeight <= clipTarTop) {
+                      if (desY + desHeight <= clipTarTop) {
                         foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
                           desX, desY, desWidth, desHeight);
-                      } else if (tileY >= clipTarBottom) {
+                      } else if (desY >= clipTarBottom) {
                         foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
                           desX, desY, desWidth, desHeight);
                       } else {
-                        if (tileX + desWidth <= clipTarLeft) {
+                        if (desX + desWidth <= clipTarLeft) {
                           foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
                             desX, desY, desWidth, desHeight);
-                        } else if (tileX >= clipTarRight) {
+                        } else if (desX >= clipTarRight) {
                           foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
                             desX, desY, desWidth, desHeight);
                         } else {
+                          // todo!!!
                           if (tileY + halfTileHeight === clipTarTop) {
-                            if (tileX + halfTileWidth === clipTarLeft) {
-                              foreRender.drawImageExt(img, )
-                            } else if (tileX + halfTileWidth === clipTarRight) {
 
-                            } else {
-
-                            }
-                          } else if (tileY + halfTileHeight === clipTarBottom && clipTarBottom !== newHeight) {
+                          } else if (tileY + halfTileHeight === clipTarBottom) {
 
                           } else {
 
