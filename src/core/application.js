@@ -314,8 +314,6 @@ export default (
           }
           render.width = width;
           render.height = height;
-          renderZone.right = width;
-          renderZone.bottom = height;
           renderZone.width = width;
           renderZone.height = height;
           renderZone.right = width;
@@ -379,7 +377,6 @@ export default (
       var InnerApplication = LangUtil.extend(Notifier);
 
       InnerApplication.prototype.defScaleMode = 0;
-      InnerApplication.prototype.defEnableDirtyZone = false;
       InnerApplication.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.defineNotifyProperty('scaleMode', LangUtil.checkAndGet(conf.scaleMode, this.defScaleMode));
@@ -472,7 +469,7 @@ export default (
         dirtyZone.left = Math.max(renderZone.left, dirtyZone.left);
         dirtyZone.right = Math.min(renderZone.right, dirtyZone.right);
         dirtyZone.top = Math.max(renderZone.top, dirtyZone.top);
-        dirtyZone.bottom = Math.min(renderZone.top, dirtyZone.bottom);
+        dirtyZone.bottom = Math.min(renderZone.bottom, dirtyZone.bottom);
         dirtyZone.width = dirtyZone.right - dirtyZone.left;
         dirtyZone.height = dirtyZone.bottom - dirtyZone.top;
         var dirtyZones = this._dirtyZones;
@@ -483,12 +480,12 @@ export default (
             if (GeometryUtil.isZoneNotCross(zone, dirtyZone)) {
               continue;
             }
-            dirtyZone.left = Math.min(zone.left, left);
-            dirtyZone.right = Math.max(zone.right, right);
-            dirtyZone.top = Math.min(zone.top, top);
-            dirtyZone.bottom = Math.max(zone.top, top);
-            dirtyZone.width = right - left;
-            dirtyZone.height = bottom - top;
+            dirtyZone.left = Math.min(zone.left, dirtyZone.left);
+            dirtyZone.right = Math.max(zone.right, dirtyZone.right);
+            dirtyZone.top = Math.min(zone.top, dirtyZone.top);
+            dirtyZone.bottom = Math.max(zone.bottom, dirtyZone.bottom);
+            dirtyZone.width = dirtyZone.right - dirtyZone.left;
+            dirtyZone.height = dirtyZone.bottom - dirtyZone.top;
             insert = false;
             dirtyZones.splice(i, 1);
             break;
@@ -555,7 +552,7 @@ export default (
         if (this._timerTaskId === 0) {
           if (this._root !== null) {
             this._refresh = true;
-            this.receiveDirtyZone(null, this._renderZone);
+            this.receiveDirtyZone(null, LangUtil.clone(this._renderZone));
             this._timerTaskId = TimerUtil.addAnimationTask(this.loop, this);
             this.postNotification('resize', this, [this._render.width, this._render.height]);
           }
