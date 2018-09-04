@@ -110,7 +110,7 @@ export default (
           height: 0
         };
         this._dirtyZoneCtx = {
-          inRenderZone: false,
+          dirty: false,
           oriReported: false,
           curReported: false
         };
@@ -365,11 +365,8 @@ export default (
 
       InnerNode.prototype.refresh = function () {
         var app = this.findApplication();
-        if (app === null) {
-          return;
-        }
-        app.refresh();
-        if (app.enableDirtyZone) {
+        if (app !== null) {
+          app.refresh();
           this._reportOriDirtyZone(app);
         }
       }
@@ -407,21 +404,15 @@ export default (
           zoneInLocal.bottom = Math.round(zoneInLocal.height + zoneInLocal.top);
           zoneInLocal.left = Math.round(zoneInLocal.width * (-this.anchorX));
           zoneInLocal.right = Math.round(zoneInLocal.width + zoneInLocal.left);
-          zoneInLocal.needUpdate = false;
-        }
-        if (transformCtx.needUpdate) {
-          transformCtx.lTransform =
-            MatrixUtil.incline2d(
-              MatrixUtil.scale2d(
-                MatrixUtil.rotate2d(
-                  MatrixUtil.translate2d(MatrixUtil.createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
+          transformCtx.lTransform = MatrixUtil.incline2d(MatrixUtil.scale2d(MatrixUtil.rotate2d(MatrixUtil.translate2d(MatrixUtil.createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
           transformCtx.lReverseTransform = MatrixUtil.reverse2d(transformCtx.lTransform);
-          transformCtx.needUpdate = false;
-        }
-        if (parentUpdateTransform || transformCtx.needUpdate) {
+          transformCtx.wTransform = MatrixUtil.mulMat2d(parentWTransform, transformCtx.lTransform);
+          transformCtx.wReverseTransform = MatrixUtil.mulMat2d(transformCtx.lReverseTransform, parentWReverseTransform);
+        } else if (parentUpdateTransform) {
           transformCtx.wTransform = MatrixUtil.mulMat2d(parentWTransform, transformCtx.lTransform);
           transformCtx.wReverseTransform = MatrixUtil.mulMat2d(transformCtx.lReverseTransform, parentWReverseTransform);
         }
+
         if (zoneInLocal.needUpdate || transformCtx.needUpdate || parentUpdateTransform) {
           var p1 = this.transformLVectorToW([zoneInLocal.left, zoneInLocal.top]);
           var p2 = this.transformLVectorToW([zoneInLocal.left, zoneInLocal.bottom]);
@@ -433,12 +424,11 @@ export default (
           zoneInWorld.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
           zoneInWorld.width = zoneInWorld.right - zoneInWorld.left;
           zoneInWorld.height = zoneInWorld.bottom - zoneInWorld.top;
-          if (GeometryUtil.isZoneCross(zoneInWorld, renderZone)) {
-            this._dirtyZoneCtx.inRenderZone = false;
-          } else {
-            this._dirtyZoneCtx.inRenderZone = true;
-          }
+          this._dirtyZoneCtx.inRenderZone = GeometryUtil.isZoneCross(zoneInWorld, renderZone);
         }
+
+        zoneInLocal.needUpdate = false;
+        transformCtx.needUpdate = false;
 
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {

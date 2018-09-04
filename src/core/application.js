@@ -328,6 +328,7 @@ export default (
       function loadImageFinished (url, success) {
         if (success) {
           if (this._loaderCtx.images[url] && this._loaderCtx.images[url].refresh) {
+            this.receiveDirtyZone(null, LangUtil.clone(this._renderZone));
             this.refresh();
           }
         }
@@ -504,7 +505,7 @@ export default (
 
       InnerApplication.prototype.loop = function () {
         var now = (new Date()).getTime(), deltaTime = 0;
-        if (this._prevLoopTime != 0) {
+        if (this._prevLoopTime !== 0) {
           deltaTime = now - this._prevLoopTime;
           this._prevLoopTime = now;
           this._animationCtx.manager.run(deltaTime);

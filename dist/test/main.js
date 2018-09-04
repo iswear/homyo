@@ -564,7 +564,7 @@
           height: 0
         };
         this._dirtyZoneCtx = {
-          inRenderZone: false,
+          dirty: false,
           oriReported: false,
           curReported: false
         };
@@ -823,9 +823,7 @@
           return;
         }
         app.refresh();
-        if (app.enableDirtyZone) {
-          this._reportOriDirtyZone(app);
-        }
+        this._reportOriDirtyZone(app);
       }
 
       InnerNode.prototype.destroy = function () {
@@ -861,21 +859,15 @@
           zoneInLocal.bottom = Math.round(zoneInLocal.height + zoneInLocal.top);
           zoneInLocal.left = Math.round(zoneInLocal.width * (-this.anchorX));
           zoneInLocal.right = Math.round(zoneInLocal.width + zoneInLocal.left);
-          zoneInLocal.needUpdate = false;
-        }
-        if (transformCtx.needUpdate) {
-          transformCtx.lTransform =
-            __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].incline2d(
-              __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].scale2d(
-                __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].rotate2d(
-                  __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].translate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
+          transformCtx.lTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].incline2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].scale2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].rotate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].translate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
           transformCtx.lReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].reverse2d(transformCtx.lTransform);
-          transformCtx.needUpdate = false;
-        }
-        if (parentUpdateTransform || transformCtx.needUpdate) {
+          transformCtx.wTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(parentWTransform, transformCtx.lTransform);
+          transformCtx.wReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(transformCtx.lReverseTransform, parentWReverseTransform);
+        } else if (parentUpdateTransform) {
           transformCtx.wTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(parentWTransform, transformCtx.lTransform);
           transformCtx.wReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(transformCtx.lReverseTransform, parentWReverseTransform);
         }
+
         if (zoneInLocal.needUpdate || transformCtx.needUpdate || parentUpdateTransform) {
           var p1 = this.transformLVectorToW([zoneInLocal.left, zoneInLocal.top]);
           var p2 = this.transformLVectorToW([zoneInLocal.left, zoneInLocal.bottom]);
@@ -887,12 +879,11 @@
           zoneInWorld.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
           zoneInWorld.width = zoneInWorld.right - zoneInWorld.left;
           zoneInWorld.height = zoneInWorld.bottom - zoneInWorld.top;
-          if (__WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].isZoneCross(zoneInWorld, renderZone)) {
-            this._dirtyZoneCtx.inRenderZone = false;
-          } else {
-            this._dirtyZoneCtx.inRenderZone = true;
-          }
+          this._dirtyZoneCtx.inRenderZone = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].isZoneCross(zoneInWorld, renderZone);
         }
+
+        zoneInLocal.needUpdate = false;
+        transformCtx.needUpdate = false;
 
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
@@ -2406,11 +2397,13 @@
         if ((offset - this.targetOffset) * (propertyOffset - this.targetOffset) <= 0) {
           binder.setRunParam('init', false);
           node[property] = node[property] + this.targetOffset - propertyOffset;
+          console.log("aaa");
           return true;
         } else {
           binder.setRunParam('propertyOffset', offset);
           binder.setRunParam('sumTime', sumTime);
           node[property] = node[property] + offset - propertyOffset;
+          console.log("bbb:" + node[property]);
           return false;
         }
       }
@@ -3248,17 +3241,32 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 (function () {
   var Application = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.Application;
+  var PropertyAnimation = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.animation.PropertyAnimation;
   var GTexture = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Texture;
+
+  var root = new GTexture({
+    x: 200,
+    y: 300,
+    width: 200,
+    height: 200,
+    visible: true,
+    image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
+  });
 
   var application = new Application({
     canvas: document.getElementById('main'),
-    root: new GTexture({
-      visible: true,
-      image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
-    })
+    root: root
   });
 
   application.run();
+  root.runAnimation(new PropertyAnimation({
+    property: 'x',
+    targetOffset: 400,
+    offsetFn: function (animation, deltaTime, sumTime) {
+      return 10 * sumTime / 1000;
+    }
+  }), null, null, false);
+
 })();
 
 /***/ }),
@@ -3730,6 +3738,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       function loadImageFinished (url, success) {
         if (success) {
           if (this._loaderCtx.images[url] && this._loaderCtx.images[url].refresh) {
+            this.receiveDirtyZone(null, __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].clone(this._renderZone));
             this.refresh();
           }
         }
@@ -3871,7 +3880,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         dirtyZone.left = Math.max(renderZone.left, dirtyZone.left);
         dirtyZone.right = Math.min(renderZone.right, dirtyZone.right);
         dirtyZone.top = Math.max(renderZone.top, dirtyZone.top);
-        dirtyZone.bottom = Math.min(renderZone.top, dirtyZone.bottom);
+        dirtyZone.bottom = Math.min(renderZone.bottom, dirtyZone.bottom);
         dirtyZone.width = dirtyZone.right - dirtyZone.left;
         dirtyZone.height = dirtyZone.bottom - dirtyZone.top;
         var dirtyZones = this._dirtyZones;
@@ -3906,7 +3915,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       InnerApplication.prototype.loop = function () {
         var now = (new Date()).getTime(), deltaTime = 0;
-        if (this._prevLoopTime != 0) {
+        if (this._prevLoopTime !== 0) {
           deltaTime = now - this._prevLoopTime;
           this._prevLoopTime = now;
           this._animationCtx.manager.run(deltaTime);
