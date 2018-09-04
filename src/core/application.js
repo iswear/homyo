@@ -528,12 +528,10 @@ export default (
           // 同步最新的结点转换
           root._syncTransform(transformCtx.transform, transformCtx.transform, renderZone, transformCtx.needUpdate);
           // 重新计算脏矩形
-          if (this.enableDirtyZone) {
-            // 重复检测受影响区域
-            while (root._reportCurDirtyZone(this, dirtyZones)) { }
-          } else {
-            // 画布区域加上
-            dirtyZones.push(renderZone);
+          while (true) {
+            if (!root._reportCurDirtyZone(this, dirtyZones)) {
+              break;
+            }
           }
           // 清理脏矩形区域
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
@@ -552,6 +550,7 @@ export default (
       InnerApplication.prototype.run = function () {
         if (this._timerTaskId === 0) {
           if (this._root !== null) {
+            this._refresh = true;
             this._timerTaskId = TimerUtil.addAnimationTask(this.loop, this);
             this.postNotification('resize', this, [this._render.width, this._render.height]);
           }

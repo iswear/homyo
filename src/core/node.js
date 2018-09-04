@@ -543,7 +543,7 @@ export default (
           } else {
             if (dirtyZoneCtx.inRenderZone) {
               if (this.checkNeedRender()) {
-                var w = this._syncTransform.wTransform;
+                var w = this._transformCtx.wTransform;
                 // 设置矩阵
                 render.setTransform(w[0], w[3], w[1], w[4], w[2], w[5]);
                 // 设置透明度
