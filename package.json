@@ -2,10 +2,10 @@
   "name": "homyo",
   "version": "1.0.0",
   "description": "canvas html5",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "test": "test",
-    "build": "webpack"
+    "test": "webpack --env.profile=test",
+    "build": "webpack --env.profile=build"
   },
   "repository": {
     "type": "git",
