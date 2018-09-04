@@ -819,11 +819,10 @@
 
       InnerNode.prototype.refresh = function () {
         var app = this.findApplication();
-        if (app === null) {
-          return;
+        if (app !== null) {
+          app.refresh();
+          this._reportOriDirtyZone(app);
         }
-        app.refresh();
-        this._reportOriDirtyZone(app);
       }
 
       InnerNode.prototype.destroy = function () {
@@ -859,6 +858,9 @@
           zoneInLocal.bottom = Math.round(zoneInLocal.height + zoneInLocal.top);
           zoneInLocal.left = Math.round(zoneInLocal.width * (-this.anchorX));
           zoneInLocal.right = Math.round(zoneInLocal.width + zoneInLocal.left);
+        }
+        
+        if (transformCtx.needUpdate) {
           transformCtx.lTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].incline2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].scale2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].rotate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].translate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
           transformCtx.lReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].reverse2d(transformCtx.lTransform);
           transformCtx.wTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(parentWTransform, transformCtx.lTransform);
@@ -2397,13 +2399,11 @@
         if ((offset - this.targetOffset) * (propertyOffset - this.targetOffset) <= 0) {
           binder.setRunParam('init', false);
           node[property] = node[property] + this.targetOffset - propertyOffset;
-          console.log("aaa");
           return true;
         } else {
           binder.setRunParam('propertyOffset', offset);
           binder.setRunParam('sumTime', sumTime);
           node[property] = node[property] + offset - propertyOffset;
-          console.log("bbb:" + node[property]);
           return false;
         }
       }
@@ -3259,13 +3259,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   });
 
   application.run();
-  root.runAnimation(new PropertyAnimation({
-    property: 'x',
-    targetOffset: 400,
-    offsetFn: function (animation, deltaTime, sumTime) {
-      return 10 * sumTime / 1000;
-    }
-  }), null, null, false);
+  // root.runAnimation(new PropertyAnimation({
+  //   property: 'x',
+  //   targetOffset: 400,
+  //   offsetFn: function (animation, deltaTime, sumTime) {
+  //     return 10 * sumTime / 1000;
+  //   }
+  // }), null, null, false);
+  
+  
+  document.onclick = function () {
+    console.log('yaya')
+    root.x += 10;
+  }
 
 })();
 
@@ -3946,7 +3952,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           // 清理脏矩形区域
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
-            render.clearRect(dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
+            // render.clearRect(dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
           }
           // 重新绘制阶段
           root._dispatchRender(render, 1, renderZone, dirtyZones);

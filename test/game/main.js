@@ -20,12 +20,18 @@ import homyo from '../../main'
   });
 
   application.run();
-  root.runAnimation(new PropertyAnimation({
-    property: 'x',
-    targetOffset: 400,
-    offsetFn: function (animation, deltaTime, sumTime) {
-      return 10 * sumTime / 1000;
-    }
-  }), null, null, false);
+  // root.runAnimation(new PropertyAnimation({
+  //   property: 'x',
+  //   targetOffset: 400,
+  //   offsetFn: function (animation, deltaTime, sumTime) {
+  //     return 10 * sumTime / 1000;
+  //   }
+  // }), null, null, false);
+  
+  
+  document.onclick = function () {
+    console.log('yaya')
+    root.x += 10;
+  }
 
 })();

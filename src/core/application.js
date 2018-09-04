@@ -536,7 +536,7 @@ export default (
           // 清理脏矩形区域
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
-            render.clearRect(dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
+            // render.clearRect(dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
           }
           // 重新绘制阶段
           root._dispatchRender(render, 1, renderZone, dirtyZones);

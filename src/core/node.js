@@ -404,6 +404,9 @@ export default (
           zoneInLocal.bottom = Math.round(zoneInLocal.height + zoneInLocal.top);
           zoneInLocal.left = Math.round(zoneInLocal.width * (-this.anchorX));
           zoneInLocal.right = Math.round(zoneInLocal.width + zoneInLocal.left);
+        }
+        
+        if (transformCtx.needUpdate) {
           transformCtx.lTransform = MatrixUtil.incline2d(MatrixUtil.scale2d(MatrixUtil.rotate2d(MatrixUtil.translate2d(MatrixUtil.createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
           transformCtx.lReverseTransform = MatrixUtil.reverse2d(transformCtx.lTransform);
           transformCtx.wTransform = MatrixUtil.mulMat2d(parentWTransform, transformCtx.lTransform);
