@@ -318,6 +318,8 @@ export default (
           renderZone.bottom = height;
           renderZone.width = width;
           renderZone.height = height;
+          renderZone.right = width;
+          renderZone.bottom = height;
           transformCtx.needUpdate = false;
           this._scaleX = width / clientWidth;
           this._scaleY = height / clientHeight;
@@ -423,6 +425,7 @@ export default (
 
         functions.initEvent.call(this);
         functions.syncTransform.call(this);
+        functions.syncRenderSize.call(this);
 
         this.addObserver('scaleModeChanged', functions.syncTransform, this, this);
       }
@@ -524,7 +527,6 @@ export default (
           var root = this._root;
           var render = this._render;
           var transformCtx = this._transformCtx;
-          this._refresh = false;
           // 同步最新的结点转换
           root._syncTransform(transformCtx.transform, transformCtx.transform, renderZone, transformCtx.needUpdate);
           // 重新计算脏矩形
@@ -544,6 +546,8 @@ export default (
           dirtyZones.splice(0, dirtyZones.length);
           // 矩阵回归到单位矩阵
           render.setTransform(1, 0, 0, 1, 0, 0);
+          this._refresh = false;
+          this._dirtyZones = [];
         }
       }
 
@@ -551,6 +555,7 @@ export default (
         if (this._timerTaskId === 0) {
           if (this._root !== null) {
             this._refresh = true;
+            this.receiveDirtyZone(null, this._renderZone);
             this._timerTaskId = TimerUtil.addAnimationTask(this.loop, this);
             this.postNotification('resize', this, [this._render.width, this._render.height]);
           }
