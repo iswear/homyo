@@ -463,7 +463,7 @@ export default (
 
       InnerApplication.prototype.receiveDirtyZone = function (node, dirtyZone) {
         var renderZone = this._renderZone;
-        if (GeometryUtil.isRectNotCross(renderZone, dirtyZone)) {
+        if (GeometryUtil.isZoneNotCross(renderZone, dirtyZone)) {
           return false;
         }
         dirtyZone.left = Math.max(renderZone.left, dirtyZone.left);
@@ -477,7 +477,7 @@ export default (
           var insert = true;
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var zone = dirtyZones[i];
-            if (GeometryUtil.isRectNotCross(zone, dirtyZone)) {
+            if (GeometryUtil.isZoneNotCross(zone, dirtyZone)) {
               continue;
             }
             dirtyZone.left = Math.min(zone.left, left);
@@ -507,7 +507,7 @@ export default (
         if (this._prevLoopTime != 0) {
           deltaTime = now - this._prevLoopTime;
           this._prevLoopTime = now;
-          this._animationManager.run(deltaTime);
+          this._animationCtx.manager.run(deltaTime);
         } else {
           this._prevLoopTime = now;
         }

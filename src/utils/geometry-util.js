@@ -8,7 +8,7 @@ export default (
   function () {
     var util = (function() {
       function isZoneCross(zone1, zone2) {
-        return !isRectNotCross(zone1, zone2);
+        return !isZoneNotCross(zone1, zone2);
       }
 
       function isZoneNotCross(zone1, zone2) {
