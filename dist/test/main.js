@@ -3245,10 +3245,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   var GTexture = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Texture;
 
   var root = new GTexture({
-    x: 200,
+    x: 400,
     y: 300,
-    width: 200,
-    height: 200,
     visible: true,
     image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
   });
@@ -3260,18 +3258,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
   application.run();
   // root.runAnimation(new PropertyAnimation({
-  //   property: 'x',
-  //   targetOffset: 400,
+  //   property: 'inclineY',
+  //   targetOffset: 1,
   //   offsetFn: function (animation, deltaTime, sumTime) {
-  //     return 10 * sumTime / 1000;
+  //     return  sumTime / 1000;
   //   }
   // }), null, null, false);
   
-  
-  document.onclick = function () {
-    console.log('yaya')
-    root.x += 10;
-  }
+  // document.onclick = function () {
+  //   console.log('yaya')
+  //   root.x += 10;
+  // }
 
 })();
 
@@ -3762,6 +3759,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       function InnerEvent() {
         this.id = 0;
         this.event = null;
+
         this.touch = null;
         this.target = null;
         this.wheelDelta = 0;
@@ -3952,7 +3950,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           // 清理脏矩形区域
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
-            // render.clearRect(dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
+            render.clearRect(dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
           }
           // 重新绘制阶段
           root._dispatchRender(render, 1, renderZone, dirtyZones);
