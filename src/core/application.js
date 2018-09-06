@@ -328,7 +328,14 @@ export default (
       function loadImageFinished (url, success) {
         if (success) {
           if (this._loaderCtx.images[url] && this._loaderCtx.images[url].refresh) {
-            this.receiveDirtyZone(null, LangUtil.clone(this._renderZone));
+            this.receiveDirtyZone(null, {
+              left: this._renderZone.left,
+              top: this._renderZone.top,
+              right: this._renderZone.right,
+              bottom: this._renderZone.bottom,
+              width: this._renderZone.width,
+              height: this._renderZone.height
+            });
             this.refresh();
           }
         }
@@ -554,7 +561,14 @@ export default (
         if (this._timerTaskId === 0) {
           if (this._root !== null) {
             this._refresh = true;
-            this.receiveDirtyZone(null, LangUtil.clone(this._renderZone));
+            this.receiveDirtyZone(null, {
+              left: this._renderZone.left,
+              top: this._renderZone.top,
+              right: this._renderZone.right,
+              bottom: this._renderZone.bottom,
+              width: this._renderZone.width,
+              height: this._renderZone.height
+            });
             this._timerTaskId = TimerUtil.addAnimationTask(this.loop, this);
             this.postNotification('resize', this, [this._render.width, this._render.height]);
           }

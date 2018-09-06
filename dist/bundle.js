@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 21);
+/******/ 	return __webpack_require__(__webpack_require__.s = 22);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -198,6 +198,14 @@
         return !isFunction(val);
       }
 
+      function getMaxInteger() {
+        return 9007199254740991;
+      }
+
+      function getMinInteger() {
+        return -9007199254740991
+      }
+
       function clone (val) {
         if (util.isArray(val)) {
           var rArr = [];
@@ -239,7 +247,9 @@
         isFunction: isFunction,
         isNotFunction: isNotFunction,
         clone: clone,
-        checkAndGet: checkAndGet
+        checkAndGet: checkAndGet,
+        getMaxInteger: getMaxInteger,
+        getMinInteger: getMinInteger
       }
     })();
 
@@ -450,8 +460,8 @@
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifier__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__ = __webpack_require__(10);
 /**
  *
  * Author: iswear(471291492@qq.com)
@@ -479,14 +489,14 @@
         this._transformCtx.needUpdate = true;
       }
       
-      function syncZoneInLocal () {
-        this._zoneInLocal.needUpdate = true;
+      function syncRectInLocal () {
+        this._rectInLocal.needUpdate = true;
       }
       
       return {
         syncClipRender: syncClipRender,
         syncTransform: syncTransform,
-        syncZoneInLocal: syncZoneInLocal
+        syncRectInLocal: syncRectInLocal
       }
     })();
 
@@ -546,7 +556,7 @@
           wTransform: [0, 0, 0, 0, 0, 0],
           wReverseTransform: [0, 0, 0, 0, 0, 0]
         };
-        this._zoneInLocal = {
+        this._rectInLocal = {
           needUpdate: false,
           top: 0,
           bottom: 0,
@@ -555,7 +565,7 @@
           width: 0,
           height: 0
         };
-        this._zoneInWorld = {
+        this._rectInWorld = {
           top: 0,
           bottom: 0,
           left: 0,
@@ -564,14 +574,14 @@
           height: 0
         };
         this._dirtyZoneCtx = {
-          dirty: false,
+          inRenderZone: false,
           oriReported: false,
           curReported: false
         };
 
         functions.syncClipRender.call(this);
         functions.syncTransform.call(this);
-        functions.syncZoneInLocal.call(this);
+        functions.syncRectInLocal.call(this);
 
         this.addObserver('xChanged', this.refresh, this, this);
         this.addObserver('yChanged', this.refresh, this, this);
@@ -597,35 +607,18 @@
         this.addObserver('parentChanged', functions.syncTransform, this, this);
 
         this.addObserver('clipChanged', functions.syncClipRender, this, this);
-
-        this.addObserver('widthChanged', functions.syncZoneInLocal, this, this);
-        this.addObserver('heightChanged', functions.syncZoneInLocal, this, this);
-        this.addObserver('anchorXChanged', functions.syncZoneInLocal, this, this);
-        this.addObserver('anchorYChanged', functions.syncZoneInLocal, this, this);
+        this.addObserver('widthChanged', functions.syncRectInLocal, this, this);
+        this.addObserver('heightChanged', functions.syncRectInLocal, this, this);
+        this.addObserver('anchorXChanged', functions.syncRectInLocal, this, this);
+        this.addObserver('anchorYChanged', functions.syncRectInLocal, this, this);
       }
 
-      InnerNode.prototype.getZoneInLocal = function () {
-        var zoneInLocal = this._zoneInLocal;
-        return {
-          left: zoneInLocal.left,
-          top: zoneInLocal.top,
-          right: zoneInLocal.right,
-          bottom: zoneInLocal.bottom,
-          width: zoneInLocal.width,
-          height: zoneInLocal.height
-        };
+      InnerNode.prototype.getRectInLocal = function () {
+        return this._rectInLocal;
       }
 
-      InnerNode.prototype.getZoneInWorld = function () {
-        var zoneInWorld = this._zoneInWorld;
-        return {
-          left: zoneInWorld.left,
-          top: zoneInWorld.top,
-          right: zoneInWorld.right,
-          bottom: zoneInWorld.bottom,
-          width: zoneInWorld.width,
-          height: zoneInWorld.height
-        };
+      InnerNode.prototype.getRectInWorld = function () {
+        return this._rectInWorld;
       }
 
       InnerNode.prototype.getChildNode = function (layerIndex, nodeIndex) {
@@ -728,14 +721,14 @@
       InnerNode.prototype.runAnimation = function (animation, fn, target, loop) {
         const application = this.findApplication()
         if (application) {
-          application.runNodeAnimation(this, animation, fn, target, loop);
+          application.getAnimationManager().addAnimationBinder(this, animation, fn, target, loop);
         }
       }
 
       InnerNode.prototype.stopAnimation = function (animation) {
         const application = this.findApplication()
         if (application) {
-          application.stopNodeAnimation(this, animation);
+          application.getAnimationManager().removeAnimationBinderByNodeAndAnimation(this, animation);
         }
       }
 
@@ -753,7 +746,7 @@
               }
             }
           }
-          application.stopNodeAllAnimation(this);
+          application.getAnimationManager().removeAnimationBinderByNode(this);
         }
       }
 
@@ -774,32 +767,28 @@
       }
 
       InnerNode.prototype.getTransformInParent = function () {
-        var t = this._transformCtx.lTransform;
-        return [t[0], t[1], t[2], t[3], t[4], t[5]];
+        return __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].clone(this._transformCtx.lTransform);
       }
 
       InnerNode.prototype.getReverseTransformInParent = function () {
-        var t = this._transformCtx.lReverseTransform;
-        return [t[0], t[1], t[2], t[3], t[4], t[5]];
+        return __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].clone(this._transformCtx.lReverseTransform);
       }
 
       InnerNode.prototype.getTransformInWorld = function () {
-        var t = this._transformCtx.wTransform;
-        return [t[0], t[1], t[2], t[3], t[4], t[5]];
+        return __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].clone(this._transformCtx.wTransform);
       }
 
       InnerNode.prototype.getReverseTransformInWorld = function() {
-        var t = this._transformCtx.wReverseTransform;
-        return [t[0], t[1], t[2], t[3], t[4], t[5]];
+        return __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].clone(this._transformCtx.wReverseTransform);
       }
 
       InnerNode.prototype.startClip = function (render) {
-        var zone = this._zoneInLocal;
+        var rect = this._rectInLocal;
         render.beginPath();
-        render.moveTo(zone.left, zone.top);
-        render.lineTo(zone.right, zone.top);
-        render.lineTo(zone.right, zone.bottom);
-        render.lineTo(zone.left, zone.bottom);
+        render.moveTo(rect.left, rect.top);
+        render.lineTo(rect.right, rect.top);
+        render.lineTo(rect.right, rect.bottom);
+        render.lineTo(rect.left, rect.bottom);
         render.closePath();
         render.clip();
       }
@@ -814,8 +803,8 @@
       }
 
       InnerNode.prototype.checkEventTrigger = function (name, e, x, y) {
-        var zone = this._zoneInLocal;
-        if (x >= zone.left && x <= zone.right && y >= zone.top && y <= zone.bottom) {
+        var rect = this._rectInLocal;
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
           return true;
         } else {
           return false;
@@ -839,8 +828,11 @@
 
       InnerNode.prototype.refresh = function () {
         var app = this.findApplication();
-        if (app !== null) {
-          app.refresh();
+        if (app === null) {
+          return;
+        }
+        app.refresh();
+        if (app.enableDirtyZone) {
           this._reportOriDirtyZone(app);
         }
       }
@@ -867,46 +859,50 @@
       }
 
       InnerNode.prototype._syncTransform = function (parentWTransform, parentWReverseTransform, renderZone, parentUpdateTransform) {
-        this.postNotification('frame', this);
         var transformCtx = this._transformCtx;
-        var zoneInLocal = this._zoneInLocal;
-        var zoneInWorld = this._zoneInWorld;
-        if (zoneInLocal.needUpdate) {
-          zoneInLocal.width = Math.round(this.width);
-          zoneInLocal.height = Math.round(this.height);
-          zoneInLocal.top = Math.round(zoneInLocal.height * (-this.anchorY));
-          zoneInLocal.bottom = Math.round(zoneInLocal.height + zoneInLocal.top);
-          zoneInLocal.left = Math.round(zoneInLocal.width * (-this.anchorX));
-          zoneInLocal.right = Math.round(zoneInLocal.width + zoneInLocal.left);
+        var rectInLocal = this._rectInLocal;
+        var rectInWorld = this._rectInWorld;
+        if (rectInLocal.needUpdate) {
+          rectInLocal.width = Math.round(this.width);
+          rectInLocal.height = Math.round(this.height);
+          rectInLocal.top = Math.round(rectInLocal.height * (-this.anchorY));
+          rectInLocal.bottom = Math.round(rectInLocal.height + rectInLocal.top);
+          rectInLocal.left = Math.round(rectInLocal.width * (-this.anchorX));
+          rectInLocal.right = Math.round(rectInLocal.width + rectInLocal.left);
+          rectInLocal.needUpdate = false;
         }
-        
         if (transformCtx.needUpdate) {
-          transformCtx.lTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].incline2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].scale2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].rotate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].translate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
+          transformCtx.lTransform =
+            __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].incline2d(
+              __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].scale2d(
+                __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].rotate2d(
+                  __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].translate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
           transformCtx.lReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].reverse2d(transformCtx.lTransform);
-          transformCtx.wTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(parentWTransform, transformCtx.lTransform);
-          transformCtx.wReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(transformCtx.lReverseTransform, parentWReverseTransform);
-        } else if (parentUpdateTransform) {
+          transformCtx.needUpdate = false;
+        }
+        if (parentUpdateTransform || transformCtx.needUpdate) {
           transformCtx.wTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(parentWTransform, transformCtx.lTransform);
           transformCtx.wReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(transformCtx.lReverseTransform, parentWReverseTransform);
         }
-
-        if (zoneInLocal.needUpdate || transformCtx.needUpdate || parentUpdateTransform) {
-          var p1 = this.transformLVectorToW([zoneInLocal.left, zoneInLocal.top]);
-          var p2 = this.transformLVectorToW([zoneInLocal.left, zoneInLocal.bottom]);
-          var p3 = this.transformLVectorToW([zoneInLocal.right, zoneInLocal.top]);
-          var p4 = this.transformLVectorToW([zoneInLocal.right, zoneInLocal.bottom]);
-          zoneInWorld.top = Math.min(Math.min(p1[1], p2[1]), Math.min(p3[1], p4[1]));
-          zoneInWorld.bottom = Math.max(Math.max(p1[1], p2[1]), Math.max(p3[1], p4[1]));
-          zoneInWorld.left = Math.min(Math.min(p1[0], p2[0]), Math.min(p3[0], p4[0]));
-          zoneInWorld.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
-          zoneInWorld.width = zoneInWorld.right - zoneInWorld.left;
-          zoneInWorld.height = zoneInWorld.bottom - zoneInWorld.top;
-          this._dirtyZoneCtx.inRenderZone = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].isZoneCross(zoneInWorld, renderZone);
+        if (rectInLocal.needUpdate || transformCtx.needUpdate || parentUpdateTransform) {
+          var p1 = this.transformLVectorToW([rectInLocal.left, rectInLocal.top]);
+          var p2 = this.transformLVectorToW([rectInLocal.left, rectInLocal.bottom]);
+          var p3 = this.transformLVectorToW([rectInLocal.right, rectInLocal.top]);
+          var p4 = this.transformLVectorToW([rectInLocal.right, rectInLocal.bottom]);
+          rectInWorld.top = Math.min(Math.min(p1[1], p2[1]), Math.min(p3[1], p4[1]));
+          rectInWorld.bottom = Math.max(Math.max(p1[1], p2[1]), Math.max(p3[1], p4[1]));
+          rectInWorld.left = Math.min(Math.min(p1[0], p2[0]), Math.min(p3[0], p4[0]));
+          rectInWorld.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
+          rectInWorld.width = rectInWorld.right - rectInWorld.left;
+          rectInWorld.height = rectInWorld.bottom - rectInWorld.top;
+          if (__WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].isRectNotCross(rectInWorld, renderZone)) {
+            this._dirtyZoneCtx.inRenderZone = false;
+          } else {
+            this._dirtyZoneCtx.inRenderZone = true;
+          }
         }
 
-        zoneInLocal.needUpdate = false;
-        transformCtx.needUpdate = false;
-
+        this.postNotification('frame', this);
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
           var layer = layers[i];
@@ -922,14 +918,7 @@
         var dirtyZoneCtx = this._dirtyZoneCtx;
         if (dirtyZoneCtx.inRenderZone && !dirtyZoneCtx.oriReported) {
           this.oriReported = true;
-          app.receiveDirtyZone(this, {
-            left: this._zoneInWorld.left - 1,
-            top: this._zoneInWorld.top - 1,
-            right: this._zoneInWorld.right + 1,
-            bottom: this._zoneInWorld.bottom + 1,
-            width: this._zoneInWorld.width + 2,
-            height: this._zoneInWorld.height + 1
-          });
+          app.receiveDirtyZone(this, __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].clone(this._rectInWorld));
         }
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
@@ -945,32 +934,18 @@
       InnerNode.prototype._reportCurDirtyZone = function (app, dirtyZones) {
         var result = false;
         var dirtyZoneCtx = this._dirtyZoneCtx;
-        var zoneInWorld = this._zoneInWorld;
+        var rectInWorld = this._rectInWorld;
         if (dirtyZoneCtx.inRenderZone) {
           if (!dirtyZoneCtx.curReported) {
             var wTrans = this._transformCtx.wTransform;
             if (dirtyZoneCtx.oriReported) {
-              result = app.receiveDirtyZone(this, {
-                left: zoneInWorld.left - 1,
-                top: zoneInWorld.top - 1,
-                right: zoneInWorld.right + 1,
-                bottom: zoneInWorld.bottom + 1,
-                width: zoneInWorld.width + 2,
-                height: zoneInWorld.height + 2
-              });
+              result = app.receiveDirtyZone(this, __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].clone(rectInWorld));
               dirtyZoneCtx.curReported = true;
             } else if (!(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 0)) {
               for (var i = 0, len = dirtyZones.length; i < len; ++i) {
                 var dirtyZone = dirtyZones[i];
-                if (__WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].isZoneCross(dirtyZone, zoneInWorld)) {
-                  result = app.receiveDirtyZone(this, {
-                    left: zoneInWorld.left - 1,
-                    top: zoneInWorld.top - 1,
-                    right: zoneInWorld.right + 1,
-                    bottom: zoneInWorld.bottom + 1,
-                    width: zoneInWorld.width + 2,
-                    height: zoneInWorld.height + 2
-                  });
+                if (__WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].isRectCross(dirtyZone, rectInWorld)) {
+                  result = app.receiveDirtyZone(this, __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].clone(rectInWorld));
                   dirtyZoneCtx.curReported = true;
                   break;
                 }
@@ -1005,14 +980,14 @@
               render.globalAplha = alpha;
               // 绘制自身
               if (dirtyZoneCtx.curReported) {
-                this.postNotification('render', this, [render, [this._zoneInWorld]]);
+                this.postNotification('render', this, [render, [this._rectInLocal]]);
                 this._dispatchChildrenRender(render, alpha, renderZone, dirtyZones);
                 this.stopClip();
               } else {
-                var zoneInWorld = this._zoneInWorld;
+                var rectInWorld = this._rectInWorld;
                 var crossDirtyZones = [];
                 for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-                  var crossDirtyZone = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].getZoneCross(zoneInWorld, dirtyZones[i]);
+                  var crossDirtyZone = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].getRectCross(rectInWorld, dirtyZones[i]);
                   if (crossDirtyZone !== null) {
                     crossDirtyZone.left -= w[4];
                     crossDirtyZone.right -= w[4];
@@ -1031,19 +1006,19 @@
           } else {
             if (dirtyZoneCtx.inRenderZone) {
               if (this.checkNeedRender()) {
-                var w = this._transformCtx.wTransform;
+                var w = this._syncTransform.wTransform;
                 // 设置矩阵
                 render.setTransform(w[0], w[3], w[1], w[4], w[2], w[5]);
                 // 设置透明度
                 render.globalAplha = alpha;
                 // 绘制自身
                 if (dirtyZoneCtx.curReported) {
-                  this.postNotification('render', this, [render, [this._zoneInLocal]]);
+                  this.postNotification('render', this, [render, [this._rectInLocal]]);
                 } else {
-                  var zoneInWorld = this._zoneInWorld;
+                  var rectInWorld = this._rectInWorld;
                   var crossDirtyZones = [];
                   for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-                    var crossDirtyZone = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].getZoneCross(zoneInWorld, dirtyZones[i]);
+                    var crossDirtyZone = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].getRectCross(rectInWorld, dirtyZones[i]);
                     if (crossDirtyZone !== null) {
                       crossDirtyZone.left -= w[4];
                       crossDirtyZone.right -= w[4];
@@ -1161,7 +1136,6 @@
           return this.$context[name];
         }
       }
-
       function contextPropertySetter (name) {
         return function (val) {
           if (this.$context[name] !== val) {
@@ -1169,13 +1143,11 @@
           }
         }
       }
-
       function canvasPropertyGetter (name) {
         return function () {
           return this.$canvas[name];
         }
       }
-
       function canvasPropertySetter (name) {
         return function (val) {
           if (this.$canvas[name] !== val) {
@@ -1431,62 +1403,6 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/**
- * util for class extend and so on
- * Author: iswear(471291492@qq.com)
- * Date: 2017/8/12
- */
-
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
-    var util = (function() {
-      function isZoneCross(zone1, zone2) {
-        return !isZoneNotCross(zone1, zone2);
-      }
-
-      function isZoneNotCross(zone1, zone2) {
-        return zone1.left >= zone2.right || zone1.right <= zone2.left || zone1.top >= zone2.bottom || zone1.bottom <= zone2.top;
-      }
-
-      function getZoneCross(zone1, zone2) {
-        var left = Math.max(zone1.left, zone2.left);
-        var right = Math.min(zone1.right, zone2.right);
-        var width = right - left;
-        if (width <= 0) {
-          return null;
-        }
-        var top = Math.max(zone1.top, zone2.top);
-        var bottom = Math.min(zone1.bottom, zone2.bottom);
-        var height = bottom - top;
-        if (height <= 0) {
-          return null;
-        }
-        return {
-          left: left,
-          right: right,
-          top: top,
-          bottom: bottom,
-          width: width,
-          height: height
-        }
-      }
-      
-      return {
-        isZoneCross: isZoneCross,
-        isZoneNotCross: isZoneNotCross,
-        getZoneCross: getZoneCross
-      }
-    })();
-
-    return util;
-  }
-)());
-
-/***/ }),
-/* 5 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifier__ = __webpack_require__(1);
 /**
@@ -1513,7 +1429,7 @@
 )());
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1572,7 +1488,6 @@
         this.animation = null;
         this.fn = null;
         this.target = null;
-        this.loop = null;
         this.super('destroy');
       }
 
@@ -1580,6 +1495,61 @@
     })();
 
     return Binder;
+  }
+)());
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__core_node__ = __webpack_require__(2);
+/**
+ *
+ * Author: iswear(471291492@qq.com)
+ * Date: 2017/8/15
+ */
+
+
+
+
+/* harmony default export */ __webpack_exports__["a"] = ((
+  function () {
+
+    var GMap = (function () {
+      var InnerGMap = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__core_node__["a" /* default */]);
+
+      InnerGMap.prototype.defWidth = 0;
+      InnerGMap.prototype.defHeight = 0;
+      InnerGMap.prototype.defAnchorX = 0;
+      InnerGMap.prototype.defAnchorY = 0;
+      InnerGMap.prototype.init = function (conf) {
+        this.super('init', [conf]);
+        this.defineNotifyProperty('containerLeft', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.containerLeft, -Infinity));
+        this.defineNotifyProperty('containerRight', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.containerRight, -Infinity));
+        this.defineNotifyProperty('containerTop', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.containerTop, Infinity));
+        this.defineNotifyProperty('containerBottom', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.containerBottom, Infinity));
+
+        this._models = [];
+      }
+
+      InnerGMap.prototype.checkEventTrigger = function (name, e, x, y) {
+        return true;
+      }
+
+      InnerGMap.prototype.addModel = function (model, x, y, layerIndex) {
+
+      }
+
+      InnerGMap.prototype.removeModel = function (model, x, y, layerIndex) {
+
+      }
+
+      return InnerGMap;
+    })();
+
+    return GMap;
   }
 )());
 
@@ -1846,9 +1816,65 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/**
+ * util for class extend and so on
+ * Author: iswear(471291492@qq.com)
+ * Date: 2017/8/12
+ */
+
+/* harmony default export */ __webpack_exports__["a"] = ((
+  function () {
+    var util = (function() {
+      function isRectCross(rect1, rect2) {
+        return !isRectNotCross(rect1, rect2);
+      }
+
+      function isRectNotCross(rect1, rect2) {
+        return rect1.left >= rect2.right || rect1.right <= rect2.left || rect1.top >= rect1.bottom || rect1.bottom <= rect2.top;
+      }
+
+      function getRectCross(rect1, rect2) {
+        var left = Math.max(rect1.left, rect2.left);
+        var right = Math.min(rect1.right, rect2.right);
+        var width = right - left;
+        if (width <= 0) {
+          return null;
+        }
+        var top = Math.max(rect1.top, rect2.top);
+        var bottom = Math.min(rect1.bottom, rect2.bottom);
+        var height = bottom - top;
+        if (height <= 0) {
+          return null;
+        }
+        return {
+          left: left,
+          right: right,
+          top: top,
+          bottom: bottom,
+          width: width,
+          height: height
+        }
+      }
+      
+      return {
+        isRectCross: isRectCross,
+        isRectNotCross: isRectNotCross,
+        getRectCross: getRectCross
+      }
+    })();
+
+    return util;
+  }
+)());
+
+/***/ }),
+/* 11 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifier__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__binder__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__binder__ = __webpack_require__(5);
 /**
  *
  * Author: iswear(471291492@qq.com)
@@ -1877,7 +1903,7 @@
         this._paused = false;
       }
 
-      InnerManager.prototype.addAnimation = function (node, animation, fn, target, loop) {
+      InnerManager.prototype.addAnimationBinder = function (node, animation, fn, target, loop) {
         this._aniBinders.push(new __WEBPACK_IMPORTED_MODULE_2__binder__["a" /* default */]({
           node: node,
           animation: animation,
@@ -1887,7 +1913,7 @@
         }));
       }
 
-      InnerManager.prototype.removeAnimationByNode = function (node) {
+      InnerManager.prototype.removeAnimationBinderByNode = function (node) {
         var binders = this._aniBinders;
         for (var i = 0, len = binders.length; i < len; ++i) {
           var binder = binders[i];
@@ -1899,7 +1925,7 @@
         }
       }
 
-      InnerManager.prototype.removeAnimationByNodeAndAnimation = function (node, animation) {
+      InnerManager.prototype.removeAnimationBinderByNodeAndAnimation = function (node, animation) {
         var binders = this._aniBinders;
         for (var i = 0, len = binders.length; i < len; ++i) {
           var binder = binders[i];
@@ -1946,7 +1972,7 @@
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1963,7 +1989,6 @@
 /* harmony default export */ __webpack_exports__["a"] = ((
   function () {
     var doc = document;
-
     var FileLoader = (function () {
       var InnerFileLoader = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__notifier__["a" /* default */]);
 
@@ -2134,7 +2159,7 @@
 )());
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2248,13 +2273,13 @@
 )());
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__base_animation__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__binder__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__base_animation__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__binder__ = __webpack_require__(5);
 /**
  *
  * Author: iswear(471291492@qq.com)
@@ -2325,12 +2350,12 @@
 )());
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__base_animation__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__base_animation__ = __webpack_require__(4);
 /**
  *
  * Author: iswear(471291492@qq.com)
@@ -2398,12 +2423,12 @@
 )());
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__base_animation__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__base_animation__ = __webpack_require__(4);
 /**
  *
  * Author: iswear(471291492@qq.com)
@@ -2464,7 +2489,7 @@
 )());
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2492,15 +2517,10 @@
           ctx.render = null;
         } else {
           if (this.getObserverByAllParams('render', renderBackgroundAndBorder, this, this) === null) {
-            this.addObserver('render', renderBackgroundAndBorder, this, this, -Infinity);
+            this.addObserver('render', renderBackgroundAndBorder, this, this, __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].getMinInteger());
           }
           if (ctx.render === null) {
-            ctx.renderInvalid = true;
-            ctx.render = new __WEBPACK_IMPORTED_MODULE_2__core_render_canvas_canvas_render__["a" /* default */]({
-              canvas: doc.createElement('canvas'),
-              width: this.width,
-              height: this.height
-            });
+            ctx.render = new __WEBPACK_IMPORTED_MODULE_2__core_render_canvas_canvas_render__["a" /* default */]({canvas: doc.createElement('canvas'), width: rect.width, height: rect.height})
           }
         }
       }
@@ -2511,18 +2531,14 @@
       
       function renderBackgroundAndBorder(sender, render, dirtyZones) {
         var ctx = this._backgroundBorderCacheCtx;
-        if (ctx.renderInvalid) {
+        if (ctx.renderInvalid && ctx.render !== null) {
           renderBackgroundAndBorderCache.call(this, ctx.render);
           ctx.renderInvalid = false;
         }
-        var rectInLocal = this.getRectInLocal();
-        var cacheCanvas = ctx.render.getCanvas();
-        var offsetLeft = - rectInLocal.left;
-        var offsetTop = - rectInLocal.top;
         for (var i = 0, len = dirtyZones.length; i < len; ++i) {
           var dirtyZone = dirtyZones[i];
-          render.drawImageExt(cacheCanvas,
-            dirtyZone.left + offsetLeft, dirtyZone.top + offsetTop, dirtyZone.width, dirtyZone.height,
+          render.drawImageExt(ctx.render.getCanvas(),
+            dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height,
             dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
         }      
       }
@@ -2625,11 +2641,6 @@
         functions.syncBackgroundBorderRender.call(this);
         functions.syncBackgroundBorderRenderInvalid.call(this);
 
-        this.addObserver('backgroundColorChanged', this.refresh, this, this);
-        this.addObserver('borderWidthChanged', this.refresh, this, this);
-        this.addObserver('borderColorChanged', this.refresh, this, this);
-        this.addObserver('borderRadiusChanged', this.refresh, this, this);
-
         this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRender, this, this);
         this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRender, this, this);
         this.addObserver('borderColorChanged', functions.syncBackgroundBorderRender, this, this);
@@ -2664,7 +2675,7 @@
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2887,14 +2898,14 @@
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__core_animation_scheduler_animation__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__core_animation_property_animation__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__core_animation_queue_animation__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__core_animation_scheduler_animation__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__core_animation_property_animation__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__core_animation_queue_animation__ = __webpack_require__(14);
 /**
  *
  * Author: iswear(471291492@qq.com)
@@ -3090,13 +3101,13 @@
 )());
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__core_node__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__g_texture__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__gtexture__ = __webpack_require__(21);
 /**
  *
  * Author: iswear(471291492@qq.com)
@@ -3108,32 +3119,47 @@
 
 /* harmony default export */ __webpack_exports__["a"] = ((
   function () {
-    var GTextureNode = (function () {
-      var InnerGTextureNode = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__core_node__["a" /* default */]);
-
-      InnerGTextureNode.prototype.defLayer = 1;
-      InnerGTextureNode.prototype.defAnchorX = 0.5;
-      InnerGTextureNode.prototype.defAnchorY = 0.5;
-      InnerGTextureNode.prototype.init = function (conf) {
-        this.super('init', [conf]);
-
-        this._texture = new __WEBPACK_IMPORTED_MODULE_2__g_texture__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.texture, {}));
-        this.addChildNodeToLayer(this._texture, 0);
+    var functions = (function () {
+      function syncImg (sender, newVal, oldVal) {
+        this._texture.img = newVal;
       }
 
-      InnerGTextureNode.prototype.getTexture = function (conf) {
+      return {
+        syncImg: syncImg
+      }
+    })();
+
+    var GNode = (function () {
+      var InnerGNode = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__core_node__["a" /* default */]);
+
+      InnerGNode.prototype.defLayer = 1;
+      InnerGNode.prototype.defAnchorX = 0.5;
+      InnerGNode.prototype.defAnchorY = 0.5;
+      InnerGNode.prototype.init = function (conf) {
+        this.super('init', [conf]);
+        this.defineNotifyProperty('img', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.img, null));
+
+        this._texture = new __WEBPACK_IMPORTED_MODULE_2__gtexture__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.texture, {}));
+        this.addChildNodeToLayer(this._texture, 0);
+
+        functions.syncImg.call(this, this, this.img, null)
+
+        this.addObserver('imgChanged', functions.syncImg, this, this);
+      }
+
+      InnerGNode.prototype.getTexture = function (conf) {
         return this._texture;
       }
 
-      return InnerGTextureNode;
+      return InnerGNode;
     })();
 
-    return GTextureNode;
+    return GNode;
   }
 )());
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3150,118 +3176,111 @@
 /* harmony default export */ __webpack_exports__["a"] = ((
   function () {
     var functions = (function () {
-      function syncImageRender () {
-        this.removeObserver('render', renderImage, this, this);
-        this.removeObserver('render', renderImageClip, this, this);
-        if (this.image !== null && this.image !== '') {
-          if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isString(this.image)) {
-            this.addObserver('render', renderImage, this, this);
+      function syncImg () {
+        this.removeObserver('render', renderImg, this, this);
+        this.removeObserver('render', renderImgClip, this, this);
+        if (this.img !== null && this.img !== '') {
+          if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isString(this.img)) {
+            this._img.url = this.img;
+            this._img.image = null;
+            this._img.progress = 0;
+            this.addObserver('render', renderImg, this, this);
           } else {
-            this.addObserver('render', renderImageClip, this, this);
+            this._img.url = this.img.url;
+            this._img.image = null;
+            this._img.progress = 0;
+            this.addObserver('render', renderImgClip, this, this);
           }
         }
       }
-
-      function syncImageContext () {
-        if (this.image !== null && this.image !== '') {
-          var ctx = this._imageCtx;
-          var image = this.image;
-          ctx.invalid = true;
-          if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isString(image)) {
-            ctx.url = image;
-          } else {
-            ctx.url = image.url;
-          }
+      function syncImgRender (image) {
+        if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isString(this.img)) {
+          this.width = image.width;
+          this.height = image.height;
+          this._img.image = image;
+        } else {
+          this.width = this.img.width;
+          this.height = this.img.height;
+          this._img.image = image;
+          this._img.x = this.img.x;
+          this._img.y = this.img.y;
+          this._img.width = this.img.width;
+          this._img.height = this.img.height;
+        }
+        this.refresh();
+      }
+      function renderImg (sender, render) {
+        var img = this._img;
+        if (!img.image) {
+          loadImage.call(this, img.url);
+        } else {
+          var rect = this.getRectInLocal();
+          render.drawImage(img.image, rect.left, rect.top);
         }
       }
-
-      function renderImage (sender, render, dirtyZones) {
-        var image = loadImage.call(this);
+      function renderImgClip (sender, render) {
+        var img = this._img;
+        if (!img.image) {
+          loadImage.call(this, img.url);
+        } else {
+          var rect = this.getRectInLocal();
+          render.drawImageExt(img.image, img.x, img.y, img.width, img.height, rect.left, rect.top, img.width, img.height);
+        }
+      }
+      function loadImage (url) {
+        var fileLoader = this.findApplication().getFileLoader();
+        var image = fileLoader.loadImageAsync(url);
         if (image !== null) {
-          var zoneInLocal = this.getZoneInLocal();
-          var offsetLeft = - zoneInLocal.left;
-          var offsetTop = - zoneInLocal.top;
-          for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-            var dirtyZone = dirtyZones[i];
-            render.drawImageExt(image,
-              dirtyZone.left + offsetLeft, dirtyZone.top + offsetTop, dirtyZone.width, dirtyZone.height,
-              dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
+          syncImgRender.call(this, image);
+        } else {
+          if (this._img.progress === 0) {
+            fileLoader.loadImageAsync(url, loadImageFinished, this);
+            this._img.progress = 1;
           }
         }
       }
-      
-      function renderImageClip (sender, render, dirtyZones) {
-        var image = loadImage.call(this);
-        if (image !== null) {
-          var zoneInLocal = this.getZoneInLocal();
-          var ctx = this._imageCtx;
-          var offsetLeft = ctx.x - zoneInLocal.left;
-          var offsetTop = ctx.y - zoneInLocal.top;
-          for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-            var dirtyZone = dirtyZones[i];
-            render.drawImageExt(image,
-              dirtyZone.left + offsetLeft, dirtyZone.top + offsetTop, dirtyZone.width, dirtyZone.height,
-              dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
-          }
-        }
-      }
-
-      function loadImage () {
-        var ctx = this._imageCtx;
-        var image = this.findApplication().loadImage(ctx.url, true);
-        if (ctx.invalid && image !== null) {
-          if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isString(this.image)) {
-            this.width = image.width;
-            this.height = image.height;
-            ctx.x = 0;
-            ctx.y = 0;
-            ctx.width = image.width;
-            ctx.height = image.height;
+      function loadImageFinished (url, success) {
+        if (success) {
+          var image = this.findApplication().getFileLoader().loadImageAsync(url);
+          if (image !== null) {
+            syncImgRender.call(this, image);
+            this._img.progress = 2;
           } else {
-            this.width = this.image.width;
-            this.height = this.image.height;
-            ctx.x = this.image.x;
-            ctx.y = this.image.y;
-            ctx.width = this.image.width;
-            ctx.height = this.image.height;
+            this._img.progress = 3;
           }
-          ctx.invalid = false;
+        } else {
+          this._img.progress = 3;
         }
-        return image;
       }
 
       return {
-        syncImageRender: syncImageRender,
-        syncImageContext: syncImageContext
+        syncImg: syncImg
       }
     })();
 
     var GTexture = (function () {
       var InnerGTexture = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__core_node__["a" /* default */]);
 
-      InnerGTexture.prototype.defImage = null;
+      InnerGTexture.prototype.defImg = null;
       InnerGTexture.prototype.defAnchorX = 0.5;
       InnerGTexture.prototype.defAnchorY = 0.5;
       InnerGTexture.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('image', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.image, this.defImage));
+        this.defineNotifyProperty('img', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.img, this.defImg));
 
-        this._imageCtx = {
-          invalid: true,
-          url: null,
+        this._img = {
           x: 0,
           y: 0,
           width: 0,
-          height: 0
+          height: 0,
+          url: null,
+          image: null,
+          progress: 0
         };
 
-        functions.syncImageRender.call(this);
-        functions.syncImageContext.call(this);
+        functions.syncImg.call(this);
 
-        this.addObserver('imageChanged', this.refresh, this, this);
-
-        this.addObserver('imageChanged', functions.syncImageRender, this, this);
-        this.addObserver('imageChanged', functions.syncImageContext, this, this);
+        this.addObserver('imgChanged', functions.syncImg, this, this);
       }
 
       return InnerGTexture;
@@ -3272,80 +3291,39 @@
 )());
 
 /***/ }),
-/* 21 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__main__ = __webpack_require__(22);
-
-
-(function () {
-  var Application = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.Application;
-  var PropertyAnimation = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.animation.PropertyAnimation;
-  var GTexture = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Texture;
-
-  var root = new GTexture({
-    x: 400,
-    y: 300,
-    visible: true,
-    image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
-  });
-
-  var application = new Application({
-    canvas: document.getElementById('main'),
-    root: root
-  });
-
-  application.run();
-  root.runAnimation(new PropertyAnimation({
-    property: 'rotateZ',
-    targetOffset: Infinity,
-    offsetFn: function (animation, deltaTime, sumTime) {
-      return sumTime / 1000;
-    }
-  }), null, null, false);
-  
-  // document.onclick = function () {
-  //   console.log('yaya')
-  //   root.x += 10;
-  // }
-
-})();
-
-/***/ }),
 /* 22 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_core_application__ = __webpack_require__(23);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_core_node__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_core_notifier__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_core_io_file_loader__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_core_animation_manager__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_core_animation_binder__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__src_core_animation_base_animation__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__src_core_animation_queue_animation__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__src_core_animation_scheduler_animation__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__src_core_animation_property_animation__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_core_io_file_loader__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_core_animation_manager__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_core_animation_binder__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__src_core_animation_base_animation__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__src_core_animation_queue_animation__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__src_core_animation_scheduler_animation__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__src_core_animation_property_animation__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__src_core_render_canvas_canvas_render__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__src_core_render_webgl_webgl_render__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__src_ui_ui_view__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__src_ui_ui_label__ = __webpack_require__(25);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__src_game_g_scene__ = __webpack_require__(26);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__src_game_map_g_map__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__src_game_model_g_model__ = __webpack_require__(28);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__src_game_g_texture__ = __webpack_require__(20);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__src_game_g_texture_node__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__src_game_g_util__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__src_utils_event_util__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__src_utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__src_utils_matrix_util__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__src_utils_platform_util__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__src_utils_text_util__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__src_utils_timer_util__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__src_utils_number_util__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__src_utils_geometry_util__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__src_ui_uiview__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__src_ui_uilabel__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__src_game_gscene__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__src_game_gmap__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__src_game_gimagemap__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__src_game_gtiledmap__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__src_game_gmodel__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__src_game_gnode__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__src_game_gtexture__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__src_game_gutil__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__src_utils_event_util__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__src_utils_lang_util__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__src_utils_matrix_util__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__src_utils_platform_util__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__src_utils_text_util__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__src_utils_timer_util__ = __webpack_require__(7);
 
 
 
@@ -3381,7 +3359,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
+
+/* harmony default export */ __webpack_exports__["default"] = ((
   function () {
     var homyo = {
       core: {
@@ -3409,28 +3388,28 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       },
 
       ui: {
-        View: __WEBPACK_IMPORTED_MODULE_12__src_ui_ui_view__["a" /* default */],
-        Label: __WEBPACK_IMPORTED_MODULE_13__src_ui_ui_label__["a" /* default */]
+        View: __WEBPACK_IMPORTED_MODULE_12__src_ui_uiview__["a" /* default */],
+        Label: __WEBPACK_IMPORTED_MODULE_13__src_ui_uilabel__["a" /* default */]
       },
 
       game: {
-        Scene: __WEBPACK_IMPORTED_MODULE_14__src_game_g_scene__["a" /* default */],
-        Map: __WEBPACK_IMPORTED_MODULE_15__src_game_map_g_map__["a" /* default */],
-        Model: __WEBPACK_IMPORTED_MODULE_16__src_game_model_g_model__["a" /* default */],
-        Texture: __WEBPACK_IMPORTED_MODULE_17__src_game_g_texture__["a" /* default */],
-        TextureNode: __WEBPACK_IMPORTED_MODULE_18__src_game_g_texture_node__["a" /* default */],
-        Util: __WEBPACK_IMPORTED_MODULE_19__src_game_g_util__["a" /* default */]
+        Scene: __WEBPACK_IMPORTED_MODULE_14__src_game_gscene__["a" /* default */],
+        Map: __WEBPACK_IMPORTED_MODULE_15__src_game_gmap__["a" /* default */],
+        ImageMap: __WEBPACK_IMPORTED_MODULE_16__src_game_gimagemap__["a" /* default */],
+        TiledMap: __WEBPACK_IMPORTED_MODULE_17__src_game_gtiledmap__["a" /* default */],
+        Model: __WEBPACK_IMPORTED_MODULE_18__src_game_gmodel__["a" /* default */],
+        Node: __WEBPACK_IMPORTED_MODULE_19__src_game_gnode__["a" /* default */],
+        Texture: __WEBPACK_IMPORTED_MODULE_20__src_game_gtexture__["a" /* default */],
+        Util: __WEBPACK_IMPORTED_MODULE_21__src_game_gutil__["a" /* default */]
       },
 
       utils: {
-        EventUtil: __WEBPACK_IMPORTED_MODULE_20__src_utils_event_util__["a" /* default */],
-        LangUtil: __WEBPACK_IMPORTED_MODULE_21__src_utils_lang_util__["a" /* default */],
-        MatrixUtil: __WEBPACK_IMPORTED_MODULE_22__src_utils_matrix_util__["a" /* default */],
-        PlatformUtil: __WEBPACK_IMPORTED_MODULE_23__src_utils_platform_util__["a" /* default */],
-        TextUtil: __WEBPACK_IMPORTED_MODULE_24__src_utils_text_util__["a" /* default */],
-        TimerUtil: __WEBPACK_IMPORTED_MODULE_25__src_utils_timer_util__["a" /* default */],
-        NumberUtil: __WEBPACK_IMPORTED_MODULE_26__src_utils_number_util__["a" /* default */],
-        GeometryUtil: __WEBPACK_IMPORTED_MODULE_27__src_utils_geometry_util__["a" /* default */]
+        EventUtil: __WEBPACK_IMPORTED_MODULE_22__src_utils_event_util__["a" /* default */],
+        LangUtil: __WEBPACK_IMPORTED_MODULE_23__src_utils_lang_util__["a" /* default */],
+        MatrixUtil: __WEBPACK_IMPORTED_MODULE_24__src_utils_matrix_util__["a" /* default */],
+        PlatformUtil: __WEBPACK_IMPORTED_MODULE_25__src_utils_platform_util__["a" /* default */],
+        TextUtil: __WEBPACK_IMPORTED_MODULE_26__src_utils_text_util__["a" /* default */],
+        TimerUtil: __WEBPACK_IMPORTED_MODULE_27__src_utils_timer_util__["a" /* default */]
       }
     };
 
@@ -3447,11 +3426,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_timer_util__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_event_util__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_platform_util__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_geometry_util__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_geometry_util__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__notifier__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__render_canvas_canvas_render__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__animation_manager__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__io_file_loader__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__animation_manager__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__io_file_loader__ = __webpack_require__(12);
 /**
  * the core class for app
  * Author: iswear(471291492@qq.com)
@@ -3474,227 +3453,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     var docEle = document.documentElement;
 
     var functions = (function () {
-      function eventPreProcessDesktop (e) {
-        var eArg = this._events[0];
-        var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
-        var offsetX = (e.pageX - (canvasViewOffset.left - win.pageXOffset - docEle.clientLeft)) * this._scaleX;
-        var offsetY = (e.pageY - (canvasViewOffset.top - win.pageYOffset - docEle.clientTop)) * this._scaleY;
-        if (offsetX !== eArg.offsetX || offsetY !== eArg.offsetY || e.wheelDelta !== 0) {
-          this.move = true;
-        } else {
-          this.move = false;
-        }
-        eArg.id = 1;
-        eArg.event = e;
-        eArg.target = null;
-        eArg.wheelDelta = e.wheelDelta ? e.wheelDelta : e.detail;
-        eArg.keyCode = e.keyCode;
-        eArg.button = e.button;
-        eArg.altKey = e.altKey;
-        eArg.ctrlKey = e.ctrlKey;
-        eArg.metaKey = e.metaKey;
-        eArg.skip = false;
-        eArg.bubble = true;
-        eArg.offsetX = offsetX;
-        eArg.offsetY = offsetY;
-        return eArg;
-      }
-
-      function eventPreProcessMobile (e, touch) {
-        var eArg = this._events[touch.identifier];
-        if (!eArg) {
-          eArg = new Event();
-          this._events[touch.identifier] = eArg;
-        }
-        var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
-        var offsetX = (e.pageX - (canvasViewOffset.left - win.pageXOffset - docEle.clientLeft)) * this._scaleX;
-        var offsetY = (e.pageY - (canvasViewOffset.top - win.pageYOffset - docEle.clientTop)) * this._scaleY;
-        if (offsetX !== eArg.offsetX || offsetY !== eArg.offsetY || e.wheelDelta !== 0) {
-          this.move = true;
-        } else {
-          this.move = false;
-        }
-        eArg.id = touch.identifier;
-        eArg.event = e;
-        eArg.touch = touch;
-        eArg.target = null;
-        eArg.skip = false;
-        eArg.bubble = true;
-        eArg.offsetX = offsetX;
-        eArg.offsetY = offsetY;
-        return eArg;
-      }
-
-      function eventTouchStartDoc (e) {
-        var ee = e ? e : win.event;
-        var touches = ee.changedTouches;
-        for (var i = 0, len = touches.length; i < len; ++i) {
-          this.postNotification('touchstart', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
-        }
-      }
-
-      function eventTouchMoveDoc (e) {
-        var ee = e ? e : win.event;
-        var touches = ee.changedTouches;
-        for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = eventPreProcessMobile(this, ee, touches[i]);
-          if (eArg.move) {
-            this.postNotification('touchmove', this, [eArg]);
-          }
-        }
-      }
-
-      function eventTouchEndDoc (e) {
-        var ee = e ? e : win.event;
-        var touches = ee.changedTouches;
-        for (var i = 0, len = touches.length; i < len; ++i) {
-          this.postNotification('touchend', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
-        }
-      }
-
-      function eventTouchCancelDoc (e) {
-        var ee = e ? e : win.event;
-        var touches = ee.changedTouches;
-        for (var i = 0, len = touches.length; i < len; ++i) {
-          this.postNotification('touchcancel', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
-        }
-      }
-
-      function eventTouchStartCanvas (e) {
-        var ee = e ? e : win.event;
-        var touches = ee.changedTouches;
-        var root = this._root;
-        for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
-          this.postNotification('touchstart', this, [eArg]);
-          root._dispatchMouseTouchEvent('touchstart', eArg);
-          eArg.stopPropagation();
-          eArg.preventDefault();
-        }
-      }
-
-      function eventTouchMoveCanvas (e) {
-        var ee = e ? e : win.event;
-        var touches = ee.changedTouches;
-        var root = this._root;
-        for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
-          if (eArg.move) {
-            this.postNotification('touchmove', this, [eArg]);
-            root._dispatchMouseTouchEvent('touchmove', eArg);
-          }
-          eArg.stopPropagation();
-          eArg.preventDefault();
-        }
-      }
-
-      function eventTouchEndCanvas (e) {
-        var ee = e ? e : win.event;
-        var touches = ee.changedTouches;
-        var root = this._root;
-        for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
-          this.postNotification('touchend', this, [eArg]);
-          root._dispatchMouseTouchEvent('touchend', eArg);
-          eArg.stopPropagation();
-          eArg.preventDefault();
-        }
-      }
-
-      function eventTouchCancelCanvas (e) {
-        var ee = e ? e : win.event;
-        var touches = ee.changedTouches;
-        var root = this._root;
-        for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
-          this.postNotification('touchend', this, [eArg]);
-          root._dispatchMouseTouchEvent('touchend', eArg);
-          eArg.stopPropagation();
-          eArg.preventDefault();
-        }
-      }
-
-      function eventKeyDownDoc (e) {
-        this.postNotification('keydown', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
-      }
-
-      function eventKeyPressDoc (e) {
-        this.postNotification('keypress', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
-      }
-
-      function eventKeyUpDoc (e) {
-        this.postNotification('keyup', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
-      }
-
-      function eventMouseDownDoc (e) {
-        this.postNotification('mousedown', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
-      }
-
-      function eventMouseMoveDoc (e) {
-        this.postNotification('mousemove', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
-      }
-
-      function eventMouseUpDoc (e) {
-        this.postNotification('mouseup', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
-      }
-
-      function eventClickCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('click', this, [eArg]);
-        this._root._dispatchMouseTouchEvent('click', eArg);
-        eArg.stopPropagation();
-        eArg.preventDefault();
-      }
-
-      function eventDblClickCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('dblclick', this, [eArg]);
-        this._root._dispatchMouseTouchEvent('dblclick', eArg);
-        eArg.stopPropagation();
-        eArg.preventDefault();
-      }
-
-      function eventContextMenuCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('contextmenu', this, [eArg]);
-        this._root._dispatchMouseTouchEvent('contextmenu', eArg);
-        eArg.stopPropagation();
-        eArg.preventDefault();
-      }
-
-      function eventMouseDownCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('mousedown', this, [eArg]);
-        this._root._dispatchMouseTouchEvent('mousedown', eArg);
-        eArg.stopPropagation();
-        eArg.preventDefault();
-      }
-
-      function eventMouseMoveCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('mousemove', this, [eArg]);
-        this._root._dispatchMouseTouchEvent('mousemove', eArg);
-        eArg.stopPropagation();
-        eArg.preventDefault();
-      }
-
-      function eventMouseUpCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('mouseup', this, [eArg]);
-        this._root._dispatchMouseTouchEvent('mouseup', eArg);
-        eArg.stopPropagation();
-        eArg.preventDefault();
-      }
-
-      function eventMouseWheelCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('wheel', this, [eArg]);
-        this._root._dispatchMouseTouchEvent('wheel', eArg);
-        eArg.stopPropagation();
-        eArg.preventDefault();
-      }
-
-      function initEvent () {
+      function eventInit () {
         var canvas = this._render.getCanvas();
         var doc = document;
         if (__WEBPACK_IMPORTED_MODULE_3__utils_platform_util__["a" /* default */].isMobile) {
@@ -3724,12 +3483,204 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(canvas, 'wheel', this, eventMouseWheelCanvas);
         }
       }
-
-      function syncTransform () {
-        this._transformCtx.needUpdate = true;
+      function eventPreProcessDesktop (e) {
+        var eArg = this._events[0];
+        var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
+        var offsetX = (e.pageX - (canvasViewOffset.left - win.pageXOffset - docEle.clientLeft)) * this._scaleX;
+        var offsetY = (e.pageY - (canvasViewOffset.top - win.pageYOffset - docEle.clientTop)) * this._scaleY;
+        if (offsetX !== eArg.offsetX || offsetY !== eArg.offsetY || e.wheelDelta !== 0) {
+          this.move = true;
+        } else {
+          this.move = false;
+        }
+        eArg.id = 1;
+        eArg.event = e;
+        eArg.target = null;
+        eArg.wheelDelta = e.wheelDelta ? e.wheelDelta : e.detail;
+        eArg.keyCode = e.keyCode;
+        eArg.button = e.button;
+        eArg.altKey = e.altKey;
+        eArg.ctrlKey = e.ctrlKey;
+        eArg.metaKey = e.metaKey;
+        eArg.skip = false;
+        eArg.bubble = true;
+        eArg.offsetX = offsetX;
+        eArg.offsetY = offsetY;
+        return eArg;
       }
-
-      function syncRenderSize () {
+      function eventPreProcessMobile (e, touch) {
+        var eArg = this._events[touch.identifier];
+        if (!eArg) {
+          eArg = new Event();
+          this._events[touch.identifier] = eArg;
+        }
+        var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
+        var offsetX = (e.pageX - (canvasViewOffset.left - win.pageXOffset - docEle.clientLeft)) * this._scaleX;
+        var offsetY = (e.pageY - (canvasViewOffset.top - win.pageYOffset - docEle.clientTop)) * this._scaleY;
+        if (offsetX !== eArg.offsetX || offsetY !== eArg.offsetY || e.wheelDelta !== 0) {
+          this.move = true;
+        } else {
+          this.move = false;
+        }
+        eArg.id = touch.identifier;
+        eArg.event = e;
+        eArg.touch = touch;
+        eArg.target = null;
+        eArg.skip = false;
+        eArg.bubble = true;
+        eArg.offsetX = offsetX;
+        eArg.offsetY = offsetY;
+        return eArg;
+      }
+      function eventTouchStartDoc (e) {
+        var ee = e ? e : win.event;
+        var touches = ee.changedTouches;
+        for (var i = 0, len = touches.length; i < len; ++i) {
+          this.postNotification('touchstart', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
+        }
+      }
+      function eventTouchMoveDoc (e) {
+        var ee = e ? e : win.event;
+        var touches = ee.changedTouches;
+        for (var i = 0, len = touches.length; i < len; ++i) {
+          var eArg = eventPreProcessMobile(this, ee, touches[i]);
+          if (eArg.move) {
+            this.postNotification('touchmove', this, [eArg]);
+          }
+        }
+      }
+      function eventTouchEndDoc (e) {
+        var ee = e ? e : win.event;
+        var touches = ee.changedTouches;
+        for (var i = 0, len = touches.length; i < len; ++i) {
+          this.postNotification('touchend', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
+        }
+      }
+      function eventTouchCancelDoc (e) {
+        var ee = e ? e : win.event;
+        var touches = ee.changedTouches;
+        for (var i = 0, len = touches.length; i < len; ++i) {
+          this.postNotification('touchcancel', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
+        }
+      }
+      function eventTouchStartCanvas (e) {
+        var ee = e ? e : win.event;
+        var touches = ee.changedTouches;
+        var root = this._root;
+        for (var i = 0, len = touches.length; i < len; ++i) {
+          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
+          this.postNotification('touchstart', this, [eArg]);
+          root._dispatchMouseTouchEvent('touchstart', eArg);
+          eArg.stopPropagation();
+          eArg.preventDefault();
+        }
+      }
+      function eventTouchMoveCanvas (e) {
+        var ee = e ? e : win.event;
+        var touches = ee.changedTouches;
+        var root = this._root;
+        for (var i = 0, len = touches.length; i < len; ++i) {
+          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
+          if (eArg.move) {
+            this.postNotification('touchmove', this, [eArg]);
+            root._dispatchMouseTouchEvent('touchmove', eArg);
+          }
+          eArg.stopPropagation();
+          eArg.preventDefault();
+        }
+      }
+      function eventTouchEndCanvas (e) {
+        var ee = e ? e : win.event;
+        var touches = ee.changedTouches;
+        var root = this._root;
+        for (var i = 0, len = touches.length; i < len; ++i) {
+          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
+          this.postNotification('touchend', this, [eArg]);
+          root._dispatchMouseTouchEvent('touchend', eArg);
+          eArg.stopPropagation();
+          eArg.preventDefault();
+        }
+      }
+      function eventTouchCancelCanvas (e) {
+        var ee = e ? e : win.event;
+        var touches = ee.changedTouches;
+        var root = this._root;
+        for (var i = 0, len = touches.length; i < len; ++i) {
+          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
+          this.postNotification('touchend', this, [eArg]);
+          root._dispatchMouseTouchEvent('touchend', eArg);
+          eArg.stopPropagation();
+          eArg.preventDefault();
+        }
+      }
+      function eventKeyDownDoc (e) {
+        this.postNotification('keydown', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+      }
+      function eventKeyPressDoc (e) {
+        this.postNotification('keypress', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+      }
+      function eventKeyUpDoc (e) {
+        this.postNotification('keyup', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+      }
+      function eventMouseDownDoc (e) {
+        this.postNotification('mousedown', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+      }
+      function eventMouseMoveDoc (e) {
+        this.postNotification('mousemove', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+      }
+      function eventMouseUpDoc (e) {
+        this.postNotification('mouseup', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+      }
+      function eventClickCanvas (e) {
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        this.postNotification('click', this, [eArg]);
+        this._root._dispatchMouseTouchEvent('click', eArg);
+        eArg.stopPropagation();
+        eArg.preventDefault();
+      }
+      function eventDblClickCanvas (e) {
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        this.postNotification('dblclick', this, [eArg]);
+        this._root._dispatchMouseTouchEvent('dblclick', eArg);
+        eArg.stopPropagation();
+        eArg.preventDefault();
+      }
+      function eventContextMenuCanvas (e) {
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        this.postNotification('contextmenu', this, [eArg]);
+        this._root._dispatchMouseTouchEvent('contextmenu', eArg);
+        eArg.stopPropagation();
+        eArg.preventDefault();
+      }
+      function eventMouseDownCanvas (e) {
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        this.postNotification('mousedown', this, [eArg]);
+        this._root._dispatchMouseTouchEvent('mousedown', eArg);
+        eArg.stopPropagation();
+        eArg.preventDefault();
+      }
+      function eventMouseMoveCanvas (e) {
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        this.postNotification('mousemove', this, [eArg]);
+        this._root._dispatchMouseTouchEvent('mousemove', eArg);
+        eArg.stopPropagation();
+        eArg.preventDefault();
+      }
+      function eventMouseUpCanvas (e) {
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        this.postNotification('mouseup', this, [eArg]);
+        this._root._dispatchMouseTouchEvent('mouseup', eArg);
+        eArg.stopPropagation();
+        eArg.preventDefault();
+      }
+      function eventMouseWheelCanvas (e) {
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        this.postNotification('wheel', this, [eArg]);
+        this._root._dispatchMouseTouchEvent('wheel', eArg);
+        eArg.stopPropagation();
+        eArg.preventDefault();
+      }
+      function checkRenderSize () {
         var render = this._render;
         var renderZone = this._renderZone;
         var transformCtx = this._transformCtx;
@@ -3768,38 +3719,34 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           }
           render.width = width;
           render.height = height;
-          renderZone.width = width;
-          renderZone.height = height;
           renderZone.right = width;
           renderZone.bottom = height;
+          renderZone.width = width;
+          renderZone.height = height;
           transformCtx.needUpdate = false;
           this._scaleX = width / clientWidth;
           this._scaleY = height / clientHeight;
           this.refresh();
         }
       }
-
-      function loadImageFinished (url, success) {
-        if (success) {
-          if (this._loaderCtx.images[url] && this._loaderCtx.images[url].refresh) {
-            this.receiveDirtyZone(null, {
-              left: this._renderZone.left,
-              top: this._renderZone.top,
-              right: this._renderZone.right,
-              bottom: this._renderZone.bottom,
-              width: this._renderZone.width,
-              height: this._renderZone.height
-            });
-            this.refresh();
+      function syncTransform () {
+        this._transformCtx.needUpdate = true;
+      }
+      function syncNodesDirtyZoneCtx () {
+        if (this._root) {
+          if (this.enableDirtyZone) {
+            this._root._enableDirtyZone(true);
+          } else {
+            this._root._disableDirtyZone(true);
           }
         }
       }
 
       return {
-        initEvent: initEvent,
+        eventInit: eventInit,
         syncTransform: syncTransform,
-        syncRenderSize: syncRenderSize,
-        loadImageFinished: loadImageFinished
+        checkRenderSize: checkRenderSize,
+        syncNodesDirtyZoneCtx: syncNodesDirtyZoneCtx
       }
     })();
 
@@ -3807,7 +3754,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       function InnerEvent() {
         this.id = 0;
         this.event = null;
-
         this.touch = null;
         this.target = null;
         this.wheelDelta = 0;
@@ -3840,9 +3786,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       var InnerApplication = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_5__notifier__["a" /* default */]);
 
       InnerApplication.prototype.defScaleMode = 0;
+      InnerApplication.prototype.defEnableDirtyZone = false;
       InnerApplication.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.defineNotifyProperty('scaleMode', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.scaleMode, this.defScaleMode));
+        this.defineNotifyProperty('enableDirtyZone', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.enableDirtyZone, this.defEnableDirtyZone));
 
         this._root = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.root, null);
         this._root.application = this;
@@ -3863,16 +3811,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this._refresh = true;
         this._timerTaskId = 0;
         this._events = [];
-
-        this._animationCtx = {
-          manager: new __WEBPACK_IMPORTED_MODULE_7__animation_manager__["a" /* default */]({})
-        };
-        this._loaderCtx = {
-          images: {},
-          audios: {},
-          videos: {},
-          loader: new __WEBPACK_IMPORTED_MODULE_8__io_file_loader__["a" /* default */]({})
-        };
+        this._animationManager = new __WEBPACK_IMPORTED_MODULE_7__animation_manager__["a" /* default */]({});
+        this._fileLoader = new __WEBPACK_IMPORTED_MODULE_8__io_file_loader__["a" /* default */]({});
 
         this._clientWidth = this._render.clientWidth;
         this._clientHeight = this._render.clientHeight;
@@ -3883,56 +3823,31 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           transform: [1, 0, 0, 0, 1, 0]
         };
 
-        functions.initEvent.call(this);
+        functions.eventInit.call(this);
         functions.syncTransform.call(this);
-        functions.syncRenderSize.call(this);
+        functions.syncNodesDirtyZoneCtx.call(this);
 
         this.addObserver('scaleModeChanged', functions.syncTransform, this, this);
+        this.addObserver('enableDirtyZoneChanged', functions.syncNodesDirtyZoneCtx, this, this);
       }
 
-      InnerApplication.prototype.runNodeAnimation = function (node, animation, fn, target, loop) {
-        this._animationCtx.manager.addAnimation(node, animation, fn, target, loop);
+      InnerApplication.prototype.getAnimationManager = function () {
+        return this._animationManager;
       }
 
-      InnerApplication.prototype.stopNodeAnimation = function (node, animation) {
-        this._animationCtx.manager.removeAnimationByNodeAndAnimation(node, animation);
-      }
-
-      InnerApplication.prototype.stopNodeAllAnimation = function (node) {
-        this._animationCtx.manager.removeAnimationByNode(node);
-      }
-
-      InnerApplication.prototype.loadImage = function (url, refresh) {
-        var loaderCtx = this._loaderCtx;
-        var loader = loaderCtx.loader;
-        if (loaderCtx.images[url]) {
-          loaderCtx.images[url].refresh |= refresh;
-          var image = loader.loadImageAsync(url);
-          return image;
-        } else {
-          loaderCtx.images[url] = {refresh: refresh};
-          var image = loader.loadImageAsync(url, functions.loadImageFinished, this);
-          return image;
-        }
-      }
-
-      InnerApplication.prototype.loadAudio = function (url) {
-        return this._loaderCtx.loader.loadAudioAsync(url);
-      }
-
-      InnerApplication.prototype.loadVideo = function (url) {
-        return this._loaderCtx.loader.loadVideoAsync(url);
+      InnerApplication.prototype.getFileLoader = function () {
+        return this._fileLoader;
       }
 
       InnerApplication.prototype.receiveDirtyZone = function (node, dirtyZone) {
         var renderZone = this._renderZone;
-        if (__WEBPACK_IMPORTED_MODULE_4__utils_geometry_util__["a" /* default */].isZoneNotCross(renderZone, dirtyZone)) {
+        if (__WEBPACK_IMPORTED_MODULE_4__utils_geometry_util__["a" /* default */].isRectNotCross(renderZone, dirtyZone)) {
           return false;
         }
         dirtyZone.left = Math.max(renderZone.left, dirtyZone.left);
         dirtyZone.right = Math.min(renderZone.right, dirtyZone.right);
         dirtyZone.top = Math.max(renderZone.top, dirtyZone.top);
-        dirtyZone.bottom = Math.min(renderZone.bottom, dirtyZone.bottom);
+        dirtyZone.bottom = Math.min(renderZone.top, dirtyZone.bottom);
         dirtyZone.width = dirtyZone.right - dirtyZone.left;
         dirtyZone.height = dirtyZone.bottom - dirtyZone.top;
         var dirtyZones = this._dirtyZones;
@@ -3940,15 +3855,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           var insert = true;
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var zone = dirtyZones[i];
-            if (__WEBPACK_IMPORTED_MODULE_4__utils_geometry_util__["a" /* default */].isZoneNotCross(zone, dirtyZone)) {
+            if (__WEBPACK_IMPORTED_MODULE_4__utils_geometry_util__["a" /* default */].isRectNotCross(zone, dirtyZone)) {
               continue;
             }
-            dirtyZone.left = Math.min(zone.left, dirtyZone.left);
-            dirtyZone.right = Math.max(zone.right, dirtyZone.right);
-            dirtyZone.top = Math.min(zone.top, dirtyZone.top);
-            dirtyZone.bottom = Math.max(zone.bottom, dirtyZone.bottom);
-            dirtyZone.width = dirtyZone.right - dirtyZone.left;
-            dirtyZone.height = dirtyZone.bottom - dirtyZone.top;
+            dirtyZone.left = Math.min(zone.left, left);
+            dirtyZone.right = Math.max(zone.right, right);
+            dirtyZone.top = Math.min(zone.top, top);
+            dirtyZone.bottom = Math.max(zone.top, top);
+            dirtyZone.width = right - left;
+            dirtyZone.height = bottom - top;
             insert = false;
             dirtyZones.splice(i, 1);
             break;
@@ -3967,17 +3882,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       InnerApplication.prototype.loop = function () {
         var now = (new Date()).getTime(), deltaTime = 0;
-        if (this._prevLoopTime !== 0) {
+        if (this._prevLoopTime != 0) {
           deltaTime = now - this._prevLoopTime;
           this._prevLoopTime = now;
-          this._animationCtx.manager.run(deltaTime);
+          this._animationManager.run(deltaTime);
         } else {
           this._prevLoopTime = now;
         }
         // 每半秒钟检测是否需要变换
         if (this._preCheckTime > 500) {
           this._preCheckTime = 0;
-          functions.syncRenderSize.call(this);
+          functions.checkRenderSize.call(this);
         } else {
           this._preCheckTime += deltaTime;
         }
@@ -3987,13 +3902,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           var root = this._root;
           var render = this._render;
           var transformCtx = this._transformCtx;
+          this._refresh = false;
           // 同步最新的结点转换
           root._syncTransform(transformCtx.transform, transformCtx.transform, renderZone, transformCtx.needUpdate);
           // 重新计算脏矩形
-          while (true) {
-            if (!root._reportCurDirtyZone(this, dirtyZones)) {
-              break;
-            }
+          if (this.enableDirtyZone) {
+            // 重复检测受影响区域
+            while (root._reportCurDirtyZone(this, dirtyZones)) { }
+          } else {
+            // 画布区域加上
+            dirtyZones.push(renderZone);
           }
           // 清理脏矩形区域
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
@@ -4006,23 +3924,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           dirtyZones.splice(0, dirtyZones.length);
           // 矩阵回归到单位矩阵
           render.setTransform(1, 0, 0, 1, 0, 0);
-          this._refresh = false;
-          this._dirtyZones = [];
         }
       }
 
       InnerApplication.prototype.run = function () {
         if (this._timerTaskId === 0) {
           if (this._root !== null) {
-            this._refresh = true;
-            this.receiveDirtyZone(null, {
-              left: this._renderZone.left,
-              top: this._renderZone.top,
-              right: this._renderZone.right,
-              bottom: this._renderZone.bottom,
-              width: this._renderZone.width,
-              height: this._renderZone.height
-            });
             this._timerTaskId = __WEBPACK_IMPORTED_MODULE_1__utils_timer_util__["a" /* default */].addAnimationTask(this.loop, this);
             this.postNotification('resize', this, [this._render.width, this._render.height]);
           }
@@ -4043,13 +3950,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           this._render.destroy();
           this._render = null;
         }
-        if (this._animationCtx) {
-          this._animationCtx.manager.destroy();
-          this._animationCtx = null;
+        if (this._animationManager) {
+          this._animationManager.destroy();
+          this._animationManager = null;
         }
-        if (this._loaderCtx) {
-          this._loaderCtx.loader.destroy();
-          this._loaderCtx = null;
+        if (this._fileLoader) {
+          this._fileLoader.destroy();
+          this._fileLoader = null;
         }
         this.super('destroy');
       }
@@ -4138,16 +4045,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_text_util__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_geometry_util__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ui_view__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__core_render_canvas_canvas_render__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_text_util__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__uiview__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__core_render_canvas_canvas_render__ = __webpack_require__(3);
 /**
  *
  * Author: iswear(471291492@qq.com)
  * Date: 2017/8/16
  */
-
 
 
 
@@ -4159,22 +4064,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
     var functions = (function () {
       function syncTextRender () {
-        var ctx = this._textCacheCtx;
-        if (this.text === null || this.text.trim().length === 0) {
-          this.removeObserver('render', renderLabelText, this, this);
-          ctx.render = null;
-        } else {
+        if (this.text !== null && this.text.length > 0) {
           if (this.getObserverByAllParams('render', renderLabelText, this, this) === null) {
             this.addObserver('render', renderLabelText, this, this);
           }
-          if (ctx.render === null) {
-            ctx.renderInvalid = true;
-            ctx.render = new __WEBPACK_IMPORTED_MODULE_4__core_render_canvas_canvas_render__["a" /* default */]({
-              canvas: doc.createElement('canvas'),
-              width: this.width,
-              height: this.height
-            });
-          }
+        } else {
+          this.removeObserver('render', renderLabelText, this, this);
         }
       }
 
@@ -4206,56 +4101,76 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
 
         var rect = this.getRectInLocal();
+        var left = rect.left;
+        var top = rect.top;
         var width = rect.width;
         var height = rect.height;
+
+        var cacheRender = renderCache.render;
+        var cacheWidth = cacheRender.width;
+        var cacheHeight = cacheRender.height;
 
         var contentWidth = width - this.borderWidth * 2;
         var contentHeight = height - this.borderWidth * 2;
 
         if (contentWidth > 0 && contentHeight > 0) {
-          var left = rect.left;
-          var top = rect.top;
+          var desX, desY;
+          if (this.textHorAlign > 0) {
+            desX = contentWidth - src
+          } else if (this.textHorAlign < 0) {
 
-          var cacheRender = renderCache.render;
-          var cacheWidth = cacheRender.width;
-          var cacheHeight = cacheRender.height;
+          } else {
 
-          var desRect = {
-            left: 0,
-            top: 0,
-            right: 0,
-            bottom: 0,
-            width: cacheWidth,
-            height: cacheHeight,
-          };
-          if (this.textHorAlign < 0) {
-            desRect.left = left + this.borderWidth;
-          } else if (this.textHorAlign > 0) {
-            desRect.left = left + this.borderWidth + contentWidth - cacheWidth;
+          }
+          if (this.textVerAlign > 0) {
+
+          } else if (this.textVerAlign < 0) {
+
           } else {
-            desRect.left = left + this.borderWidth + Math.ceil((contentWidth - cacheWidth) / 2);
+
           }
-          desRect.right = desRect.left + cacheWidth;
-          if (this.textVerAlign < 0) {
-            desRect.top = top + this.borderWidth;
-          } else if (this.textVerAlign > 0) {
-            desRect.top = top + this.borderWidth + contentHeight - cacheHeight;
-          } else {
-            desRect.top = top + this.borderWidth + Math.ceil((contentHeight - cacheHeight) / 2);
+        }
+
+
+
+
+
+
+
+
+
+
+
+        var rect = this.getRectInLocal();
+        var left = rect.left;
+        var top = rect.top;
+        var width = rect.width;
+        var height = rect.height;
+
+        var cacheRender = renderCache.render;
+        var cacheWidth = cacheRender.width;
+        var cacheHeight = cacheRender.height;
+
+        var srcWidth, srcHeight;
+        var desX = left + this.borderWidth;
+        var desY = top + this.borderWidth;
+        var textRenderWidth = width - this.borderWidth * 2;
+        var textRenderHeight = height - this.borderWidth * 2;
+
+        if (width > 0 && height > 0) {
+          srcWidth = (cacheWidth < textRenderWidth) ? cacheWidth : textRenderWidth;
+          srcHeight = (cacheHeight < textRenderHeight) ? cacheHeight : textRenderHeight;
+          if (this.textHorAlign > 0) {
+            desX += textRenderWidth - srcWidth;
+          } else if (this.textHorAlign === 0) {
+            desX += Math.ceil((textRenderWidth - srcWidth) / 2);
           }
-          desRect.bottom = desRect.top + cacheHeight;
-          var offsetLeft = - desRect.left;
-          var offsetTop = - desRect.top;
-          var cacheCanvas = cacheRender.getCanvas();
-          for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-            var dirtyZone = dirtyZones[i];
-            var crossRect = __WEBPACK_IMPORTED_MODULE_2__utils_geometry_util__["a" /* default */].getRectCross(desRect, dirtyZone);
-            if (crossRect !== null) {
-              render.drawImageExt(cacheCanvas,
-                crossRect.left + offsetLeft, crossRect.top + offsetTop, crossRect.width, crossRect.height,
-                crossRect.left, crossRect.top, crossRect.width, crossRect.height);
-            }
+          if (this.textVerAlign > 0) {
+            desY += textRenderHeight - srcHeight;
+          } else if (this.textVerAlign === 0) {
+            desY += Math.ceil((textRenderHeight - srcHeight) / 2);
           }
+          render.drawImageExt(cacheRender.getCanvas(), 0, 0, srcWidth, srcHeight, desX, desY, srcWidth, srcHeight);
         }
       }
       
@@ -4282,14 +4197,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var lineHeight = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(this.textLineHeight, 1.5 * this.fontSize);
         var lineNum = (this.textLineNum < 1 || this.textLineNum > lines.length) ? lines.length : this.textLineNum;
         var render = renderCache.render;
-        var renderWidth = (lineNum === 1) ? layoutInfo.width : (rect.width - 2 * this.borderWidth);
-        var renderHeight = lineHeight * lineNum + 1;
-        if (render.width !== render.width || render.height !== renderHeight) {
-          render.width = renderWidth;
-          render.height = renderHeight;
-        } else {
-          render.clear();
-        }
+        render.width = (lineNum === 1) ? layoutInfo.width : (rect.width - 2 * this.borderWidth);
+        render.height = lineHeight * lineNum + 1;
+        render.clear();
         render.textBaseline = 'middle';
         var tx = 0, ty = lineHeight / 2;
         if (this.textHorAlign < 0) {
@@ -4319,7 +4229,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     })();
 
     var UILabel = (function () {
-      var InnerUILabel = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_3__ui_view__["a" /* default */]);
+      var InnerUILabel = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_2__uiview__["a" /* default */]);
 
       InnerUILabel.prototype.defFontSize = 13;
       InnerUILabel.prototype.defFontFamily = 'Helvetica, Roboto, Arial, sans-serif';
@@ -4336,6 +4246,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.defineNotifyProperty('textVerAlign', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.textVerAlign, this.defTextVerAlign));
         this.defineNotifyProperty('textLineHeight', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.textLineHeight, undefined));
         this.defineNotifyProperty('textLineNum', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.textLineNum, 1));
+        this.defineNotifyProperty('textRichInfo', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.textRichInfo, null));
 
         this._textCacheCtx = {
           fontInvalid: true,
@@ -4343,13 +4254,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           layoutInvalid: true,
           layout: null,
           renderInvalid: true,
-          render: null
+          render: new __WEBPACK_IMPORTED_MODULE_3__core_render_canvas_canvas_render__["a" /* default */]({canvas:doc.createElement('canvas')})
         };
 
-        functions.syncTextRender.call(this);
-        functions.syncTextFontInvalid.call(this);
-        functions.syncTextLayoutInvalid.call(this);
-        functions.syncTextRenderInvalid.call(this);
+        functions.syncFont.call(this);
+        functions.syncLabelText.call(this);
 
         this.addObserver('textChanged', this.refresh, this, this);
         this.addObserver('fontSizeChanged', this.refresh, this, this);
@@ -4359,6 +4268,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.addObserver('textVerAlignChanged', this.refresh, this, this);
         this.addObserver('textLineHeightChanged', this.refresh, this, this);
         this.addObserver('textLineNumChanged', this.refresh, this, this);
+        this.addObserver('textRichInfo', this.refresh, this, this);
 
         this.addObserver('textChanged', functions.syncTextRender, this, this);
 
@@ -4378,6 +4288,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.addObserver('textHorAlignChanged', functions.syncTextRenderInvalid, this, this);
         this.addObserver('textLineHeightChanged', functions.syncTextRenderInvalid, this, this);
         this.addObserver('textLineNumChanged', functions.syncTextRenderInvalid, this, this);
+        this.addObserver('textRichInfoChanged', functions.syncTextRenderInvalid, this, this);
       }
 
       return InnerUILabel;
@@ -4404,12 +4315,96 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 /* harmony default export */ __webpack_exports__["a"] = ((
   function () {
+    var functions = (function () {
+      function syncMap (sender, newVal, oldVal) {
+        if (oldVal) {
+          this.removeChildNode(oldVal, true);
+        }
+        var map = this.map;
+        if (map) {
+          this.addChildNodeToLayer(map, 0);
+          if (map.getObserverByAllParams('xChanged', syncContainerZone, this, map) === null) {
+            map.addObserver('xChanged', syncContainerZone, this, map);
+          }
+          if (map.getObserverByAllParams('yChanged', syncContainerZone, this, map) === null) {
+            map.addObserver('yChanged', syncContainerZone, this, map);
+          }
+          if (map.getObserverByAllParams('rotateZChanged', syncContainerZone, this, map) === null) {
+            map.addObserver('rotateZChanged', syncContainerZone, this, map);
+          }
+          if (map.getObserverByAllParams('scaleXChanged', syncContainerZone, this, map) === null) {
+            map.addObserver('scaleXChanged', syncContainerZone, this, map);
+          }
+          if (map.getObserverByAllParams('scaleYChanged', syncContainerZone, this, map) === null) {
+            map.addObserver('scaleYChanged', syncContainerZone, this, map);
+          }
+          if (map.getObserverByAllParams('inclineX', syncContainerZone, this, map) === null) {
+            map.addObserver('inclineX', syncContainerZone, this, map);
+          }
+          if (map.getObserverByAllParams('inclineY', syncContainerZone, this, map) === null) {
+            map.addObserver('inclineY', syncContainerZone, this, map);
+          }
+          if (map.getObserverByAllParams('frame', syncContainerZoneListener, this, map) === null) {
+            map.addObserver('frame', syncContainerZoneListener, this, map);
+          }
+          this._needUpdateMapContainerZone = true;
+        }
+      }
+      function syncContainerZone (sender) {
+        this._needUpdateMapContainerZone = true;
+      }
+      function syncContainerZoneListener () {
+        if (this._needUpdateMapContainerZone) {
+          var map = this.map;
+          if (map) {
+            var rect = this.getRectInLocal();
+            var leftTop = map.transformPVectorToL([rect.left, rect.top]);
+            var leftBottom = map.transformPVectorToL([rect.left, rect.bottom]);
+            var rightTop = map.transformPVectorToL([rect.right, rect.top]);
+            var rightBottom = map.transformPVectorToL([rect.right, rect.bottom]);
+            map.containerLeft = Math.min(leftTop[0], leftBottom[0], rightTop[0], rightBottom[0]);
+            map.containerRight = Math.max(leftTop[0], leftBottom[0], rightTop[0], rightBottom[0]);
+            map.containerTop = Math.min(leftTop[1], leftBottom[1], rightTop[1], rightBottom[1]);
+            map.containerBottom = Math.max(leftTop[1], leftBottom[1], rightTop[1], rightBottom[1]);
+            this._needUpdateMapContainerZone = false;
+          }
+        }
+      }
+
+      return {
+        syncMap: syncMap,
+        syncContainerZone: syncContainerZone
+      }
+    })();
+
     var GScene = (function () {
       var InnerGScene = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__core_node__["a" /* default */]);
 
       InnerGScene.prototype.defLayer = 1;
       InnerGScene.prototype.defAnchorX = 0;
       InnerGScene.prototype.defAnchorY = 0;
+      InnerGScene.prototype.init = function (conf) {
+        this.super('init', [ conf ]);
+        this.defineNotifyProperty('map', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.map, null));
+        this.defineNotifyProperty('contentOffsetX', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.contentOffsetX, 0));
+        this.defineNotifyProperty('contentOffsetY', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.contentOffsetY, 0));
+
+        this._needUpdateMapContainerZone = true;
+
+        functions.syncMap.call(this);
+
+        this.addObserver('mapChanged', functions.syncMap, this, this);
+
+        this.addObserver('widthChanged', functions.syncContainerZone, this, this);
+        this.addObserver('heightChanged', functions.syncContainerZone, this, this);
+        this.addObserver('anchorXChanged', functions.syncContainerZone, this, this);
+        this.addObserver('anchorYChanged', functions.syncContainerZone, this, this);
+      }
+
+      InnerGScene.prototype.destroy = function () {
+        this.map = null;
+        this.super('destroy');
+      }
 
       return InnerGScene;
     })();
@@ -4424,7 +4419,95 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__core_node__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__gmap__ = __webpack_require__(6);
+/**
+ *
+ * Author: iswear(471291492@qq.com)
+ * Date: 2017/8/18
+ */
+
+
+
+/* harmony default export */ __webpack_exports__["a"] = ((
+  function () {
+    var functions = (function () {
+      function syncImg () {
+        if (this.img !== null && this.img !== '') {
+          var img = this._img;
+          img.url = this.img;
+          img.needAdjustMapSize = true;
+          if (this.getObserverByAllParams('render', renderImg, this, this) === null) {
+            this.addObserver('render', renderImg, this, this);
+          }
+        } else {
+          this.removeObserver('render', renderImg, this, this);
+        }
+        this.render();
+      }
+      function renderImg (sender, render) {
+        var img = this._img;
+        var image = this.findApplication().getFileLoader().loadImageAsync(
+          img.url,
+          imageLoadFinished,
+          this
+        );
+        if (image !== null) {
+          if (img.needAdjustMapSize) {
+            this.width = image.width;
+            this.height = image.height;
+            img.needAdjustMapSize = false;
+          }
+          var rect = this.getRectInLocal();
+          var left = rect.left < this.containerLeft ? this.containerLeft : rect.left;
+          var top = rect.top < this.containerTop ? this.containerTop : rect.top;
+          var width = (rect.right < this.containerRight ? rect.right : this.containerRight) - left;
+          var height = (rect.bottom < this.containerBottom ? rect.bottom : this.containerBottom) - top;
+          render.drawImageExt(image, left, top, width, height, left, top, width, height);
+        }
+      }
+      function imageLoadFinished (url, success) {
+        this.refresh();
+      }
+      
+      return {
+        syncImg: syncImg
+      }
+    })();
+
+    var GImageMap = (function () {
+      var InnerGImageMap = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__gmap__["a" /* default */]);
+
+      InnerGImageMap.prototype.defImg = null;
+      InnerGImageMap.prototype.init = function (conf) {
+        this.super('init', [ conf ]);
+        this.defineNotifyProperty('img', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.img, this.defImg));
+
+        this._img = {
+          needAdjustMapSize: true,
+          url: null,
+          width: 0,
+          height: 0
+        };
+
+        functions.syncImg.call(this);
+
+        this.addObserver('imgChanged', functions.syncImg, this, this);
+      }
+
+      return InnerGImageMap
+    })();
+
+    return GImageMap;
+  }
+)());
+
+/***/ }),
+/* 28 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__gmap__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__core_render_canvas_canvas_render__ = __webpack_require__(3);
 /**
  *
@@ -4435,618 +4518,623 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-
 /* harmony default export */ __webpack_exports__["a"] = ((
   function () {
+    var doc = document;
+
     var functions = (function () {
-      function syncMapNodeContext () {
-        var mapNode = this._mapNode;
-        this.removeObserver('mapXChanged', syncMapX, this, this);
-        this.removeObserver('mapYChanged', syncMapX, this, this);
-        this.removeObserver('anchorXChanged', syncMapAnchorX, this, this);
-        this.removeObserver('anchorYChanged', syncMapAnchorY, this, this);
-        this.removeObserver('mapTileWidthChanged', syncMapWidth, this, this);
-        this.removeObserver('mapTileRowsChanged', syncMapWidth, this, this);
-        this.removeObserver('mapTileColsChanged', syncMapWidth, this, this);
-        this.removeObserver('mapTileHeightChanged', syncMapHeight, this, this);
-        this.removeObserver('mapTileRowsChanged', syncMapHeight, this, this);
-        this.removeObserver('mapTileColsChanged', syncMapHeight, this, this);
-        this.removeObserver('render', renderSquareMap, this, this);
-        this.removeObserver('render', renderDiamondMap, this, this);
-        mapNode.removeObserver('frame', syncMapNodeX, this, this);
-        mapNode.removeObserver('frame', syncMapNodeY, this, this);
-        mapNode.removeObserver('frame', syncMapNodeAnchorX, this, this);
-        mapNode.removeObserver('frame', syncMapNodeAnchorY, this, this);
-        mapNode.removeObserver('frame', syncMapNodeWidthSquare, this, this);
-        mapNode.removeObserver('frame', syncMapNodeWidthDiamond, this, this);
-        mapNode.removeObserver('frame', syncMapNodeHeightSquare, this, this);
-        mapNode.removeObserver('frame', syncMapNodeHeightDiamond, this, this);
-        if (this.mapTileType === 'square') {
-          this.addObserver('mapXChanged', syncMapX, this, this);
-          this.addObserver('mapYChanged', syncMapY, this, this);
-          this.addObserver('anchorXChanged', syncMapAnchorX, this, this);
-          this.addObserver('anchorYChanged', syncMapAnchorY, this, this);
-          this.addObserver('mapTileWidthChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileColsChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileHeightChanged', syncMapHeight, this, this);
-          this.addObserver('mapTileRowsChanged', syncMapHeight, this, this);
-          this.addObserver('render', renderSquareMap, this, this);
-          mapNode.addObserver('frame', syncMapNodeX, this, this);
-          mapNode.addObserver('frame', syncMapNodeY, this, this);
-          mapNode.addObserver('frame', syncMapNodeAnchorX, this, this);
-          mapNode.addObserver('frame', syncMapNodeAnchorY, this, this);
-          mapNode.addObserver('frame', syncMapNodeWidthSquare, this, this);
-          mapNode.addObserver('frame', syncMapNodeHeightSquare, this, this);
-        } else if (this.mapTileType === 'diamond') {
-          this.addObserver('mapXChanged', syncMapX, this, this);
-          this.addObserver('mapYChanged', syncMapY, this, this);
-          this.addObserver('anchorXChanged', syncMapAnchorX, this, this);
-          this.addObserver('anchorYChanged', syncMapAnchorY, this, this);
-          this.addObserver('mapTileWidthChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileRowsChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileColsChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileHeightChanged', syncMapHeight, this, this);
-          this.addObserver('mapTileRowsChanged', syncMapHeight, this, this);
-          this.addObserver('mapTileColsChanged', syncMapHeight, this, this);
-          this.addObserver('render', renderDiamondMap, this, this);
-          mapNode.addObserver('frame', syncMapNodeX, this, this);
-          mapNode.addObserver('frame', syncMapNodeY, this, this);
-          mapNode.addObserver('frame', syncMapNodeAnchorX, this, this);
-          mapNode.addObserver('frame', syncMapNodeAnchorY, this, this);
-          mapNode.addObserver('frame', syncMapNodeWidthDiamond, this, this);
-          mapNode.addObserver('frame', syncMapNodeHeightDiamond, this, this);
+      var BLOCK_FULL = 0;
+      var BLOCK_TOP = 1;
+      var BLOCK_RIGHT = 2;
+      var BLOCK_BOTTOM = 3;
+      var BLOCK_LEFT = 4;
+      var BLOCK_TOP_LEFT = 5;
+      var BLOCK_TOP_RIGHT = 6;
+      var BLOCK_BOTTOM_LEFT = 7;
+      var BLOCK_BOTTOM_RIGHT = 8;
+
+      function syncVertex () {
+        this._renderContext.vertexInvalid = true;
+      }
+
+      function syncSize () {
+        this._renderContext.sizeInvalid = true;
+      }
+
+      function syncCache () {
+        this._renderContext.cacheInvalid = false;
+      }
+
+      function renderMap (sender, render) {
+        var renderContext = this._renderContext;
+        this._renderContext.cacheFore.imageCount = 0;
+        this._renderContext.cacheBack.imageCount = 0;
+        if (!renderContext.cacheValid) {
+          renderMapCache.call(this, renderContext);
+          renderContext.cacheValid = true;
+        }
+        if (this.tileType === 1) {
+          var x = this.containerLeft - renderContext.x;
+          var y = this.containerTop - renderContext.y;
+          var width = this.containerRight - this.containerLeft;
+          var height = this.containerBottom - this.containerTop;
+          if (width > 0 && height > 0) {
+            render.drawImageExt(renderContext.cacheFore.getCanvas(), x, y, width, height,
+              this.containerLeft, this.containerTop, width, height);
+          }
+        } else {
+          var x = this.containerLeft - renderContext.x;
+          var y = this.containerTop - renderContext.y;
+          var width = this.containerRight - this.containerLeft;
+          var height = this.containerBottom - this.containerTop;
+          if (width > 0 && height > 0) {
+            render.drawImageExt(renderContext.cacheFore.getCanvas(), x, y, width, height,
+              this.containerLeft, this.containerTop, width, height);
+          }
         }
       }
 
-      function syncMapBackgroundRender () {
-        this._mapCacheCtx.background.needRender = (this.mapBackgroundImage && this.mapBackgroundImage !== '') ? true : false;
-      }
-
-      function syncMapTilesRender () {
-        var tileCtx = this._mapCacheCtx.tile;
-        tileCtx.needRender = (this.tileData && __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isArray(this.tileData)) ? true : false;
-        tileCtx.offsetInvalid = true;
-        tileCtx.sizeInvalid = true;
-        tileCtx.foreInvalid = true;
-        tileCtx.backInvalid = true;
-      }
-
-      function syncMapNodeX () {
-        if (this._mapCacheCtx.mapXInvalid) {
-          this._mapNode.x = this.mapX;
-          this._mapCacheCtx.mapXInvalid = false;
+      function renderMapCache (renderContext) {
+        if (this.tileType === 1) {
+          renderMapCacheSquare.call(this, renderContext);
+        } else {
+          renderMapCacheDiamond.call(this, renderContext);
         }
       }
 
-      function syncMapNodeY () {
-        if (this._mapCacheCtx.mapYInvalid) {
-          this._mapNode.y = this.mapY;
-          this._mapCacheCtx.mapYInvalid = false;
+      function renderMapBlock (render, fileLoader, tileImg, tileImgClip, tileCell, srcType, tX, tY, tW, tH) {
+        var imgClip = tileImgClip[tileCell];
+        if (imgClip) {
+          var img = tileImg[imgClip.imgId];
+          if (img) {
+            var image = fileLoader.loadImageAsync(img, loadImageFinished, this);
+            if (image) {
+              switch (srcType) {
+                case BLOCK_FULL:
+                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height, tX, tY, tW, tH);
+                  break;
+                case BLOCK_TOP:
+                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width, imgClip.height / 2, tX, tY, tW, tH);
+                  break;
+                case BLOCK_RIGHT:
+                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height, tX, tY, tW, tH);
+                  break;
+                case BLOCK_BOTTOM:
+                  render.drawImageExt(image, imgClip.x, imgClip.y + imgClip.height / 2, imgClip.width, imgClip.height / 2, tX, tY, tW, tH);
+                  break;
+                case BLOCK_LEFT:
+                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height, tX, tY, tW, tH);
+                  break;
+                case BLOCK_TOP_LEFT:
+                  render.drawImageExt(image, imgClip.x, imgClip.y, imgClip.width / 2, imgClip.height / 2, tX, tY, tW, tH);
+                  break;
+                case BLOCK_TOP_RIGHT:
+                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y, imgClip.width / 2, imgClip.height / 2, tX, tY, tW, tH);
+                  break;
+                case BLOCK_BOTTOM_LEFT:
+                  render.drawImageExt(image, imgClip.x, imgClip.y + imgClip.height / 2, imgClip.width / 2, imgClip.height / 2, tX, tY, tW, tH);
+                  break;
+                case BLOCK_BOTTOM_RIGHT:
+                  render.drawImageExt(image, imgClip.x + imgClip.width / 2, imgClip.y + imgClip.height / 2, imgClip.width / 2, imgClip.height / 2, tX, tY, tW, tH);
+                  break;
+                default:
+                  break;
+              }
+            }
+          }
         }
       }
 
-      function syncMapNodeAnchorX () {
-        if (this._mapCacheCtx.mapAnchorXInvalid) {
-          this._mapNode.anchorX = this.anchorX;
-          this._mapCacheCtx.mapAnchorXInvalid = false;
-        }
-      }
-
-      function syncMapNodeAnchorY () {
-        if (this._mapCacheCtx.mapAnchorYInvalid) {
-          this._mapNode.anchorY = this.anchorY;
-          this._mapCacheCtx.mapAnchorYInvalid = false;
-        }
-      }
-
-      function syncMapNodeWidthSquare () {
-        if (this._mapCacheCtx.mapWidthInvalid) {
-          this._mapNode.width = this.mapTileWidth * this.mapTileCols;
-          this._mapCacheCtx.mapWidthInvalid = false;
-        }
-      }
-
-      function syncMapNodeWidthDiamond () {
-        if (this._mapCacheCtx.mapWidthInvalid) {
-          this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
-          this._mapCacheCtx.mapWidthInvalid = false;
-        }
-      }
-
-      function syncMapNodeHeightSquare () {
-        if (this._mapCacheCtx.mapHeightInvalid) {
-          this._mapNode.height = this.mapTileHeight * this.mapTileRows;
-          this._mapCacheCtx.mapHeightInvalid = false;
-        }
-      }
-
-      function syncMapNodeHeightDiamond () {
-        if (this._mapCacheCtx.mapHeightInvalid) {
-          this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
-          this._mapCacheCtx.mapHeightInvalid = false;
-        }
-      }
-
-      function syncMapX () {
-        this._mapCacheCtx.mapXInvalid = true;
-      }
-
-      function syncMapY () {
-        this._mapCacheCtx.mapYInvalid = true;
-      }
-
-      function syncMapWidth () {
-        this._mapCacheCtx.mapWidthInvalid = true;
-      }
-
-      function syncMapHeight () {
-        this._mapCacheCtx.mapHeightInvalid = true;
-      }
-
-      function syncMapAnchorX () {
-        this._mapCacheCtx.mapAnchorXInvalid = true;
-      }
-
-      function syncMapAnchorY () {
-        this._mapCacheCtx.mapAnchorYInvalid = true;
-      }
-
-      function renderSquareMap (sender, render, dirtyZones) {
-        var ctx = this._mapCacheCtx;
-        var tileCtx = ctx.tile;
-        if (tileCtx.needRender && tileCtx.foreInvalid) {
-          renderSquareMapCache.call(this, tileCtx);
-          tileCtx.foreInvalid = false;
-        }
-        // var backgroundCtx = ctx.background;
-      }
-
-      function renderDiamondMap (sender, render, dirtyZones) {
-        var ctx = this._mapCacheCtx;
-        var tileCtx = ctx.tile;
-        if (tileCtx.needRender && tileCtx.foreInvalid) {
-          renderDiamondMapCache.call(this, tileCtx);
-          tileCtx.foreInvalid = false;
-        }
-        // var backgroundCtx = ctx.background;
-      }
-
-      function renderSquareMapCache (sender, render, dirtyZones) {
-        var ctx = this._mapCacheCtx.tile;
-        var zone = this.getZoneInLocal();
-        var mapNodeZone = this._mapNode.getZoneInLocal();
-
+      function renderMapCacheSquare (renderContext) {
         var tileWidth = this.tileWidth;
         var tileHeight = this.tileHeight;
+        var tileStepWidth = tileWidth;
+        var tileStepHeight = tileHeight;
 
-        var oldWidth = ctx.width;
-        var oldHeight = ctx.height;
+        var oldX = renderContext.x;
+        var oldY = renderContext.y;
+        var oldWidth = renderContext.width;
+        var oldHeight = renderContext.height;
+        var newX = oldX;
+        var newY = oldY;
         var newWidth = oldWidth;
         var newHeight = oldHeight;
-        if (ctx.sizeInvalid) {
-          newWidth = Math.ceil(this.width / tileWidth) * tileWidth;
-          newHeight = Math.ceil(this.height / tileHeight) * tileHeight;
-          ctx.width = newWidth;
-          ctx.height = newHeight;
-          ctx.sizeInvalid = false;
+
+        if (renderContext.vertexInvalid) {
+          newX = Math.floor(this.containerLeft / tileWidth) * tileWidth;
+          newY = Math.floor(this.containerTop / tileHeight) * tileHeight;
+          renderContext.x = newX;
+          renderContext.y = newY;
+          renderContext.vertexInvalid = false;
         }
 
-        var oldLeft = ctx.left;
-        var oldTop = ctx.top;
-        var newLeft = oldLeft;
-        var newTop = oldTop;
-        if (ctx.offsetInvalid) {
-          newLeft = Math.floor(((zone.left - this.mapX - mapNodeZone.left) / tileWidth)) * tileWidth;
-          newTop = Math.floor(((zone.top - this.mapY - mapNodeZone.top) / tileHeight)) * tileHeight;
-          ctx.left = newLeft;
-          ctx.top = newTop;
-          ctx.offsetInvalid = false;
+        if (renderContext.sizeInvalid) {
+          newWidth = Math.ceil(this.containerRight / tileWidth)  * tileWidth - newX;
+          newHeight = Math.ceil(this.containerBottom / tileHeight) * tileHeight - newY;
+          renderContext.width = newWidth;
+          renderContext.height = newHeight;
+          renderContext.sizeInvalid = false;
         }
+        var tileData = this.tileData;
+        if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isNotArray(tileData)) {
+          return;
+        }
+        var sRow = Math.floor(this.containerTop / tileHeight);
+        var sCol = Math.floor(this.containerLeft / tileWidth);
+        if (renderContext.cacheInit) {
+          if (newWidth !== oldWidth || newHeight !== oldHeight || newX !== oldX || newY !== oldY) {
+            var clipWidth = Math.min(newWidth + newX, oldWidth + oldX) - Math.max(newX, oldX);
+            var clipHeight = Math.min(newHeight + newY, oldHeight + oldY) - Math.max(newY, oldY);
+            var clip = clipWidth > 0 && clipHeight > 0;
+            var clipTarLeft = 0, clipTarTop = 0, clipTarRight = 0, clipTarBottom = 0;
+            var cacheFore = renderContext.cacheBack;
+            var cacheBack = renderContext.cacheFore;
+            cacheFore.width = newWidth;
+            cacheFore.height = newHeight;
+            if (clip) {
+              var clipSrcLeft = newX > oldX ? (newX - oldX) : 0;
+              var clipSrcTop = newY > oldY ? (newY - oldY) : 0;
+              clipTarLeft = newX < oldX ? (oldX - newX) : 0;
+              clipTarRight = clipWidth + clipTarLeft;
+              clipTarTop = newY < oldY ? (oldY - newY) : 0;
+              clipTarBottom = clipHeight + clipTarTop;
+              cacheFore.drawImageExt(cacheBack.getCanvas(), clipSrcLeft, clipSrcTop, clipWidth, clipHeight,
+                clipTarLeft, clipTarTop, clipWidth, clipHeight);
+            }
 
-        var sRow = newLeft / tileWidth;
-        var sCol = newTop / tileHeight;
-        var rowCount = this.mapTileRows;
-        var colCount = this.mapTileCols;
-        if (ctx.backInvalid) {
-          var foreRender = ctx.backRender;
-          var backRender = ctx.foreRender;
-          if (foreRender.width !== newWidth && foreRender.height !== newHeight) {
-            foreRender.width = newWidth;
-            foreRender.height = newHeight;
-          } else {
-            foreRender.clear();
-          }
-
-          var application = this.findApplication();
-          var tileData = this.tileData;
-          var tileImage = this.tileImage;
-          var tileImageClip = this.tileImageClip;
-          for (var row = sRow, tileY = 0;
-               row >= 0 && row < rowCount && tileY < newHeight;
-               row += 1, tileY += tileHeight) {
-            var tileRow = tileData[row];
-            for (var col = sCol, tileX = 0;
-                 col >= 0 && col < colCount && tileX < newWidth;
-                 col += 1, tileX += tileWidth) {
-              var tileCell = tileRow[col];
-              if (!tileCell) {
-                continue;
-              }
-              var imageClip = tileImageClip[tileCell];
-              if (imageClip) {
-                var image = tileImage[imageClip.imageId];
-                if (image) {
-                  var img = application.loadImage(image, true);
-                  if (img !== null) {
-                    foreRender.drawImageExt(img, image.x, image.y, image.width, image.height, tileX, tileY, tileWidth, tileHeight);
+            var fileLoader = this.findApplication().getFileLoader();
+            var tileImg = this.tileImg;
+            var tileImgClip = this.tileImgClip;
+            var tileDataLen = tileData.length;
+            for (var row = sRow, tileY = 0; tileY < newHeight && row < tileDataLen; row += 1, tileY += tileStepHeight) {
+              var tileRow = tileData[row];
+              if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isArray(tileRow)) {
+                var tileRowLen = tileRow.length;
+                for (var col = sCol, tileX = 0; tileX < newWidth && col < tileRowLen; col += 1, tileX += tileStepWidth) {
+                  if (!(clip && tileX >= clipTarLeft && tileX < clipTarRight && tileY >= clipTarTop && tileY < clipTarBottom)) {
+                    var tileCell = tileRow[col];
+                    renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL, tileX, tileY, tileWidth, tileHeight);
                   }
                 }
               }
             }
+            cacheBack.clear();
+            renderContext.cacheBack = cacheBack;
+            renderContext.cacheFore = cacheFore;
           }
-          ctx.foreRender = foreRender;
-          ctx.backRender = backRender;
-        } else if (newWidth !== oldWidth || newHeight !== oldHeight || newLeft !== oldLeft || newTop !== oldTop) {
-          var foreRender = ctx.backRender;
-          var backRender = ctx.foreRender;
-          if (foreRender.width !== newWidth && foreRender.height !== newHeight) {
-            foreRender.width = newWidth;
-            foreRender.height = newHeight;
-          } else {
-            foreRender.clear();
+        } else {
+          renderContext.cacheInit = true;
+          var cacheFore = renderContext.cacheFore;
+          if (newWidth !== oldWidth || newHeight !== oldHeight) {
+            cacheFore.width = newWidth;
+            cacheFore.height = newHeight;
           }
-          var clipWidth = Math.min(newWidth + newLeft, oldWidth + oldLeft) - Math.max(newLeft, oldLeft);
-          var clipHeight = Math.min(newHeight + newTop, oldHeight + oldTop) - Math.max(newTop, oldTop);
-          var clip = clipWidth > 0 && clipHeight > 0;
-          var clipTarLeft = 0;
-          var clipTarTop = 0;
-          var clipTarRight = 0;
-          var clipTarBottom = 0;
-          if (clip) {
-            clipTarLeft = newLeft < oldLeft ? (oldLeft - newLeft) : 0;
-            clipTarRight = clipWidth + clipTarLeft;
-            clipTarTop = newTop < oldTop ? (oldTop - newTop) : 0;
-            clipTarBottom = clipHeight + clipTarTop;
-            foreRender.drawImageExt(backRender.getCanvas(), newLeft > oldLeft ? (newLeft - oldLeft) : 0, newTop > oldTop ? (newTop - oldTop) : 0, clipWidth, clipHeight,
-              clipTarLeft, clipTarTop, clipWidth, clipHeight);
-          }
-          var application = this.findApplication();
-          var tileData = this.tileData;
-          var tileImage = this.tileImage;
-          var tileImageClip = this.tileImageClip;
-          for (var row = sRow, tileY = 0;
-               row >= 0 && row < rowCount && tileY < newHeight;
-               row += 1, tileY += tileHeight) {
+          var fileLoader = this.findApplication().getFileLoader();
+          var tileImg = this.tileImg;
+          var tileImgClip = this.tileImgClip;
+
+          var tileDataLen = tileData.length;
+          for (var row = sRow, tileY = 0; tileY < newHeight && row < tileDataLen; row += 1, tileY += tileStepHeight) {
             var tileRow = tileData[row];
-            for (var col = sCol, tileX = 0;
-                 col >= 0 && col < colCount && tileX < newWidth;
-                 col += 1, tileX += tileWidth) {
-              if (clip && tileX >= clipTarLeft && tileX < clipTarRight && tileY >= clipTarTop && tileY < clipTarBottom) {
-                continue;
-              }
-              var tileCell = tileRow[col];
-              if (!tileCell) {
-                continue;
-              }
-              var imageClip = tileImageClip[tileCell];
-              if (imageClip) {
-                var image = tileImage[imageClip.imageId];
-                if (image) {
-                  var img = application.loadImage(image, true);
-                  if (img !== null) {
-                    foreRender.drawImageExt(img, image.x, image.y, image.width, image.height, tileX, tileY, tileWidth, tileHeight);
-                  }
-                }
+            if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isArray(tileRow)) {
+              var tileRowLen = tileRow.length;
+              for (var col = sCol, tileX = 0; tileX < newWidth && col < tileRowLen; col += 1, tileX += tileStepWidth) {
+                var tileCell = tileRow[col];
+                renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL, tileX, tileY, tileWidth, tileHeight);
               }
             }
           }
-          ctx.foreRender = foreRender;
-          ctx.backRender = backRender;
         }
-        ctx.backInvalid = false;
-        ctx.foreInvalid = false;
       }
 
-      function renderDiamondMapCache (sender, render, dirtyZones) {
-        var ctx = this._mapCacheCtx.tile;
-        var zone = this.getZoneInLocal();
-        var mapNodeZone = this._mapNode.getZoneInLocal();
-
+      function renderMapCacheDiamond(renderContext) {
         var tileWidth = this.tileWidth;
         var tileHeight = this.tileHeight;
-        var halfTileWidth = tileWidth / 2;
-        var halfTileHeight = tileHeight / 2;
+        var tileStepWidth = tileWidth / 2;
+        var tileStepHeight = tileHeight / 2;
 
-        var containerLeft = zone.left - this.mapX - mapNodeZone.left - this.mapTileRows * halfTileWidth;
-        var containerTop = zone.top - this.mapY - mapNodeZone.top;
-        var containerRight = containerLeft + this.width;
-        var containerBottom = containerTop + this.height;
+        var sRow = Math.floor(this.containerTop / tileHeight - this.containerLeft / tileWidth);
+        var sCol = Math.floor(this.containerTop / tileHeight + this.containerLeft / tileWidth);
+        var eRow = Math.floor(this.containerBottom / tileHeight - this.containerRight / tileWidth);
+        var eCol = Math.floor(this.containerBottom / tileHeight + this.containerRight / tileWidth);
 
-        var sRow = Math.floor(containerTop / tileHeight - containerLeft / tileWidth);
-        var sCol = Math.floor(containerTop / tileHeight + containerLeft / tileWidth);
-        var eRow = Math.floor(containerBottom / tileHeight - containerRight / tileWidth);
-        var eCol = Math.floor(containerBottom / tileHeight + containerRight / tileWidth);
+        var oldX = renderContext.x;
+        var oldY = renderContext.y;
+        var oldWidth = renderContext.width;
+        var oldHeight = renderContext.height;
 
-        var oldLeft = ctx.left;
-        var oldTop = ctx.top;
-        var newLeft = oldLeft;
-        var newTop = oldTop;
-        if (ctx.offsetInvalid) {
-          newLeft = ((sCol - sRow - 1) * halfTileWidth) + containerLeft;
-          newTop = (sCol + sRow) * halfTileHeight;
-          ctx.left = newLeft;
-          ctx.top = newTop;
-          ctx.offsetInvalid = false;
-        }
-
-        var oldWidth = ctx.width;
-        var oldHeight = ctx.height;
+        var newX = oldX;
+        var newY = oldY;
         var newWidth = oldWidth;
         var newHeight = oldHeight;
-        if (ctx.sizeInvalid) {
-          newWidth = (eCol - eRow + 1) * halfTileWidth - newLeft;
-          newHeight = (eCol + eRow + 2) * halfTileHeight - newTop;
-          ctx.width = newWidth;
-          ctx.height = newHeight;
-          ctx.sizeInvalid = false;
+        if (renderContext.vertexInvalid) {
+          newX = (sCol - sRow - 1) * tileStepWidth;
+          newY = (sCol + sRow) * tileStepHeight;
+          renderContext.x = newX;
+          renderContext.y = newY;
+          renderContext.vertexInvalid = false;
+        }
+        if (renderContext.sizeInvalid) {
+          newWidth = (eCol - eRow + 1) * tileStepWidth - newX;
+          newHeight = (eCol + eRow + 2) * tileStepHeight - newY;
+          renderContext.width = newWidth;
+          renderContext.height = newHeight;
+          renderContext.sizeInvalid = false;
+        }
+        var tileData = this.tileData;
+        if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isNotArray(tileData)) {
+          return;
         }
 
-        var rowCount = this.mapTileRows;
-        var colCount = this.mapTileCols;
-        if (ctx.backInvalid) {
-          var foreRender = ctx.backRender;
-          var backRender = ctx.foreRender;
-          if (foreRender.width !== newWidth && foreRender.height !== newHeight) {
-            foreRender.width = newWidth;
-            foreRender.height = newHeight;
-          } else {
-            foreRender.clear();
-          }
-          var application = this.findApplication();
-          var tileData = this.tileData;
-          var tileImage = this.tileImage;
-          var tileImageClip = this.tileImageClip;
-          for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
-               startTileY < newHeight;
-               startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
-            if (startRow < 0 || startCol >= colCount) {
-              break;
-            }
-            for (var row = startRow, col = startCol, tileX = startTileX, tileY = startTileY;
-                 tileX < newWidth;
-                 row -= 1, col += 1, tileX += tileWidth) {
-              if (row < 0 || col >= colCount) {
-                break;
-              }
-              if (row >= rowCount || col < 0) {
-                continue;
-              }
-              var tileCell = tileData[row][col];
-              if (!tileCell) {
-                continue;
-              }
-              var imageClip = tileImageClip[tileCell];
-              if (imageClip) {
-                var image = tileImage[imageClip.imageId];
-                if (image) {
-                  var img = application.loadImage(image, true);
-                  if (img !== null) {
-                    var srcX = image.x;
-                    var srcY = image.y;
-                    var srcWidth = image.width;
-                    var srcHeight = image.height;
-                    var desX = tileX;
-                    var desY = tileY;
-                    var desWidth = tileWidth;
-                    var desHeight = tileHeight;
-                    if (desX < 0) {
-                      srcX += image.width / 2;
-                      srcWidth -= image.width / 2;
-                      desX += halfTileWidth;
-                      desWidth -= halfTileWidth;
-                    } else if (desX + tileWidth > newWidth) {
-                      srcWidth -= image.width / 2;
-                      desWidth -= halfTileWidth;
-                    }
-                    if (desY < 0) {
-                      srcY += image.height / 2;
-                      srcHeight -= image.height / 2;
-                      desY += halfTileHeight;
-                      desHeight -= halfTileHeight;
-                    } else if (desY + tileHeight > newWidth) {
-                      srcHeight -= image.height / 2;
-                      desHeight -= halfTileHeight;
-                    }
-                    foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
-                      desX, desY, desWidth, desHeight);
-                  }
-                }
-              }
-            }
-          }
-          ctx.foreRender = foreRender;
-          ctx.backRender = backRender;
-        } else if (newWidth !== oldWidth || newHeight !== oldHeight || newLeft !== oldLeft || newTop !== oldTop) {
-          var foreRender = ctx.backRender;
-          var backRender = ctx.foreRender;
-          if (foreRender.width !== newWidth && foreRender.height !== newHeight) {
-            foreRender.width = newWidth;
-            foreRender.height = newHeight;
-          } else {
-            foreRender.clear();
-          }
-          var clipWidth = Math.min(newWidth + newLeft, oldWidth + oldLeft) - Math.max(newLeft, oldLeft);
-          var clipHeight = Math.min(newHeight + newTop, oldHeight + oldTop) - Math.max(newTop, oldTop);
-          var clip = clipWidth > 0 && clipHeight > 0;
-          var clipTarLeft = 0;
-          var clipTarTop = 0;
-          var clipTarRight = 0;
-          var clipTarBottom = 0;
-          if (clip) {
-            clipTarLeft = newLeft < oldLeft ? (oldLeft - newLeft) : 0;
-            clipTarRight = clipWidth + clipTarLeft;
-            clipTarTop = newTop < oldTop ? (oldTop - newTop) : 0;
-            clipTarBottom = clipHeight + clipTarTop;
-            foreRender.drawImageExt(backRender.getCanvas(), newLeft > oldLeft ? (newLeft - oldLeft) : 0, newTop > oldTop ? (newTop - oldTop) : 0, clipWidth, clipHeight,
-              clipTarLeft, clipTarTop, clipWidth, clipHeight);
+        var edgeLeft = -tileStepWidth;
+        var edgeRight = newWidth - tileStepWidth;
+        var edgeTop = -tileStepHeight;
+        var edgeBottom = newHeight - tileStepHeight;
+        var clip = false;
+        if (renderContext.cacheInit) {
+          if (newWidth !== oldWidth || newHeight !== oldHeight || newX !== oldX || newY !== oldY) {
+            var clipWidth = Math.min(newWidth + newX, oldWidth + oldX) - Math.max(newX, oldX);
+            var clipHeight = Math.min(newHeight + newY, oldHeight + oldY) - Math.max(newY, oldY);
+            clip = clipWidth > 0 && clipHeight > 0;
+            if (clip) {
+              var clipSrcLeft = newX > oldX ? (newX - oldX) : 0;
+              var clipSrcTop = newY > oldY ? (newY - oldY) : 0;
+              var clipTarLeft = newX < oldX ? (oldX - newX) : 0;
+              var clipTarTop = newY < oldY ? (oldY - newY) : 0;
+              var clipTarRight = clipTarLeft + clipWidth;
+              var clipTarBottom = clipTarTop + clipHeight;
+              var cacheFore = renderContext.cacheBack;
+              var cacheBack = renderContext.cacheFore;
+              var edgeClipLeft = clipTarLeft - tileStepWidth;
+              var edgeClipRight = clipTarRight - tileStepWidth;
+              var edgeClipTop = clipTarTop - tileStepHeight;
+              var edgeClipBottom = clipTarBottom - tileStepHeight;
+              cacheFore.width = newWidth;
+              cacheFore.height = newHeight;
+              cacheFore.drawImageExt(cacheBack.getCanvas(), clipSrcLeft, clipSrcTop, clipWidth, clipHeight,
+                clipTarLeft, clipTarTop, clipWidth, clipHeight);
 
-          }
-          var application = this.findApplication();
-          var tileData = this.tileData;
-          var tileImage = this.tileImage;
-          var tileImageClip = this.tileImageClip;
-          for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
-               startTileY < newHeight;
-               startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
-            if (startRow < 0 || startCol >= colCount) {
-              break;
-            }
-            for (row = startRow, col = startCol, tileX = startTileX , tileY = startTileY;
-              tileX < newWidth;
-              row -= 1, col += 1, tileX += tileWidth) {
-              if (row < 0 || col >= colCount) {
-                break;
-              }
-              if (row >= rowCount || col < 0) {
-                continue;
-              }
-              var tileCell = tileData[row][col];
-              if (!tileCell) {
-                continue;
-              }
-              var imageClip = tileImageClip[tileCell];
-              if (imageClip) {
-                var image = tileImage[imageClip.imageId];
-                if (image) {
-                  var img = application.loadImage(image, true);
-                  if (img !== null) {
-                    var halfImageWidth = image.width / 2;
-                    var halfImageHeight = image.height / 2;
-                    var srcX = image.x;
-                    var srcY = image.y;
-                    var srcWidth = image.width;
-                    var srcHeight = image.height;
-                    var desX = tileX;
-                    var desY = tileY;
-                    var desWidth = tileWidth;
-                    var desHeight = tileHeight;
-                    if (desX < 0) {
-                      srcX += halfImageWidth;
-                      desX += halfTileWidth;
-                      srcWidth -= halfImageWidth;
-                      desWidth -= halfTileWidth;
-                    } else if (desX + tileWidth > newWidth) {
-                      srcWidth -= halfImageWidth;
-                      desWidth -= halfTileWidth;
-                    }
-                    if (desY < 0) {
-                      srcY += halfImageHeight;
-                      desY += halfTileHeight;
-                      srcHeight -= halfImageHeight;
-                      desHeight -= halfTileHeight;
-                    } else if (desY + tileHeight > newHeight) {
-                      srcHeight -= halfImageHeight;
-                      desHeight -= halfTileHeight;
-                    }
-                    if (clip) {
-                      if (desY + desHeight <= clipTarTop) {
-                        foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
-                          desX, desY, desWidth, desHeight);
-                      } else if (desY >= clipTarBottom) {
-                        foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
-                          desX, desY, desWidth, desHeight);
-                      } else {
-                        if (desX + desWidth <= clipTarLeft) {
-                          foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
-                            desX, desY, desWidth, desHeight);
-                        } else if (desX >= clipTarRight) {
-                          foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
-                            desX, desY, desWidth, desHeight);
-                        } else {
-                          if (tileY + halfTileHeight === clipTarTop) {
-                            if (tileX + halfTileWidth === clipTarLeft) {
-                              if (clipTarLeft > 0) {
-                                if (clipTarTop > 0) {
-                                  foreRender.drawImageExt(img, image.x, image.y, image.width, halfImageHeight,
-                                    tileX, tileY, tileWidth, halfTileHeight);
-                                }
-                                foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, halfImageWidth, halfImageHeight,
-                                  tileX, tileY + halfTileHeight, halfTileWidth, halfTileHeight);
-                              } else {
-                                if (clipTarTop > 0) {
-                                  foreRender.drawImageExt(img, image.x + halfImageWidth, halfImageWidth, halfImageHeight,
-                                    tileX + halfTileWidth, tileY, halfTileWidth, halfTileHeight);
-                                }
-                              }
-                            } else if (tileX + halfTileWidth === clipTarRight) {
-                              if (clipTarRight < newWidth) {
-                                if (clipTarTop > 0) {
-                                  foreRender.drawImageExt(img, image.x, image.y, image.width, halfImageHeight,
-                                    tileX, tileY, tileWidth, halfTileHeight);
-                                }
-                                foreRender.drawImageExt(img, image.x + halfImageWidth, image.y + halfImageHeight, halfImageWidth, halfImageHeight,
-                                  tileX + halfTileWidth, tileY + halfTileHeight, halfTileWidth, halfTileHeight);
-                              } else {
-                                if (clipTarTop > 0) {
-                                  foreRender.drawImageExt(img, image.x, image.y, halfImageWidth, halfImageHeight,
-                                    tileX, tileY, halfTileWidth, halfTileHeight);
-                                }
-                              }
+              var fileLoader = this.findApplication().getFileLoader();
+              var tileImg = this.tileImg;
+              var tileImgClip = this.tileImgClip;
+
+              var tileDataLen = tileData.length;
+              // 往上面绘制
+              for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = -tileStepHeight;
+                   startTileX < newWidth;
+                   row -= 1, startCol += 1, startTileX += tileWidth) {
+                if (row >= 0 && row < tileDataLen) {
+                  var tileRow = tileData[row];
+                  if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isArray(tileRow)) {
+                    var tileRowLen = tileRow.length;
+                    for (var col = startCol, tileX = startTileX, tileY = startTileY;
+                         tileX < newWidth && tileY < newHeight;
+                         col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
+                      if (col >= 0 && col < tileRowLen) {
+                        var tileCell = tileRow[col];
+                        if (tileX < edgeClipLeft || tileX > edgeClipRight || tileY < edgeClipTop || tileY > edgeClipBottom) {
+                          if (tileX === edgeLeft) {
+                            if (tileY === edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_RIGHT,
+                                tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                            } else if (tileY === edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_RIGHT,
+                                tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
                             } else {
-                              if (clipTarTop > 0) {
-                                foreRender.drawImageExt(img, image.x, image.y, image.width, halfImageHeight,
-                                  tileX, tileY, tileWidth, halfTileHeight);
-                              }
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_RIGHT,
+                                tileX + tileStepWidth, tileY, tileStepWidth, tileHeight);
                             }
-                          } else if (tileY + halfTileHeight === clipTarBottom) {
-                            if (tileX + halfTileWidth === clipTarLeft) {
-                              if (clipTarLeft > 0) {
-                                if (clipTarBottom < newHeight) {
-                                  foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, image.width, halfImageHeight,
-                                    tileX, tileY + halfTileHeight, tileWidth, halfTileHeight);
-                                }
-                                foreRender.drawImageExt(img, image.x, image.y, halfImageWidth, halfImageHeight,
-                                  tileX, tileY, halfImageWidth, halfImageHeight);
-                              } else {
-                                if (clipTarBottom < newHeight) {
-                                  foreRender.drawImageExt(img, image.x + halfImageWidth, image.y + halfImageHeight, halfImageWidth, halfImageHeight,
-                                    tileX + halfTileWidth, tileY + halfTileHeight, halfTileWidth, halfTileHeight);
-                                }
-                              }
-                            } else if (tileX + halfTileWidth === clipTarRight) {
-                              if (clipTarRight < newWidth) {
-                                if (clipTarBottom < newHeight) {
-                                  foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, image.width, halfImageHeight,
-                                    tileX, tileY + halfTileHeight, tileWidth, halfTileHeight);
-                                }
-                                foreRender.drawImageExt(img, image.x + halfImageWidth, image.y, halfImageWidth, halfImageHeight,
-                                  tileX + halfTileWidth, tileY, halfTileWidth, halfTileHeight);
-                              } else {
-                                if (clipTarBottom < newHeight) {
-                                  foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, halfImageWidth, halfImageHeight,
-                                    tileX, tileY + halfImageHeight, halfTileWidth, halfTileHeight);
-                                }
-                              }
+                          } else if (tileX === edgeRight) {
+                            if (tileY === edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_LEFT,
+                                tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                            } else if (tileY === edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_LEFT,
+                                tileX, tileY, tileStepWidth, tileStepHeight);
                             } else {
-                              if (clipTarBottom < newHeight) {
-                                foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, image.width, halfImageHeight,
-                                  tileX, tileY + halfTileHeight, tileWidth, halfTileHeight);
-                              }
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_LEFT,
+                                tileX, tileY, tileStepWidth, tileHeight);
                             }
                           } else {
-                            if (tileX + halfTileWidth === clipTarLeft) {
-                              foreRender.drawImageExt(img, image.x, image.y, halfImageWidth, image.height,
-                                tileX, tileY, halfTileWidth, tileHeight);
-                            } else if (tileX + halfTileWidth === clipTarRight) {
-                              foreRender.drawImageExt(img, image.x + halfImageWidth, image.y, halfImageWidth, image.height,
-                                tileX + halfTileWidth, tileY, halfTileWidth, tileHeight);
+                            if (tileY === edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            } else if (tileY === edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            } else {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL,
+                                tileX, tileY, tileWidth, tileHeight);
+                            }
+                          }
+                        } else if (tileX === edgeClipLeft) {
+                          if (tileY === edgeClipTop) {
+                            if (tileY > edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_LEFT,
+                              tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                          } else if (tileY === edgeClipBottom) {
+                            if (tileY < edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_LEFT,
+                              tileX, tileY, tileStepWidth, tileStepHeight);
+                          } else {
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_LEFT,
+                              tileX, tileY, tileStepWidth, tileHeight);
+                          }
+                        } else if (tileX === edgeClipRight) {
+                          if (tileY === edgeClipTop) {
+                            if (tileY > edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_RIGHT,
+                              tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                          } else if (tileY === edgeClipBottom) {
+                            if (tileY < edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_RIGHT,
+                              tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
+                          } else {
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_RIGHT,
+                              tileX + tileStepWidth, tileY, tileStepWidth, tileHeight);
+                          }
+                        } else {
+                          if (tileY === edgeClipTop) {
+                            if (tileY > edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            }
+                          } else if (tileY === edgeClipBottom) {
+                            if (tileY < edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
                             }
                           }
                         }
                       }
+                    }
+                  }
+                }
+              }
+              // 往下面绘制
+              for (var row = sRow + 1, startCol = sCol, startTileX = -tileStepWidth, startTileY = tileStepHeight;
+                   startTileY < newHeight;
+                   row += 1, startCol += 1, startTileY += tileHeight) {
+                if (row >= 0 && row < tileDataLen) {
+                  var tileRow = tileData[row];
+                  if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isArray(tileRow)) {
+                    var tileRowLen = tileRow.length;
+                    for (var col = startCol, tileX = startTileX, tileY = startTileY;
+                         tileX < newWidth && tileY < newHeight;
+                         col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
+                      if (col >= 0 && col < tileRowLen) {
+                        var tileCell = tileRow[col];
+                        if (tileX < edgeClipLeft || tileX > edgeClipRight || tileY < edgeClipTop || tileY > edgeClipBottom) {
+                          if (tileX === edgeLeft) {
+                            if (tileY === edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_RIGHT,
+                                tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                            } else if (tileY === edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_RIGHT,
+                                tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
+                            } else {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_RIGHT,
+                                tileX + tileStepWidth, tileY, tileStepWidth, tileHeight);
+                            }
+                          } else if (tileX === edgeRight) {
+                            if (tileY === edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_LEFT,
+                                tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                            } else if (tileY === edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_LEFT,
+                                tileX, tileY, tileStepWidth, tileStepHeight);
+                            } else {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_LEFT,
+                                tileX, tileY, tileStepWidth, tileHeight);
+                            }
+                          } else {
+                            if (tileY === edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            } else if (tileY === edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            } else {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL,
+                                tileX, tileY, tileWidth, tileHeight);
+                            }
+                          }
+                        } else if (tileX === edgeClipLeft) {
+                          if (tileY === edgeClipTop) {
+                            if (tileY > edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_LEFT,
+                              tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                          } else if (tileY === edgeClipBottom) {
+                            if (tileY < edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_LEFT,
+                              tileX, tileY, tileStepWidth, tileStepHeight);
+                          } else {
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_LEFT,
+                              tileX, tileY, tileStepWidth, tileHeight);
+                          }
+                        } else if (tileX === edgeClipRight) {
+                          if (tileY === edgeClipTop) {
+                            if (tileY > edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_RIGHT,
+                              tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                          } else if (tileY === edgeClipBottom) {
+                            if (tileY < edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            }
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_RIGHT,
+                              tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
+                          } else {
+                            renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_RIGHT,
+                              tileX + tileStepWidth, tileY, tileStepWidth, tileHeight);
+                          }
+                        } else {
+                          if (tileY === edgeClipTop) {
+                            if (tileY > edgeTop) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                                tileX, tileY, tileWidth, tileStepHeight);
+                            }
+                          } else if (tileY === edgeClipBottom) {
+                            if (tileY < edgeBottom) {
+                              renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                                tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            cacheBack.clear();
+            renderContext.cacheFore = cacheFore;
+            renderContext.cacheBack = cacheBack;
+          } else {
+            clip = true;
+          }
+        }
+
+        if (!clip) {
+          var cacheFore;
+          if (renderContext.cacheInit) {
+            cacheFore = renderContext.cacheFore;
+            if (newWidth === oldWidth && newHeight === oldHeight) {
+              cacheFore.clear();
+            } else {
+              cacheFore.width = newWidth;
+              cacheFore.height = newHeight;
+            }
+          } else {
+            renderContext.cacheInit = true;
+            cacheFore = renderContext.cacheFore;
+            cacheFore.clear();
+            cacheFore.width = newWidth;
+            cacheFore.height = newHeight;
+          }
+          var fileLoader = this.findApplication().getFileLoader();
+          var tileImg = this.tileImg;
+          var tileImgClip = this.tileImgClip;
+          var tileDataLen = tileData.length;
+          // 往上面绘制
+          for (var row = sRow, startCol = sCol - 1, startTileX = -tileStepWidth, startTileY = -tileStepHeight;
+               startTileX < newWidth;
+               row -= 1, startCol += 1, startTileX += tileWidth) {
+            if (row >= 0 && row < tileDataLen) {
+              var tileRow = tileData[row];
+              if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isArray(tileRow)) {
+                var tileRowLen = tileRow.length;
+                for (var col = startCol, tileX = startTileX, tileY = startTileY;
+                     tileX < newWidth && tileY < newHeight;
+                     col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
+                  if (col >= 0 && col < tileRowLen) {
+                    var tileCell = tileRow[col];
+                    if (tileX === edgeLeft) {
+                      if (tileY === edgeTop) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_RIGHT,
+                          tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                      } else if (tileY === edgeBottom) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_RIGHT,
+                          tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
+                      } else {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_RIGHT,
+                          tileX + tileStepWidth, tileY, tileStepWidth, tileHeight);
+                      }
+                    } else if (tileX === edgeRight) {
+                      if (tileY === edgeTop) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_LEFT,
+                          tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                      } else if (tileY === edgeBottom) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_LEFT,
+                          tileX, tileY, tileStepWidth, tileStepHeight);
+                      } else {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_LEFT,
+                          tileX, tileY, tileStepWidth, tileHeight);
+                      }
                     } else {
-                      foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
-                        desX, desY, desWidth, desHeight);
+                      if (tileY === edgeTop) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                          tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                      } else if (tileY === edgeBottom) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                          tileX, tileY, tileWidth, tileStepHeight);
+                      } else {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL,
+                          tileX, tileY, tileWidth, tileHeight);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          // 往下面绘制
+          for (var row = sRow + 1, startCol = sCol, startTileX = -tileStepWidth, startTileY = tileStepHeight;
+               startTileY < newHeight;
+               row += 1, startCol += 1, startTileY += tileHeight) {
+            if (row >= 0 && row < tileDataLen) {
+              var tileRow = tileData[row];
+              if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isArray(tileRow)) {
+                var tileRowLen = tileRow.length;
+                for (var col = startCol, tileX = startTileX, tileY = startTileY;
+                     tileX < newWidth && tileY < newHeight;
+                     col += 1, tileX += tileStepWidth, tileY += tileStepHeight) {
+                  if (col >= 0 && col < tileRowLen) {
+                    var tileCell = tileRow[col];
+                    if (tileX === edgeLeft) {
+                      if (tileY === edgeTop) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_RIGHT,
+                          tileX + tileStepWidth, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                      } else if (tileY === edgeBottom) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_RIGHT,
+                          tileX + tileStepWidth, tileY, tileStepWidth, tileStepHeight);
+                      } else {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_RIGHT,
+                          tileX + tileStepWidth, tileY, tileStepWidth, tileHeight);
+                      }
+                    } else if (tileX === edgeRight) {
+                      if (tileY === edgeTop) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM_LEFT,
+                          tileX, tileY + tileStepHeight, tileStepWidth, tileStepHeight);
+                      } else if (tileY === edgeBottom) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP_LEFT,
+                          tileX, tileY, tileStepWidth, tileStepHeight);
+                      } else {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_LEFT,
+                          tileX, tileY, tileStepWidth, tileHeight);
+                      }
+                    } else {
+                      if (tileY === edgeTop) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_BOTTOM,
+                          tileX, tileY + tileStepHeight, tileWidth, tileStepHeight);
+                      } else if (tileY === edgeBottom) {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_TOP,
+                          tileX, tileY, tileWidth, tileStepHeight);
+                      } else {
+                        renderMapBlock.call(this, cacheFore, fileLoader, tileImg, tileImgClip, tileCell, BLOCK_FULL,
+                          tileX, tileY, tileWidth, tileHeight);
+                      }
                     }
                   }
                 }
@@ -5054,106 +5142,93 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }
           }
         }
-        ctx.backInvalid = false;
-        ctx.foreInvalid = false;
+      }
+
+      function loadImageFinished() {
+        this._renderContext.cacheInit = false;
+        this.refresh();
       }
 
       return {
-        syncMapNodeContext: syncMapNodeContext,
-        syncMapBackgroundRender: syncMapBackgroundRender,
-        syncMapTilesRender: syncMapTilesRender
-      };
+        syncVertex: syncVertex,
+        syncSize: syncSize,
+        syncCache: syncCache,
+        renderMap: renderMap
+      }
     })();
 
-    var GMap = (function () {
-      var InnerGMap = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__core_node__["a" /* default */]);
+    var GTiledMap = (function () {
+      var InnerGTiledMap = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__gmap__["a" /* default */]);
 
-      InnerGMap.prototype.defWidth = 0;
-      InnerGMap.prototype.defHeight = 0;
-      InnerGMap.prototype.defAnchorX = 0.5;
-      InnerGMap.prototype.defAnchorY = 0.5;
-      InnerGMap.prototype.defMapTileType = 'square';
-      InnerGMap.prototype.defMapTileWidth = 50;
-      InnerGMap.prototype.defMapTileHeight = 50;
-      InnerGMap.prototype.defMapTileRows = 40;
-      InnerGMap.prototype.defMapTileCols = 30;
-      InnerGMap.prototype.init = function (conf) {
+      InnerGTiledMap.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('mapX', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapX, 0));
-        this.defineNotifyProperty('mapY', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapY, 0));
-        this.defineNotifyProperty('mapBackgroundImage', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapBackgroundImage, null));
-        this.defineNotifyProperty('mapTileType', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapTileType, this.defMapTileType));
-        this.defineNotifyProperty('mapTileWidth', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapTileWidth, this.defMapTileWidth));
-        this.defineNotifyProperty('mapTileHeight', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapTileHeight, this.defMapTileHeight));
-        this.defineNotifyProperty('mapTileImageIndex', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapTileImageIndex, {}));
-        this.defineNotifyProperty('mapTileImageClipIndex', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapTileImageClipIndex, {}));
-        this.defineNotifyProperty('mapTileRows', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapTileRows, this.defMapTileRows));
-        this.defineNotifyProperty('mapTileCols', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapTileCols, this.defMapTileCols));
-        this.defineNotifyProperty('mapTileData', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapTileData, []));
+        this.defineNotifyProperty('tileType', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.tileType, 1));
+        this.defineNotifyProperty('tileWidth', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.tileWidth, 50));
+        this.defineNotifyProperty('tileHeight', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.tileHeight, 50));
+        this.defineNotifyProperty('tileImg', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.tileImg, {}));
+        this.defineNotifyProperty('tileImgClip', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.tileImgClip, {}));
+        this.defineNotifyProperty('tileData', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.tileData, {}));
 
-        this._mapNode = new __WEBPACK_IMPORTED_MODULE_1__core_node__["a" /* default */]({
-          rotateZ: 0
-        });
-        this.addChildNode(this._mapNode);
+        this._renderContext = {
+          vertexInvalid: true,
+          x: 0,
+          y: 0,
+          sizeInvalid: true,
+          width: 0,
+          height: 0,
+          cacheInit: false,
+          cacheInvalid: true,
+          cacheFore: new __WEBPACK_IMPORTED_MODULE_2__core_render_canvas_canvas_render__["a" /* default */]({canvas: doc.createElement('canvas')}),
+          cacheBack: new __WEBPACK_IMPORTED_MODULE_2__core_render_canvas_canvas_render__["a" /* default */]({canvas: doc.createElement('canvas')})
+        }
 
-        this._mapCacheCtx = {
-          mapXInvalid: true,
-          mapYInvalid: true,
-          mapWidthInvalid: true,
-          mapHeightInvalid: true,
-          mapAnchorXInvalid: true,
-          mapAnchorYInvalid: true,
-          background: {
-            needRender: false,
-          },
-          tile: {
-            needRender: false,
-            offsetInvalid: true,
-            left: 0,
-            top: 0,
-            sizeInvalid: true,
-            width: 0,
-            height: 0,
-            foreInvalid: true,
-            foreRender: new __WEBPACK_IMPORTED_MODULE_2__core_render_canvas_canvas_render__["a" /* default */]({canvas: doc.createElement('canvas')}),
-            backInvalid: true,
-            backRender: new __WEBPACK_IMPORTED_MODULE_2__core_render_canvas_canvas_render__["a" /* default */]({canvas: doc.createElement('canvas')})
-          }
-        };
+        this.addObserver('tileTypeChanged', functions.syncVertex, this, this);
+        this.addObserver('tileWidthChanged', functions.syncVertex, this, this);
+        this.addObserver('tileHeightChanged', functions.syncVertex, this, this);
+        this.addObserver('containerTopChanged', functions.syncVertex, this, this);
+        this.addObserver('containerLeftChanged', functions.syncVertex, this, this);
 
-        functions.syncMapNodeContext.call(this);
-        functions.syncMapBackgroundRender.call(this);
-        functions.syncMapTilesRender.call(this);
+        this.addObserver('tileWidthChanged', functions.syncSize, this, this);
+        this.addObserver('tileHeightChanged', functions.syncSize, this, this);
+        this.addObserver('containerTopChanged', functions.syncSize, this, this);
+        this.addObserver('containerBottomChanged', functions.syncSize, this, this);
+        this.addObserver('containerLeftChanged', functions.syncSize, this, this);
+        this.addObserver('containerRightChanged', functions.syncSize, this, this);
 
-        this.addObserver('mapTileTypeChanged', functions.syncMapNodeContext, this, this);
-        this.addObserver('mapBackgroundImageChanged', functions.syncMapBackgroundRender, this, this);
-        this.addObserver('mapTileDataChanged', functions.syncMapTilesRender, this, this);
+        this.addObserver('tileTypeChanged', functions.syncCache, this, this);
+        this.addObserver('tileWidthChanged', functions.syncCache, this, this);
+        this.addObserver('tileHeightChanged', functions.syncCache, this, this);
+        this.addObserver('containerTopChanged', functions.syncCache, this, this);
+        this.addObserver('containerBottomChanged', functions.syncCache, this, this);
+        this.addObserver('containerLeftChanged', functions.syncCache, this, this);
+        this.addObserver('containerRightChanged', functions.syncCache, this, this);
+
+        this.addObserver('render', functions.renderMap, this, this);
       }
 
-      InnerGMap.prototype.addModel = function (model) {
-        this._mapNode.addChildNode(model);
+      InnerGTiledMap.prototype.invalidAndRefresh = function () {
+        this._renderContext.init = false;
+        this._renderContext.Invalid = true;
+        this.refresh();
       }
 
-      InnerGMap.prototype.removeModel = function (model, destroy) {
-        this._mapNode.removeChildNode(model, destroy);
-      }
-
-      return InnerGMap;
+      return InnerGTiledMap;
     })();
 
-    return GMap;
+    return GTiledMap;
   }
 )());
 
+
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__core_notifier__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__g_util__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__g_texture_node__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__gutil__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__gnode__ = __webpack_require__(20);
 /**
  *
  * Author: iswear(471291492@qq.com)
@@ -5168,7 +5243,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   function () {
     var functions = (function () {
       function createNode (conf) {
-        var node = new __WEBPACK_IMPORTED_MODULE_3__g_texture_node__["a" /* default */](conf.node);
+        var node = new __WEBPACK_IMPORTED_MODULE_3__gnode__["a" /* default */](conf.node);
         if (conf.id) {
           this._nodeMap[conf.id] = node;
         }
@@ -5180,14 +5255,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
         return node;
       }
-
       function createNodes (conf) {
         if (conf) {
           this._nodeMap = {};
           this._node = createNode.call(this, conf);
         }
       }
-
       function compileActions (actions) {
         this._actions = {};
         if (actions) {R
@@ -5200,7 +5273,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 var node = this._nodeMap[nodeId];
                 var nodeFrames = modelActionFrames[nodeId];
                 if (node && nodeFrames) {
-                  var animation = __WEBPACK_IMPORTED_MODULE_2__g_util__["a" /* default */].compileModelFrames(node, nodeFrames, node === this._node);
+                  var animation = __WEBPACK_IMPORTED_MODULE_2__gutil__["a" /* default */].compileModelFrames(node, nodeFrames, node === this._node);
                   if (animation) {
                     nodeCompiledActions.push({
                       node: node,
@@ -5216,7 +5289,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           }
         }
       }
-
       function runAction () {
         var context = this._actionsContext;
         if (context.runningAct) {
@@ -5229,7 +5301,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           }
         }
       }
-
       function runActionProgress (binder, deltaTime, finish) {
         if (finish) {
           var context = this._actionsContext;
@@ -5242,10 +5313,45 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       return {
         createNodes: createNodes,
-        compileActions: compileActions
+        compileActions: compileActions,
+        runActionProgress: runActionProgress
       }
     })();
 
+    /**
+     * var exampleConf = {
+     *   id: '模型id',
+     *   name: '模型名称',
+     *   root: {
+     *     id: '',
+     *     name: '',
+     *     node: {
+     *       x: '',
+     *       y: '' ...
+     *     },
+     *     ctrl: {
+     *       height: ''
+     *     },
+     *     children: [
+     *       {
+     *         node: {},
+     *         info: {},
+     *         ctrl: {},
+     *         children: []
+     *       }
+     *     ]
+     *   },
+     *   actions: [
+     *     {
+     *       id: '',
+     *       name: '',
+     *       frames: {
+     *
+     *       }
+     *     }
+     *   ]
+     * }
+     */
     var GModel = (function () {
       var InnerGModel = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__core_notifier__["a" /* default */]);
 
@@ -5325,7 +5431,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           var node = this._nodeMap[nodeId];
           var nodeActFrames = modelActFrames[nodeId];
           if (node && nodeActFrames) {
-            var animation = __WEBPACK_IMPORTED_MODULE_2__g_util__["a" /* default */].compileModelFrames(node, nodeActFrames, node === this._node);
+            var animation = __WEBPACK_IMPORTED_MODULE_2__gutil__["a" /* default */].compileModelFrames(node, nodeActFrames, node === this._node);
             if (animation) {
               nodeActions.push({
                 node: node,
@@ -5375,40 +5481,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   }
 )());
 
-
-/***/ }),
-/* 29 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/**
- * util for class extend and so on
- * Author: iswear(471291492@qq.com)
- * Date: 2017/8/12
- */
-
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
-
-    var util = (function() {
-
-      function getMaxInteger() {
-        return 9007199254740991;
-      }
-
-      function getMinInteger() {
-        return -9007199254740991
-      }
-
-      return {
-        getMaxInteger: getMaxInteger,
-        getMinInteger: getMinInteger
-      }
-    })();
-
-    return util;
-  }
-)());
 
 /***/ })
 /******/ ]);

@@ -151,11 +151,27 @@ export default (
       }
 
       InnerNode.prototype.getZoneInLocal = function () {
-        return LangUtil.clone(this._zoneInLocal);
+        var zoneInLocal = this._zoneInLocal;
+        return {
+          left: zoneInLocal.left,
+          top: zoneInLocal.top,
+          right: zoneInLocal.right,
+          bottom: zoneInLocal.bottom,
+          width: zoneInLocal.width,
+          height: zoneInLocal.height
+        };
       }
 
       InnerNode.prototype.getZoneInWorld = function () {
-        return LangUtil.clone(this._zoneInWorld);
+        var zoneInWorld = this._zoneInWorld;
+        return {
+          left: zoneInWorld.left,
+          top: zoneInWorld.top,
+          right: zoneInWorld.right,
+          bottom: zoneInWorld.bottom,
+          width: zoneInWorld.width,
+          height: zoneInWorld.height
+        };
       }
 
       InnerNode.prototype.getChildNode = function (layerIndex, nodeIndex) {
@@ -304,19 +320,23 @@ export default (
       }
 
       InnerNode.prototype.getTransformInParent = function () {
-        return LangUtil.clone(this._transformCtx.lTransform);
+        var t = this._transformCtx.lTransform;
+        return [t[0], t[1], t[2], t[3], t[4], t[5]];
       }
 
       InnerNode.prototype.getReverseTransformInParent = function () {
-        return LangUtil.clone(this._transformCtx.lReverseTransform);
+        var t = this._transformCtx.lReverseTransform;
+        return [t[0], t[1], t[2], t[3], t[4], t[5]];
       }
 
       InnerNode.prototype.getTransformInWorld = function () {
-        return LangUtil.clone(this._transformCtx.wTransform);
+        var t = this._transformCtx.wTransform;
+        return [t[0], t[1], t[2], t[3], t[4], t[5]];
       }
 
       InnerNode.prototype.getReverseTransformInWorld = function() {
-        return LangUtil.clone(this._transformCtx.wReverseTransform);
+        var t = this._transformCtx.wReverseTransform;
+        return [t[0], t[1], t[2], t[3], t[4], t[5]];
       }
 
       InnerNode.prototype.startClip = function (render) {
@@ -448,7 +468,14 @@ export default (
         var dirtyZoneCtx = this._dirtyZoneCtx;
         if (dirtyZoneCtx.inRenderZone && !dirtyZoneCtx.oriReported) {
           this.oriReported = true;
-          app.receiveDirtyZone(this, LangUtil.clone(this._zoneInWorld));
+          app.receiveDirtyZone(this, {
+            left: this._zoneInWorld.left - 1,
+            top: this._zoneInWorld.top - 1,
+            right: this._zoneInWorld.right + 1,
+            bottom: this._zoneInWorld.bottom + 1,
+            width: this._zoneInWorld.width + 2,
+            height: this._zoneInWorld.height + 1
+          });
         }
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
@@ -469,13 +496,27 @@ export default (
           if (!dirtyZoneCtx.curReported) {
             var wTrans = this._transformCtx.wTransform;
             if (dirtyZoneCtx.oriReported) {
-              result = app.receiveDirtyZone(this, LangUtil.clone(zoneInWorld));
+              result = app.receiveDirtyZone(this, {
+                left: zoneInWorld.left - 1,
+                top: zoneInWorld.top - 1,
+                right: zoneInWorld.right + 1,
+                bottom: zoneInWorld.bottom + 1,
+                width: zoneInWorld.width + 2,
+                height: zoneInWorld.height + 2
+              });
               dirtyZoneCtx.curReported = true;
             } else if (!(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 0)) {
               for (var i = 0, len = dirtyZones.length; i < len; ++i) {
                 var dirtyZone = dirtyZones[i];
                 if (GeometryUtil.isZoneCross(dirtyZone, zoneInWorld)) {
-                  result = app.receiveDirtyZone(this, LangUtil.clone(zoneInWorld));
+                  result = app.receiveDirtyZone(this, {
+                    left: zoneInWorld.left - 1,
+                    top: zoneInWorld.top - 1,
+                    right: zoneInWorld.right + 1,
+                    bottom: zoneInWorld.bottom + 1,
+                    width: zoneInWorld.width + 2,
+                    height: zoneInWorld.height + 2
+                  });
                   dirtyZoneCtx.curReported = true;
                   break;
                 }

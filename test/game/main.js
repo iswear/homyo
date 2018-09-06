@@ -18,13 +18,13 @@ import homyo from '../../main'
   });
 
   application.run();
-  // root.runAnimation(new PropertyAnimation({
-  //   property: 'inclineY',
-  //   targetOffset: 1,
-  //   offsetFn: function (animation, deltaTime, sumTime) {
-  //     return  sumTime / 1000;
-  //   }
-  // }), null, null, false);
+  root.runAnimation(new PropertyAnimation({
+    property: 'rotateZ',
+    targetOffset: Infinity,
+    offsetFn: function (animation, deltaTime, sumTime) {
+      return sumTime / 1000;
+    }
+  }), null, null, false);
   
   // document.onclick = function () {
   //   console.log('yaya')
