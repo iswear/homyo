@@ -35,11 +35,12 @@ export default (
       }
 
       function renderImage (sender, render, dirtyZones) {
-        var image = loadImage.call(this);
-        if (image !== null) {
-          var zoneInLocal = this.getZoneInLocal();
-          var offsetLeft = - zoneInLocal.left;
-          var offsetTop = - zoneInLocal.top;
+        var ctx = this._imageCtx;
+        var image = this.findApplication().loadImage(ctx.url, this.getID(), loadImageFinished, this);
+        if (image) {
+          var localZone = this.getLocalZone();
+          var offsetLeft = - localZone.left;
+          var offsetTop = - localZone.top;
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
             render.drawImageExt(image,
@@ -50,12 +51,12 @@ export default (
       }
       
       function renderImageClip (sender, render, dirtyZones) {
-        var image = loadImage.call(this);
-        if (image !== null) {
-          var zoneInLocal = this.getZoneInLocal();
-          var ctx = this._imageCtx;
-          var offsetLeft = ctx.x - zoneInLocal.left;
-          var offsetTop = ctx.y - zoneInLocal.top;
+        var ctx = this._imageCtx;
+        var image = this.findApplication().loadImage(ctx.url, this.getID(), loadImageFinished, this);
+        if (image) {
+          var localZone = this.getLocalZone();
+          var offsetLeft = ctx.x - localZone.left;
+          var offsetTop = ctx.y - localZone.top;
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
             render.drawImageExt(image,
@@ -65,10 +66,10 @@ export default (
         }
       }
 
-      function loadImage () {
+      function loadImageFinished (url, image, success, async) {
         var ctx = this._imageCtx;
-        var image = this.findApplication().loadImage(ctx.url, true);
-        if (ctx.invalid && image !== null) {
+        if (ctx.invalid && success) {
+          console.log('bb');
           if (LangUtil.isString(this.image)) {
             this.width = image.width;
             this.height = image.height;
@@ -86,7 +87,10 @@ export default (
           }
           ctx.invalid = false;
         }
-        return image;
+        if (async) {
+          console.log('aa');
+          this.dirty();
+        }
       }
 
       return {
@@ -117,7 +121,7 @@ export default (
         functions.syncImageRender.call(this);
         functions.syncImageContext.call(this);
 
-        this.addObserver('imageChanged', this.refresh, this, this);
+        this.addObserver('imageChanged', this.dirty, this, this);
 
         this.addObserver('imageChanged', functions.syncImageRender, this, this);
         this.addObserver('imageChanged', functions.syncImageContext, this, this);

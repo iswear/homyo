@@ -13,11 +13,11 @@ export default (
 
       InnerSchedulerAnimation.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('fn', LangUtil.checkAndGet(conf.fn, null));
-        this.defineNotifyProperty('target', LangUtil.checkAndGet(conf.target, null));
+        this.defineNotifyProperty('callbackFn', LangUtil.checkAndGet(conf.callbackFn, null));
+        this.defineNotifyProperty('callbackTarget', LangUtil.checkAndGet(conf.callbackTarget, null));
         this.defineNotifyProperty('interval', LangUtil.checkAndGet(conf.interval, 0));
         this.defineNotifyProperty('repeats', LangUtil.checkAndGet(conf.repeats, 0));
-        this.defineNotifyProperty('param', LangUtil.checkAndGet(conf.param, null));
+        this.defineNotifyProperty('params', LangUtil.checkAndGet(conf.params, null));
       }
 
       InnerSchedulerAnimation.prototype.execute = function (binder, deltaTime) {
@@ -33,7 +33,7 @@ export default (
           }
           sumTime += deltaTime;
           if (sumTime >= this.interval) {
-            this.fn.call(this.target, binder, this.param);
+            this.callbackFn.call(this.callbackTarget, binder, this.params);
             sumTime -= this.interval;
             repeats += 1;
           }
@@ -51,10 +51,10 @@ export default (
       }
 
       InnerSchedulerAnimation.prototype.destroy = function () {
-        this.fn = null;
-        this.target = null;
-        this.param = null;
-        this.super('destroy')
+        this.callbackFn = null;
+        this.callbackTarget = null;
+        this.params = null;
+        this.super('destroy');
       }
 
       return InnerSchedulerAnimation;

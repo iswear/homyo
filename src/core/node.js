@@ -21,18 +21,18 @@ export default (
         }
       }
 
-      function syncTransform () {
-        this._transformCtx.needUpdate = true;
+      function syncLocalTransform () {
+        this._transformCtx.localInvalid = true;
       }
       
-      function syncZoneInLocal () {
-        this._zoneInLocal.needUpdate = true;
+      function syncLocalZone () {
+        this._zoneCtx.localInvalid = true;
       }
       
       return {
         syncClipRender: syncClipRender,
-        syncTransform: syncTransform,
-        syncZoneInLocal: syncZoneInLocal
+        syncLocalTransform: syncLocalTransform,
+        syncLocalZone: syncLocalZone
       }
     })();
 
@@ -80,98 +80,118 @@ export default (
         this.defineNotifyProperty('application', LangUtil.checkAndGet(conf.application, null));
 
         this._id = ++id;
+        
         this._childNodes =  {
           count: 0, 
           defLayer: LangUtil.checkAndGet(conf.defLayer, this.defLayer), 
           nodeLayers: []
         };
         this._transformCtx = {
-          needUpdate: false,
-          lTransform: [0, 0, 0, 0, 0, 0],
-          lReverseTransform: [0, 0, 0, 0, 0, 0],
-          wTransform: [0, 0, 0, 0, 0, 0],
-          wReverseTransform: [0, 0, 0, 0, 0, 0]
+          localInvalid: false,
+          localTransform: [0, 0, 0, 0, 0, 0],
+          localReverseTransform: [0, 0, 0, 0, 0, 0],
+          worldTransform: [0, 0, 0, 0, 0, 0],
+          worldReverseTransform: [0, 0, 0, 0, 0, 0]
         };
-        this._zoneInLocal = {
-          needUpdate: false,
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: 0,
-          height: 0
+        this._zoneCtx = {
+          localInvalid: true,
+          local: {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: 0,
+            height: 0
+          },
+          world: {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: 0,
+            height: 0
+          }
         };
-        this._zoneInWorld = {
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: 0,
-          height: 0
-        };
-        this._dirtyZoneCtx = {
-          dirty: false,
+        this._dirtyCtx = {
+          render: true,
           oriReported: false,
-          curReported: false
+          curReported: false,
         };
 
         functions.syncClipRender.call(this);
-        functions.syncTransform.call(this);
-        functions.syncZoneInLocal.call(this);
+        functions.syncLocalTransform.call(this);
+        functions.syncLocalZone.call(this);
 
-        this.addObserver('xChanged', this.refresh, this, this);
-        this.addObserver('yChanged', this.refresh, this, this);
-        this.addObserver('rotateZChanged', this.refresh, this, this);
-        this.addObserver('scaleXChanged', this.refresh, this, this);
-        this.addObserver('scaleYChanged', this.refresh, this, this);
-        this.addObserver('inclineXChanged', this.refresh, this, this);
-        this.addObserver('inclineYChanged', this.refresh, this, this);
-        this.addObserver('widthChanged', this.refresh, this, this);
-        this.addObserver('heightChanged', this.refresh, this, this);
-        this.addObserver('anchorXChanged', this.refresh, this, this);
-        this.addObserver('anchorYChanged', this.refresh, this, this);
-        this.addObserver('alphaChanged', this.refresh, this, this);
-        this.addObserver('visibleChanged', this.refresh, this, this);
-
-        this.addObserver('xChanged', functions.syncTransform, this, this);
-        this.addObserver('yChanged', functions.syncTransform, this, this);
-        this.addObserver('rotateZChanged', functions.syncTransform, this, this);
-        this.addObserver('scaleXChanged', functions.syncTransform, this, this);
-        this.addObserver('scaleYChanged', functions.syncTransform, this, this);
-        this.addObserver('inclineXChanged', functions.syncTransform, this, this);
-        this.addObserver('inclineYChanged', functions.syncTransform, this, this);
-        this.addObserver('parentChanged', functions.syncTransform, this, this);
+        this.addObserver('xChanged', this.dirty, this, this);
+        this.addObserver('yChanged', this.dirty, this, this);
+        this.addObserver('rotateZChanged', this.dirty, this, this);
+        this.addObserver('scaleXChanged', this.dirty, this, this);
+        this.addObserver('scaleYChanged', this.dirty, this, this);
+        this.addObserver('inclineXChanged', this.dirty, this, this);
+        this.addObserver('inclineYChanged', this.dirty, this, this);
+        this.addObserver('widthChanged', this.dirty, this, this);
+        this.addObserver('heightChanged', this.dirty, this, this);
+        this.addObserver('anchorXChanged', this.dirty, this, this);
+        this.addObserver('anchorYChanged', this.dirty, this, this);
+        this.addObserver('alphaChanged', this.dirty, this, this);
+        this.addObserver('visibleChanged', this.dirty, this, this);
 
         this.addObserver('clipChanged', functions.syncClipRender, this, this);
 
-        this.addObserver('widthChanged', functions.syncZoneInLocal, this, this);
-        this.addObserver('heightChanged', functions.syncZoneInLocal, this, this);
-        this.addObserver('anchorXChanged', functions.syncZoneInLocal, this, this);
-        this.addObserver('anchorYChanged', functions.syncZoneInLocal, this, this);
+        this.addObserver('xChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('yChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('rotateZChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('scaleXChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('scaleYChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('inclineXChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('inclineYChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('parentChanged', functions.syncLocalTransform, this, this);
+
+
+        this.addObserver('widthChanged', functions.syncLocalZone, this, this);
+        this.addObserver('heightChanged', functions.syncLocalZone, this, this);
+        this.addObserver('anchorXChanged', functions.syncLocalZone, this, this);
+        this.addObserver('anchorYChanged', functions.syncLocalZone, this, this);
       }
 
-      InnerNode.prototype.getZoneInLocal = function () {
-        var zoneInLocal = this._zoneInLocal;
+      InnerNode.prototype.getID = function () {
+        return this._id;
+      }
+
+      InnerNode.prototype.getLocalZone = function () {
+        var localZone = this._zoneCtx.local;
         return {
-          left: zoneInLocal.left,
-          top: zoneInLocal.top,
-          right: zoneInLocal.right,
-          bottom: zoneInLocal.bottom,
-          width: zoneInLocal.width,
-          height: zoneInLocal.height
+          left: localZone.left,
+          top: localZone.top,
+          right: localZone.right,
+          bottom: localZone.bottom,
+          width: localZone.width,
+          height: localZone.height
         };
       }
 
-      InnerNode.prototype.getZoneInWorld = function () {
-        var zoneInWorld = this._zoneInWorld;
+      InnerNode.prototype.getWorldZone = function () {
+        var worldZone = this._zoneCtx.world;
         return {
-          left: zoneInWorld.left,
-          top: zoneInWorld.top,
-          right: zoneInWorld.right,
-          bottom: zoneInWorld.bottom,
-          width: zoneInWorld.width,
-          height: zoneInWorld.height
+          left: worldZone.left,
+          top: worldZone.top,
+          right: worldZone.right,
+          bottom: worldZone.bottom,
+          width: worldZone.width,
+          height: worldZone.height
         };
+      }
+
+      InnerNode.prototype.getDirtyZone = function () {
+        var worldZone = this._zoneCtx.world;
+        return {
+          left: worldZone.left - 1, 
+          top: worldZone.top - 1,
+          right: worldZone.right + 1,
+          bottom: worldZone.bottom + 1,
+          width: worldZone.width + 2,
+          height: worldZone.height + 2
+        }
       }
 
       InnerNode.prototype.getChildNode = function (layerIndex, nodeIndex) {
@@ -216,7 +236,6 @@ export default (
         childNodes.count ++;
         node.parent = this;
         nodeLayers[layerIndex].push(node);
-        this.refresh();
       }
 
       InnerNode.prototype.insertChildNode = function (node, nodeIndex) {
@@ -237,7 +256,6 @@ export default (
         } else {
           nodeLayers[layerIndex].push(node);
         }
-        this.refresh()
       }
 
       InnerNode.prototype.removeChildNode = function (node, destroy) {
@@ -255,7 +273,6 @@ export default (
                   node.parent = null;
                   node.application = null;
                   this._childNodes.count--;
-                  this.refresh();
                   return;
                 }
               }
@@ -304,43 +321,43 @@ export default (
       }
 
       InnerNode.prototype.transformLVectorToW = function (vector) {
-        return MatrixUtil.mulMat2dAndVect2d(this._transformCtx.wTransform, vector);
+        return MatrixUtil.mulMat2dAndVect2d(this._transformCtx.worldTransform, vector);
       }
 
       InnerNode.prototype.transformWVectorToL = function (vector) {
-        return MatrixUtil.mulMat2dAndVect2d(this._transformCtx.wReverseTransform, vector);
+        return MatrixUtil.mulMat2dAndVect2d(this._transformCtx.worldReverseTransform, vector);
       }
 
       InnerNode.prototype.transformLVectorToP = function (vector) {
-        return MatrixUtil.mulMat2dAndVect2d(this._transformCtx.lTransform, vector);
+        return MatrixUtil.mulMat2dAndVect2d(this._transformCtx.localTransform, vector);
       }
 
       InnerNode.prototype.transformPVectorToL = function (vector) {
-        return MatrixUtil.mulMat2dAndVect2d(this._transformCtx.lReverseTransform, vector);
+        return MatrixUtil.mulMat2dAndVect2d(this._transformCtx.localReverseTransform, vector);
       }
 
       InnerNode.prototype.getTransformInParent = function () {
-        var t = this._transformCtx.lTransform;
+        var t = this._transformCtx.localTransform;
         return [t[0], t[1], t[2], t[3], t[4], t[5]];
       }
 
       InnerNode.prototype.getReverseTransformInParent = function () {
-        var t = this._transformCtx.lReverseTransform;
+        var t = this._transformCtx.localReverseTransform;
         return [t[0], t[1], t[2], t[3], t[4], t[5]];
       }
 
       InnerNode.prototype.getTransformInWorld = function () {
-        var t = this._transformCtx.wTransform;
+        var t = this._transformCtx.worldTransform;
         return [t[0], t[1], t[2], t[3], t[4], t[5]];
       }
 
       InnerNode.prototype.getReverseTransformInWorld = function() {
-        var t = this._transformCtx.wReverseTransform;
+        var t = this._transformCtx.worldReverseTransform;
         return [t[0], t[1], t[2], t[3], t[4], t[5]];
       }
 
       InnerNode.prototype.startClip = function (render) {
-        var zone = this._zoneInLocal;
+        var zone = this._zoneCtx.local;
         render.beginPath();
         render.moveTo(zone.left, zone.top);
         render.lineTo(zone.right, zone.top);
@@ -360,7 +377,7 @@ export default (
       }
 
       InnerNode.prototype.checkEventTrigger = function (name, e, x, y) {
-        var zone = this._zoneInLocal;
+        var zone = this._zoneCtx.local;
         if (x >= zone.left && x <= zone.right && y >= zone.top && y <= zone.bottom) {
           return true;
         } else {
@@ -380,14 +397,6 @@ export default (
           }
           this.application = app;
           return app;
-        }
-      }
-
-      InnerNode.prototype.refresh = function () {
-        var app = this.findApplication();
-        if (app !== null) {
-          app.refresh();
-          this._reportOriDirtyZone(app);
         }
       }
 
@@ -415,68 +424,71 @@ export default (
       InnerNode.prototype._syncTransform = function (parentWTransform, parentWReverseTransform, renderZone, parentUpdateTransform) {
         this.postNotification('frame', this);
         var transformCtx = this._transformCtx;
-        var zoneInLocal = this._zoneInLocal;
-        var zoneInWorld = this._zoneInWorld;
-        if (zoneInLocal.needUpdate) {
-          zoneInLocal.width = Math.round(this.width);
-          zoneInLocal.height = Math.round(this.height);
-          zoneInLocal.top = Math.round(zoneInLocal.height * (-this.anchorY));
-          zoneInLocal.bottom = Math.round(zoneInLocal.height + zoneInLocal.top);
-          zoneInLocal.left = Math.round(zoneInLocal.width * (-this.anchorX));
-          zoneInLocal.right = Math.round(zoneInLocal.width + zoneInLocal.left);
+        var zoneCtx = this._zoneCtx;
+        var dirtyCtx = this._dirtyCtx;
+        var localZone = zoneCtx.local;
+        var worldZone = zoneCtx.world;
+        if (zoneCtx.localInvalid) {
+          localZone.width = Math.round(this.width);
+          localZone.height = Math.round(this.height);
+          localZone.top = Math.round(localZone.height * (-this.anchorY));
+          localZone.bottom = Math.round(localZone.height + localZone.top);
+          localZone.left = Math.round(localZone.width * (-this.anchorX));
+          localZone.right = Math.round(localZone.width + localZone.left);
         }
         
-        if (transformCtx.needUpdate) {
-          transformCtx.lTransform = MatrixUtil.incline2d(MatrixUtil.scale2d(MatrixUtil.rotate2d(MatrixUtil.translate2d(MatrixUtil.createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
-          transformCtx.lReverseTransform = MatrixUtil.reverse2d(transformCtx.lTransform);
-          transformCtx.wTransform = MatrixUtil.mulMat2d(parentWTransform, transformCtx.lTransform);
-          transformCtx.wReverseTransform = MatrixUtil.mulMat2d(transformCtx.lReverseTransform, parentWReverseTransform);
+        if (transformCtx.localInvalid) {
+          transformCtx.localTransform = MatrixUtil.incline2d(MatrixUtil.scale2d(MatrixUtil.rotate2d(MatrixUtil.translate2d(MatrixUtil.createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
+          transformCtx.localReverseTransform = MatrixUtil.reverse2d(transformCtx.localTransform);
+          transformCtx.worldTransform = MatrixUtil.mulMat2d(parentWTransform, transformCtx.localTransform);
+          transformCtx.worldReverseTransform = MatrixUtil.mulMat2d(transformCtx.localReverseTransform, parentWReverseTransform);
         } else if (parentUpdateTransform) {
-          transformCtx.wTransform = MatrixUtil.mulMat2d(parentWTransform, transformCtx.lTransform);
-          transformCtx.wReverseTransform = MatrixUtil.mulMat2d(transformCtx.lReverseTransform, parentWReverseTransform);
+          transformCtx.worldTransform = MatrixUtil.mulMat2d(parentWTransform, transformCtx.localTransform);
+          transformCtx.worldReverseTransform = MatrixUtil.mulMat2d(transformCtx.localReverseTransform, parentWReverseTransform);
         }
 
-        if (zoneInLocal.needUpdate || transformCtx.needUpdate || parentUpdateTransform) {
-          var p1 = this.transformLVectorToW([zoneInLocal.left, zoneInLocal.top]);
-          var p2 = this.transformLVectorToW([zoneInLocal.left, zoneInLocal.bottom]);
-          var p3 = this.transformLVectorToW([zoneInLocal.right, zoneInLocal.top]);
-          var p4 = this.transformLVectorToW([zoneInLocal.right, zoneInLocal.bottom]);
-          zoneInWorld.top = Math.min(Math.min(p1[1], p2[1]), Math.min(p3[1], p4[1]));
-          zoneInWorld.bottom = Math.max(Math.max(p1[1], p2[1]), Math.max(p3[1], p4[1]));
-          zoneInWorld.left = Math.min(Math.min(p1[0], p2[0]), Math.min(p3[0], p4[0]));
-          zoneInWorld.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
-          zoneInWorld.width = zoneInWorld.right - zoneInWorld.left;
-          zoneInWorld.height = zoneInWorld.bottom - zoneInWorld.top;
-          this._dirtyZoneCtx.inRenderZone = GeometryUtil.isZoneCross(zoneInWorld, renderZone);
+        if (zoneCtx.localInvalid || transformCtx.localInvalid || parentUpdateTransform) {
+          var p1 = this.transformLVectorToW([localZone.left, localZone.top]);
+          var p2 = this.transformLVectorToW([localZone.left, localZone.bottom]);
+          var p3 = this.transformLVectorToW([localZone.right, localZone.top]);
+          var p4 = this.transformLVectorToW([localZone.right, localZone.bottom]);
+          worldZone.top = Math.min(Math.min(p1[1], p2[1]), Math.min(p3[1], p4[1]));
+          worldZone.bottom = Math.max(Math.max(p1[1], p2[1]), Math.max(p3[1], p4[1]));
+          worldZone.left = Math.min(Math.min(p1[0], p2[0]), Math.min(p3[0], p4[0]));
+          worldZone.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
+          worldZone.width = worldZone.right - worldZone.left;
+          worldZone.height = worldZone.bottom - worldZone.top;
         }
 
-        zoneInLocal.needUpdate = false;
-        transformCtx.needUpdate = false;
+        transformCtx.localInvalid = false;
+        zoneCtx.localInvalid = false;
+        dirtyCtx.render = GeometryUtil.isZoneCross(renderZone, this.getDirtyZone());
 
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
           var layer = layers[i];
           if (layer) {
             for (var j = 0, len2 = layer.length; j < len2; ++j) {
-              layer[j]._syncTransform(transformCtx.wTransform, transformCtx.wReverseTransform, parentUpdateTransform || transformCtx.needUpdate);
+              layer[j]._syncTransform(transformCtx.worldTransform, transformCtx.worldReverseTransform, parentUpdateTransform || transformCtx.localInvalid);
             }
           }
         }
       }
 
+      InnerNode.prototype.dirty = function () {
+        var app = this.findApplication();
+        this._reportOriDirtyZone(app);
+      }
+
       InnerNode.prototype._reportOriDirtyZone = function (app) {
-        var dirtyZoneCtx = this._dirtyZoneCtx;
-        if (dirtyZoneCtx.inRenderZone && !dirtyZoneCtx.oriReported) {
+        var dirtyCtx = this._dirtyCtx;
+        if (!dirtyCtx.oriReported) {
+          if (dirtyCtx.render) {
+            app.receiveDirtyZone(this, this.getDirtyZone());
+          }
           this.oriReported = true;
-          app.receiveDirtyZone(this, {
-            left: this._zoneInWorld.left - 1,
-            top: this._zoneInWorld.top - 1,
-            right: this._zoneInWorld.right + 1,
-            bottom: this._zoneInWorld.bottom + 1,
-            width: this._zoneInWorld.width + 2,
-            height: this._zoneInWorld.height + 1
-          });
         }
+
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
           var layer = layers[i];
@@ -490,34 +502,22 @@ export default (
 
       InnerNode.prototype._reportCurDirtyZone = function (app, dirtyZones) {
         var result = false;
-        var dirtyZoneCtx = this._dirtyZoneCtx;
-        var zoneInWorld = this._zoneInWorld;
-        if (dirtyZoneCtx.inRenderZone) {
-          if (!dirtyZoneCtx.curReported) {
-            var wTrans = this._transformCtx.wTransform;
-            if (dirtyZoneCtx.oriReported) {
-              result = app.receiveDirtyZone(this, {
-                left: zoneInWorld.left - 1,
-                top: zoneInWorld.top - 1,
-                right: zoneInWorld.right + 1,
-                bottom: zoneInWorld.bottom + 1,
-                width: zoneInWorld.width + 2,
-                height: zoneInWorld.height + 2
-              });
-              dirtyZoneCtx.curReported = true;
+        var dirtyCtx = this._dirtyCtx;
+        var worldZone = this._zoneCtx.world;
+        if (dirtyCtx.render) {
+          if (!dirtyCtx.curReported) {
+            var wTrans = this._transformCtx.worldTransform;
+            if (dirtyCtx.oriReported) {
+              var dirtyZone = this.getDirtyZone();
+              result = app.receiveDirtyZone(this, dirtyZone);
+              dirtyCtx.curReported = true;
             } else if (!(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 0)) {
+              var dirtyZone = this.getDirtyZone();
               for (var i = 0, len = dirtyZones.length; i < len; ++i) {
                 var dirtyZone = dirtyZones[i];
-                if (GeometryUtil.isZoneCross(dirtyZone, zoneInWorld)) {
-                  result = app.receiveDirtyZone(this, {
-                    left: zoneInWorld.left - 1,
-                    top: zoneInWorld.top - 1,
-                    right: zoneInWorld.right + 1,
-                    bottom: zoneInWorld.bottom + 1,
-                    width: zoneInWorld.width + 2,
-                    height: zoneInWorld.height + 2
-                  });
-                  dirtyZoneCtx.curReported = true;
+                if (GeometryUtil.isZoneCross(dirtyZone, worldZone)) {
+                  result = app.receiveDirtyZone(this, dirtyZone);
+                  dirtyCtx.curReported = true;
                   break;
                 }
               }
@@ -538,27 +538,27 @@ export default (
       }
 
       InnerNode.prototype._dispatchRender = function (render, parentAlpha, renderZone, dirtyZones) {
-        var dirtyZoneCtx = this._dirtyZoneCtx;
+        var dirtyCtx = this._dirtyCtx;
         var alpha = this.alpha * parentAlpha;
         if (this.visible && alpha > 0) {
           if (this.clip) {
             // 如果发生裁剪
-            if (dirtyZoneCtx.inRenderZone) {
-              var w = this._transformCtx.wTransform;
+            if (dirtyCtx.render) {
+              var w = this._transformCtx.worldTransform;
               // 设置矩阵
               render.setTransform(w[0], w[3], w[1], w[4], w[2], w[5]);
               // 设置透明度
               render.globalAplha = alpha;
               // 绘制自身
-              if (dirtyZoneCtx.curReported) {
-                this.postNotification('render', this, [render, [this._zoneInWorld]]);
+              if (dirtyCtx.curReported) {
+                this.postNotification('render', this, [render, [this._zoneCtx.local]]);
                 this._dispatchChildrenRender(render, alpha, renderZone, dirtyZones);
                 this.stopClip();
               } else {
-                var zoneInWorld = this._zoneInWorld;
+                var worldZone = this._zoneCtx.world;
                 var crossDirtyZones = [];
                 for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-                  var crossDirtyZone = GeometryUtil.getZoneCross(zoneInWorld, dirtyZones[i]);
+                  var crossDirtyZone = GeometryUtil.getZoneCross(worldZone, dirtyZones[i]);
                   if (crossDirtyZone !== null) {
                     crossDirtyZone.left -= w[4];
                     crossDirtyZone.right -= w[4];
@@ -575,21 +575,21 @@ export default (
               }
             }
           } else {
-            if (dirtyZoneCtx.inRenderZone) {
+            if (dirtyCtx.render) {
               if (this.checkNeedRender()) {
-                var w = this._transformCtx.wTransform;
+                var w = this._transformCtx.worldTransform;
                 // 设置矩阵
                 render.setTransform(w[0], w[3], w[1], w[4], w[2], w[5]);
                 // 设置透明度
                 render.globalAplha = alpha;
                 // 绘制自身
-                if (dirtyZoneCtx.curReported) {
-                  this.postNotification('render', this, [render, [this._zoneInLocal]]);
+                if (dirtyCtx.curReported) {
+                  this.postNotification('render', this, [render, [this._zoneCtx.local]]);
                 } else {
-                  var zoneInWorld = this._zoneInWorld;
+                  var worldZone = this._zoneCtx.world;
                   var crossDirtyZones = [];
                   for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-                    var crossDirtyZone = GeometryUtil.getZoneCross(zoneInWorld, dirtyZones[i]);
+                    var crossDirtyZone = GeometryUtil.getZoneCross(worldZone, dirtyZones[i]);
                     if (crossDirtyZone !== null) {
                       crossDirtyZone.left -= w[4];
                       crossDirtyZone.right -= w[4];
@@ -610,8 +610,8 @@ export default (
             }
           }
         }
-        dirtyZoneCtx.oriReported = false;
-        dirtyZoneCtx.curReported = false;
+        dirtyCtx.oriReported = false;
+        dirtyCtx.curReported = false;
       }
 
       InnerNode.prototype._dispatchChildrenRender = function (render, alpha, renderZone, dirtyZones) {

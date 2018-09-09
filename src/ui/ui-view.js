@@ -152,10 +152,10 @@ export default (
         functions.syncBackgroundBorderRender.call(this);
         functions.syncBackgroundBorderRenderInvalid.call(this);
 
-        this.addObserver('backgroundColorChanged', this.refresh, this, this);
-        this.addObserver('borderWidthChanged', this.refresh, this, this);
-        this.addObserver('borderColorChanged', this.refresh, this, this);
-        this.addObserver('borderRadiusChanged', this.refresh, this, this);
+        this.addObserver('backgroundColorChanged', this.dirty, this, this);
+        this.addObserver('borderWidthChanged', this.dirty, this, this);
+        this.addObserver('borderColorChanged', this.dirty, this, this);
+        this.addObserver('borderRadiusChanged', this.dirty, this, this);
 
         this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRender, this, this);
         this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRender, this, this);

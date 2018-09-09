@@ -24,12 +24,12 @@ export default (
           binders = binder.getRunParam('binders');
         } else {
           var node = binder.node;
-          var anis = this.animations;
+          var animations = this.animations;
           binders = [];
-          for (var i = 0, len = anis.length; i < len; ++i) {
+          for (var i = 0, len = animations.length; i < len; ++i) {
             binders.push(new Binder({
               node: node,
-              animation: anis[i]
+              animation: animations[i]
             }));
           }
           binder.setRunParam('init', true);

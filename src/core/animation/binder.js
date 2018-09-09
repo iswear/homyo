@@ -24,16 +24,17 @@ export default (
         this.super('init', [conf]);
         this.defineNotifyProperty('node', LangUtil.checkAndGet(conf.node, null));
         this.defineNotifyProperty('animation', LangUtil.checkAndGet(conf.animation, null));
-        this.defineNotifyProperty('fn', LangUtil.checkAndGet(conf.fn, null));
-        this.defineNotifyProperty('target', LangUtil.checkAndGet(conf.target, null));
+        this.defineNotifyProperty('callbackFn', LangUtil.checkAndGet(conf.callbackFn, null));
+        this.defineNotifyProperty('callbackTarget', LangUtil.checkAndGet(conf.callbackTarget, null));
         this.defineNotifyProperty('loop', LangUtil.checkAndGet(conf.loop, null));
+        
         this._runParams = {};
       }
 
       InnerBinder.prototype.execute = function (deltaTime) {
         var result = this.animation.execute(this, deltaTime);
-        if (this.fn !== null) {
-          this.fn.apply(this.target, [this, result]);
+        if (this.callbackFn !== null) {
+          this.callbackFn.call(this.callbackTarget, this, result);
         }
         return result;
       }
@@ -49,8 +50,8 @@ export default (
       InnerBinder.prototype.destroy = function () {
         this.node = null;
         this.animation = null;
-        this.fn = null;
-        this.target = null;
+        this.callbackFn = null;
+        this.callbackTarget = null;
         this.loop = null;
         this.super('destroy');
       }

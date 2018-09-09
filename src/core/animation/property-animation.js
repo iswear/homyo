@@ -14,7 +14,7 @@ export default (
       InnerPropertyAnimation.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.defineNotifyProperty('property', LangUtil.checkAndGet(conf.property, ''));
-        this.defineNotifyProperty('targetOffset', LangUtil.checkAndGet(conf.targetOffset, 0));
+        this.defineNotifyProperty('offset', LangUtil.checkAndGet(conf.offset, 0));
         this.defineNotifyProperty('offsetFn', LangUtil.checkAndGet(conf.offsetFn, null));
       }
 
@@ -31,9 +31,9 @@ export default (
         sumTime += deltaTime;
         var node = binder.node, property = this.property;
         var offset = this.offsetFn.call(node, binder.animation, deltaTime, sumTime);
-        if ((offset - this.targetOffset) * (propertyOffset - this.targetOffset) <= 0) {
+        if ((offset - this.offset) * (propertyOffset - this.offset) <= 0) {
           binder.setRunParam('init', false);
-          node[property] = node[property] + this.targetOffset - propertyOffset;
+          node[property] = node[property] + this.offset - propertyOffset;
           return true;
         } else {
           binder.setRunParam('propertyOffset', offset);
@@ -45,7 +45,7 @@ export default (
 
       InnerPropertyAnimation.prototype.destroy = function () {
         this.property = null;
-        this.targetOffset = null;
+        this.offset = null;
         this.offsetFn = null;
         this.super('destroy');
       }

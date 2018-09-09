@@ -475,18 +475,18 @@
         }
       }
 
-      function syncTransform () {
-        this._transformCtx.needUpdate = true;
+      function syncLocalTransform () {
+        this._transformCtx.localInvalid = true;
       }
       
-      function syncZoneInLocal () {
-        this._zoneInLocal.needUpdate = true;
+      function syncLocalZone () {
+        this._zoneCtx.localInvalid = true;
       }
       
       return {
         syncClipRender: syncClipRender,
-        syncTransform: syncTransform,
-        syncZoneInLocal: syncZoneInLocal
+        syncLocalTransform: syncLocalTransform,
+        syncLocalZone: syncLocalZone
       }
     })();
 
@@ -534,98 +534,118 @@
         this.defineNotifyProperty('application', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.application, null));
 
         this._id = ++id;
+        
         this._childNodes =  {
           count: 0, 
           defLayer: __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.defLayer, this.defLayer), 
           nodeLayers: []
         };
         this._transformCtx = {
-          needUpdate: false,
-          lTransform: [0, 0, 0, 0, 0, 0],
-          lReverseTransform: [0, 0, 0, 0, 0, 0],
-          wTransform: [0, 0, 0, 0, 0, 0],
-          wReverseTransform: [0, 0, 0, 0, 0, 0]
+          localInvalid: false,
+          localTransform: [0, 0, 0, 0, 0, 0],
+          localReverseTransform: [0, 0, 0, 0, 0, 0],
+          worldTransform: [0, 0, 0, 0, 0, 0],
+          worldReverseTransform: [0, 0, 0, 0, 0, 0]
         };
-        this._zoneInLocal = {
-          needUpdate: false,
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: 0,
-          height: 0
+        this._zoneCtx = {
+          localInvalid: true,
+          local: {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: 0,
+            height: 0
+          },
+          world: {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: 0,
+            height: 0
+          }
         };
-        this._zoneInWorld = {
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: 0,
-          height: 0
-        };
-        this._dirtyZoneCtx = {
-          dirty: false,
+        this._dirtyCtx = {
+          render: true,
           oriReported: false,
-          curReported: false
+          curReported: false,
         };
 
         functions.syncClipRender.call(this);
-        functions.syncTransform.call(this);
-        functions.syncZoneInLocal.call(this);
+        functions.syncLocalTransform.call(this);
+        functions.syncLocalZone.call(this);
 
-        this.addObserver('xChanged', this.refresh, this, this);
-        this.addObserver('yChanged', this.refresh, this, this);
-        this.addObserver('rotateZChanged', this.refresh, this, this);
-        this.addObserver('scaleXChanged', this.refresh, this, this);
-        this.addObserver('scaleYChanged', this.refresh, this, this);
-        this.addObserver('inclineXChanged', this.refresh, this, this);
-        this.addObserver('inclineYChanged', this.refresh, this, this);
-        this.addObserver('widthChanged', this.refresh, this, this);
-        this.addObserver('heightChanged', this.refresh, this, this);
-        this.addObserver('anchorXChanged', this.refresh, this, this);
-        this.addObserver('anchorYChanged', this.refresh, this, this);
-        this.addObserver('alphaChanged', this.refresh, this, this);
-        this.addObserver('visibleChanged', this.refresh, this, this);
-
-        this.addObserver('xChanged', functions.syncTransform, this, this);
-        this.addObserver('yChanged', functions.syncTransform, this, this);
-        this.addObserver('rotateZChanged', functions.syncTransform, this, this);
-        this.addObserver('scaleXChanged', functions.syncTransform, this, this);
-        this.addObserver('scaleYChanged', functions.syncTransform, this, this);
-        this.addObserver('inclineXChanged', functions.syncTransform, this, this);
-        this.addObserver('inclineYChanged', functions.syncTransform, this, this);
-        this.addObserver('parentChanged', functions.syncTransform, this, this);
+        this.addObserver('xChanged', this.dirty, this, this);
+        this.addObserver('yChanged', this.dirty, this, this);
+        this.addObserver('rotateZChanged', this.dirty, this, this);
+        this.addObserver('scaleXChanged', this.dirty, this, this);
+        this.addObserver('scaleYChanged', this.dirty, this, this);
+        this.addObserver('inclineXChanged', this.dirty, this, this);
+        this.addObserver('inclineYChanged', this.dirty, this, this);
+        this.addObserver('widthChanged', this.dirty, this, this);
+        this.addObserver('heightChanged', this.dirty, this, this);
+        this.addObserver('anchorXChanged', this.dirty, this, this);
+        this.addObserver('anchorYChanged', this.dirty, this, this);
+        this.addObserver('alphaChanged', this.dirty, this, this);
+        this.addObserver('visibleChanged', this.dirty, this, this);
 
         this.addObserver('clipChanged', functions.syncClipRender, this, this);
 
-        this.addObserver('widthChanged', functions.syncZoneInLocal, this, this);
-        this.addObserver('heightChanged', functions.syncZoneInLocal, this, this);
-        this.addObserver('anchorXChanged', functions.syncZoneInLocal, this, this);
-        this.addObserver('anchorYChanged', functions.syncZoneInLocal, this, this);
+        this.addObserver('xChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('yChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('rotateZChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('scaleXChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('scaleYChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('inclineXChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('inclineYChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('parentChanged', functions.syncLocalTransform, this, this);
+
+
+        this.addObserver('widthChanged', functions.syncLocalZone, this, this);
+        this.addObserver('heightChanged', functions.syncLocalZone, this, this);
+        this.addObserver('anchorXChanged', functions.syncLocalZone, this, this);
+        this.addObserver('anchorYChanged', functions.syncLocalZone, this, this);
       }
 
-      InnerNode.prototype.getZoneInLocal = function () {
-        var zoneInLocal = this._zoneInLocal;
+      InnerNode.prototype.getID = function () {
+        return this._id;
+      }
+
+      InnerNode.prototype.getLocalZone = function () {
+        var localZone = this._zoneCtx.local;
         return {
-          left: zoneInLocal.left,
-          top: zoneInLocal.top,
-          right: zoneInLocal.right,
-          bottom: zoneInLocal.bottom,
-          width: zoneInLocal.width,
-          height: zoneInLocal.height
+          left: localZone.left,
+          top: localZone.top,
+          right: localZone.right,
+          bottom: localZone.bottom,
+          width: localZone.width,
+          height: localZone.height
         };
       }
 
-      InnerNode.prototype.getZoneInWorld = function () {
-        var zoneInWorld = this._zoneInWorld;
+      InnerNode.prototype.getWorldZone = function () {
+        var worldZone = this._zoneCtx.world;
         return {
-          left: zoneInWorld.left,
-          top: zoneInWorld.top,
-          right: zoneInWorld.right,
-          bottom: zoneInWorld.bottom,
-          width: zoneInWorld.width,
-          height: zoneInWorld.height
+          left: worldZone.left,
+          top: worldZone.top,
+          right: worldZone.right,
+          bottom: worldZone.bottom,
+          width: worldZone.width,
+          height: worldZone.height
         };
+      }
+
+      InnerNode.prototype.getDirtyZone = function () {
+        var worldZone = this._zoneCtx.world;
+        return {
+          left: worldZone.left - 1, 
+          top: worldZone.top - 1,
+          right: worldZone.right + 1,
+          bottom: worldZone.bottom + 1,
+          width: worldZone.width + 2,
+          height: worldZone.height + 2
+        }
       }
 
       InnerNode.prototype.getChildNode = function (layerIndex, nodeIndex) {
@@ -670,7 +690,6 @@
         childNodes.count ++;
         node.parent = this;
         nodeLayers[layerIndex].push(node);
-        this.refresh();
       }
 
       InnerNode.prototype.insertChildNode = function (node, nodeIndex) {
@@ -691,7 +710,6 @@
         } else {
           nodeLayers[layerIndex].push(node);
         }
-        this.refresh()
       }
 
       InnerNode.prototype.removeChildNode = function (node, destroy) {
@@ -709,7 +727,6 @@
                   node.parent = null;
                   node.application = null;
                   this._childNodes.count--;
-                  this.refresh();
                   return;
                 }
               }
@@ -758,43 +775,43 @@
       }
 
       InnerNode.prototype.transformLVectorToW = function (vector) {
-        return __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2dAndVect2d(this._transformCtx.wTransform, vector);
+        return __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2dAndVect2d(this._transformCtx.worldTransform, vector);
       }
 
       InnerNode.prototype.transformWVectorToL = function (vector) {
-        return __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2dAndVect2d(this._transformCtx.wReverseTransform, vector);
+        return __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2dAndVect2d(this._transformCtx.worldReverseTransform, vector);
       }
 
       InnerNode.prototype.transformLVectorToP = function (vector) {
-        return __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2dAndVect2d(this._transformCtx.lTransform, vector);
+        return __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2dAndVect2d(this._transformCtx.localTransform, vector);
       }
 
       InnerNode.prototype.transformPVectorToL = function (vector) {
-        return __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2dAndVect2d(this._transformCtx.lReverseTransform, vector);
+        return __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2dAndVect2d(this._transformCtx.localReverseTransform, vector);
       }
 
       InnerNode.prototype.getTransformInParent = function () {
-        var t = this._transformCtx.lTransform;
+        var t = this._transformCtx.localTransform;
         return [t[0], t[1], t[2], t[3], t[4], t[5]];
       }
 
       InnerNode.prototype.getReverseTransformInParent = function () {
-        var t = this._transformCtx.lReverseTransform;
+        var t = this._transformCtx.localReverseTransform;
         return [t[0], t[1], t[2], t[3], t[4], t[5]];
       }
 
       InnerNode.prototype.getTransformInWorld = function () {
-        var t = this._transformCtx.wTransform;
+        var t = this._transformCtx.worldTransform;
         return [t[0], t[1], t[2], t[3], t[4], t[5]];
       }
 
       InnerNode.prototype.getReverseTransformInWorld = function() {
-        var t = this._transformCtx.wReverseTransform;
+        var t = this._transformCtx.worldReverseTransform;
         return [t[0], t[1], t[2], t[3], t[4], t[5]];
       }
 
       InnerNode.prototype.startClip = function (render) {
-        var zone = this._zoneInLocal;
+        var zone = this._zoneCtx.local;
         render.beginPath();
         render.moveTo(zone.left, zone.top);
         render.lineTo(zone.right, zone.top);
@@ -814,7 +831,7 @@
       }
 
       InnerNode.prototype.checkEventTrigger = function (name, e, x, y) {
-        var zone = this._zoneInLocal;
+        var zone = this._zoneCtx.local;
         if (x >= zone.left && x <= zone.right && y >= zone.top && y <= zone.bottom) {
           return true;
         } else {
@@ -834,14 +851,6 @@
           }
           this.application = app;
           return app;
-        }
-      }
-
-      InnerNode.prototype.refresh = function () {
-        var app = this.findApplication();
-        if (app !== null) {
-          app.refresh();
-          this._reportOriDirtyZone(app);
         }
       }
 
@@ -869,68 +878,71 @@
       InnerNode.prototype._syncTransform = function (parentWTransform, parentWReverseTransform, renderZone, parentUpdateTransform) {
         this.postNotification('frame', this);
         var transformCtx = this._transformCtx;
-        var zoneInLocal = this._zoneInLocal;
-        var zoneInWorld = this._zoneInWorld;
-        if (zoneInLocal.needUpdate) {
-          zoneInLocal.width = Math.round(this.width);
-          zoneInLocal.height = Math.round(this.height);
-          zoneInLocal.top = Math.round(zoneInLocal.height * (-this.anchorY));
-          zoneInLocal.bottom = Math.round(zoneInLocal.height + zoneInLocal.top);
-          zoneInLocal.left = Math.round(zoneInLocal.width * (-this.anchorX));
-          zoneInLocal.right = Math.round(zoneInLocal.width + zoneInLocal.left);
+        var zoneCtx = this._zoneCtx;
+        var dirtyCtx = this._dirtyCtx;
+        var localZone = zoneCtx.local;
+        var worldZone = zoneCtx.world;
+        if (zoneCtx.localInvalid) {
+          localZone.width = Math.round(this.width);
+          localZone.height = Math.round(this.height);
+          localZone.top = Math.round(localZone.height * (-this.anchorY));
+          localZone.bottom = Math.round(localZone.height + localZone.top);
+          localZone.left = Math.round(localZone.width * (-this.anchorX));
+          localZone.right = Math.round(localZone.width + localZone.left);
         }
         
-        if (transformCtx.needUpdate) {
-          transformCtx.lTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].incline2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].scale2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].rotate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].translate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
-          transformCtx.lReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].reverse2d(transformCtx.lTransform);
-          transformCtx.wTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(parentWTransform, transformCtx.lTransform);
-          transformCtx.wReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(transformCtx.lReverseTransform, parentWReverseTransform);
+        if (transformCtx.localInvalid) {
+          transformCtx.localTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].incline2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].scale2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].rotate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].translate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
+          transformCtx.localReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].reverse2d(transformCtx.localTransform);
+          transformCtx.worldTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(parentWTransform, transformCtx.localTransform);
+          transformCtx.worldReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(transformCtx.localReverseTransform, parentWReverseTransform);
         } else if (parentUpdateTransform) {
-          transformCtx.wTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(parentWTransform, transformCtx.lTransform);
-          transformCtx.wReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(transformCtx.lReverseTransform, parentWReverseTransform);
+          transformCtx.worldTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(parentWTransform, transformCtx.localTransform);
+          transformCtx.worldReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(transformCtx.localReverseTransform, parentWReverseTransform);
         }
 
-        if (zoneInLocal.needUpdate || transformCtx.needUpdate || parentUpdateTransform) {
-          var p1 = this.transformLVectorToW([zoneInLocal.left, zoneInLocal.top]);
-          var p2 = this.transformLVectorToW([zoneInLocal.left, zoneInLocal.bottom]);
-          var p3 = this.transformLVectorToW([zoneInLocal.right, zoneInLocal.top]);
-          var p4 = this.transformLVectorToW([zoneInLocal.right, zoneInLocal.bottom]);
-          zoneInWorld.top = Math.min(Math.min(p1[1], p2[1]), Math.min(p3[1], p4[1]));
-          zoneInWorld.bottom = Math.max(Math.max(p1[1], p2[1]), Math.max(p3[1], p4[1]));
-          zoneInWorld.left = Math.min(Math.min(p1[0], p2[0]), Math.min(p3[0], p4[0]));
-          zoneInWorld.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
-          zoneInWorld.width = zoneInWorld.right - zoneInWorld.left;
-          zoneInWorld.height = zoneInWorld.bottom - zoneInWorld.top;
-          this._dirtyZoneCtx.inRenderZone = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].isZoneCross(zoneInWorld, renderZone);
+        if (zoneCtx.localInvalid || transformCtx.localInvalid || parentUpdateTransform) {
+          var p1 = this.transformLVectorToW([localZone.left, localZone.top]);
+          var p2 = this.transformLVectorToW([localZone.left, localZone.bottom]);
+          var p3 = this.transformLVectorToW([localZone.right, localZone.top]);
+          var p4 = this.transformLVectorToW([localZone.right, localZone.bottom]);
+          worldZone.top = Math.min(Math.min(p1[1], p2[1]), Math.min(p3[1], p4[1]));
+          worldZone.bottom = Math.max(Math.max(p1[1], p2[1]), Math.max(p3[1], p4[1]));
+          worldZone.left = Math.min(Math.min(p1[0], p2[0]), Math.min(p3[0], p4[0]));
+          worldZone.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
+          worldZone.width = worldZone.right - worldZone.left;
+          worldZone.height = worldZone.bottom - worldZone.top;
         }
 
-        zoneInLocal.needUpdate = false;
-        transformCtx.needUpdate = false;
+        transformCtx.localInvalid = false;
+        zoneCtx.localInvalid = false;
+        dirtyCtx.render = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].isZoneCross(renderZone, this.getDirtyZone());
 
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
           var layer = layers[i];
           if (layer) {
             for (var j = 0, len2 = layer.length; j < len2; ++j) {
-              layer[j]._syncTransform(transformCtx.wTransform, transformCtx.wReverseTransform, parentUpdateTransform || transformCtx.needUpdate);
+              layer[j]._syncTransform(transformCtx.worldTransform, transformCtx.worldReverseTransform, parentUpdateTransform || transformCtx.localInvalid);
             }
           }
         }
       }
 
+      InnerNode.prototype.dirty = function () {
+        var app = this.findApplication();
+        this._reportOriDirtyZone(app);
+      }
+
       InnerNode.prototype._reportOriDirtyZone = function (app) {
-        var dirtyZoneCtx = this._dirtyZoneCtx;
-        if (dirtyZoneCtx.inRenderZone && !dirtyZoneCtx.oriReported) {
+        var dirtyCtx = this._dirtyCtx;
+        if (!dirtyCtx.oriReported) {
+          if (dirtyCtx.render) {
+            app.receiveDirtyZone(this, this.getDirtyZone());
+          }
           this.oriReported = true;
-          app.receiveDirtyZone(this, {
-            left: this._zoneInWorld.left - 1,
-            top: this._zoneInWorld.top - 1,
-            right: this._zoneInWorld.right + 1,
-            bottom: this._zoneInWorld.bottom + 1,
-            width: this._zoneInWorld.width + 2,
-            height: this._zoneInWorld.height + 1
-          });
         }
+
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
           var layer = layers[i];
@@ -944,34 +956,22 @@
 
       InnerNode.prototype._reportCurDirtyZone = function (app, dirtyZones) {
         var result = false;
-        var dirtyZoneCtx = this._dirtyZoneCtx;
-        var zoneInWorld = this._zoneInWorld;
-        if (dirtyZoneCtx.inRenderZone) {
-          if (!dirtyZoneCtx.curReported) {
-            var wTrans = this._transformCtx.wTransform;
-            if (dirtyZoneCtx.oriReported) {
-              result = app.receiveDirtyZone(this, {
-                left: zoneInWorld.left - 1,
-                top: zoneInWorld.top - 1,
-                right: zoneInWorld.right + 1,
-                bottom: zoneInWorld.bottom + 1,
-                width: zoneInWorld.width + 2,
-                height: zoneInWorld.height + 2
-              });
-              dirtyZoneCtx.curReported = true;
+        var dirtyCtx = this._dirtyCtx;
+        var worldZone = this._zoneCtx.world;
+        if (dirtyCtx.render) {
+          if (!dirtyCtx.curReported) {
+            var wTrans = this._transformCtx.worldTransform;
+            if (dirtyCtx.oriReported) {
+              var dirtyZone = this.getDirtyZone();
+              result = app.receiveDirtyZone(this, dirtyZone);
+              dirtyCtx.curReported = true;
             } else if (!(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 0)) {
+              var dirtyZone = this.getDirtyZone();
               for (var i = 0, len = dirtyZones.length; i < len; ++i) {
                 var dirtyZone = dirtyZones[i];
-                if (__WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].isZoneCross(dirtyZone, zoneInWorld)) {
-                  result = app.receiveDirtyZone(this, {
-                    left: zoneInWorld.left - 1,
-                    top: zoneInWorld.top - 1,
-                    right: zoneInWorld.right + 1,
-                    bottom: zoneInWorld.bottom + 1,
-                    width: zoneInWorld.width + 2,
-                    height: zoneInWorld.height + 2
-                  });
-                  dirtyZoneCtx.curReported = true;
+                if (__WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].isZoneCross(dirtyZone, worldZone)) {
+                  result = app.receiveDirtyZone(this, dirtyZone);
+                  dirtyCtx.curReported = true;
                   break;
                 }
               }
@@ -992,27 +992,27 @@
       }
 
       InnerNode.prototype._dispatchRender = function (render, parentAlpha, renderZone, dirtyZones) {
-        var dirtyZoneCtx = this._dirtyZoneCtx;
+        var dirtyCtx = this._dirtyCtx;
         var alpha = this.alpha * parentAlpha;
         if (this.visible && alpha > 0) {
           if (this.clip) {
             // 如果发生裁剪
-            if (dirtyZoneCtx.inRenderZone) {
-              var w = this._transformCtx.wTransform;
+            if (dirtyCtx.render) {
+              var w = this._transformCtx.worldTransform;
               // 设置矩阵
               render.setTransform(w[0], w[3], w[1], w[4], w[2], w[5]);
               // 设置透明度
               render.globalAplha = alpha;
               // 绘制自身
-              if (dirtyZoneCtx.curReported) {
-                this.postNotification('render', this, [render, [this._zoneInWorld]]);
+              if (dirtyCtx.curReported) {
+                this.postNotification('render', this, [render, [this._zoneCtx.local]]);
                 this._dispatchChildrenRender(render, alpha, renderZone, dirtyZones);
                 this.stopClip();
               } else {
-                var zoneInWorld = this._zoneInWorld;
+                var worldZone = this._zoneCtx.world;
                 var crossDirtyZones = [];
                 for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-                  var crossDirtyZone = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].getZoneCross(zoneInWorld, dirtyZones[i]);
+                  var crossDirtyZone = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].getZoneCross(worldZone, dirtyZones[i]);
                   if (crossDirtyZone !== null) {
                     crossDirtyZone.left -= w[4];
                     crossDirtyZone.right -= w[4];
@@ -1029,21 +1029,21 @@
               }
             }
           } else {
-            if (dirtyZoneCtx.inRenderZone) {
+            if (dirtyCtx.render) {
               if (this.checkNeedRender()) {
-                var w = this._transformCtx.wTransform;
+                var w = this._transformCtx.worldTransform;
                 // 设置矩阵
                 render.setTransform(w[0], w[3], w[1], w[4], w[2], w[5]);
                 // 设置透明度
                 render.globalAplha = alpha;
                 // 绘制自身
-                if (dirtyZoneCtx.curReported) {
-                  this.postNotification('render', this, [render, [this._zoneInLocal]]);
+                if (dirtyCtx.curReported) {
+                  this.postNotification('render', this, [render, [this._zoneCtx.local]]);
                 } else {
-                  var zoneInWorld = this._zoneInWorld;
+                  var worldZone = this._zoneCtx.world;
                   var crossDirtyZones = [];
                   for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-                    var crossDirtyZone = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].getZoneCross(zoneInWorld, dirtyZones[i]);
+                    var crossDirtyZone = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].getZoneCross(worldZone, dirtyZones[i]);
                     if (crossDirtyZone !== null) {
                       crossDirtyZone.left -= w[4];
                       crossDirtyZone.right -= w[4];
@@ -1064,8 +1064,8 @@
             }
           }
         }
-        dirtyZoneCtx.oriReported = false;
-        dirtyZoneCtx.curReported = false;
+        dirtyCtx.oriReported = false;
+        dirtyCtx.curReported = false;
       }
 
       InnerNode.prototype._dispatchChildrenRender = function (render, alpha, renderZone, dirtyZones) {
@@ -1545,16 +1545,17 @@
         this.super('init', [conf]);
         this.defineNotifyProperty('node', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.node, null));
         this.defineNotifyProperty('animation', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.animation, null));
-        this.defineNotifyProperty('fn', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.fn, null));
-        this.defineNotifyProperty('target', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.target, null));
+        this.defineNotifyProperty('callbackFn', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.callbackFn, null));
+        this.defineNotifyProperty('callbackTarget', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.callbackTarget, null));
         this.defineNotifyProperty('loop', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.loop, null));
+        
         this._runParams = {};
       }
 
       InnerBinder.prototype.execute = function (deltaTime) {
         var result = this.animation.execute(this, deltaTime);
-        if (this.fn !== null) {
-          this.fn.apply(this.target, [this, result]);
+        if (this.callbackFn !== null) {
+          this.callbackFn.call(this.callbackTarget, this, result);
         }
         return result;
       }
@@ -1570,8 +1571,8 @@
       InnerBinder.prototype.destroy = function () {
         this.node = null;
         this.animation = null;
-        this.fn = null;
-        this.target = null;
+        this.callbackFn = null;
+        this.callbackTarget = null;
         this.loop = null;
         this.super('destroy');
       }
@@ -1865,7 +1866,7 @@
 
       InnerManager.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this._aniBinders = [];
+        this._animationBinders = [];
         this._paused = false;
       }
 
@@ -1877,18 +1878,18 @@
         this._paused = false;
       }
 
-      InnerManager.prototype.addAnimation = function (node, animation, fn, target, loop) {
-        this._aniBinders.push(new __WEBPACK_IMPORTED_MODULE_2__binder__["a" /* default */]({
+      InnerManager.prototype.addAnimation = function (node, animation, callbackFn, callbackTarget, loop) {
+        this._animationBinders.push(new __WEBPACK_IMPORTED_MODULE_2__binder__["a" /* default */]({
           node: node,
           animation: animation,
-          fn: fn,
-          target: target,
+          callbackFn: callbackFn,
+          callbackTarget: callbackTarget,
           loop: loop
         }));
       }
 
       InnerManager.prototype.removeAnimationByNode = function (node) {
-        var binders = this._aniBinders;
+        var binders = this._animationBinders;
         for (var i = 0, len = binders.length; i < len; ++i) {
           var binder = binders[i];
           if (binder.node === node) {
@@ -1900,7 +1901,7 @@
       }
 
       InnerManager.prototype.removeAnimationByNodeAndAnimation = function (node, animation) {
-        var binders = this._aniBinders;
+        var binders = this._animationBinders;
         for (var i = 0, len = binders.length; i < len; ++i) {
           var binder = binders[i];
           if (binder.node === node && binder.animation === animation) {
@@ -1913,7 +1914,7 @@
 
       InnerManager.prototype.run = function (deltaTime) {
         if (!this._paused) {
-          var binders = this._aniBinders;
+          var binders = this._animationBinders;
           for (var i = 0, len = binders.length; i < len; ++i) {
             var binder = binders[i];
             if (binder.execute(deltaTime) && !binder.loop) {
@@ -1933,7 +1934,7 @@
       }
 
       InnerManager.prototype.destroy = function () {
-        this._aniBinders = null;
+        this._animationBinders = null;
         this.super('destroy');
       }
 
@@ -1977,7 +1978,7 @@
         this._loadedVideos = {};
       }
 
-      InnerFileLoader.prototype.loadImageAsync = function (url, fn, target) {
+      InnerFileLoader.prototype.loadImageAsync = function (url, fn, target, ignoreNewCallback) {
         if (!__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isUndefined(this._loadedImages[url])) {
           return this._loadedImages[url];
         } else {
@@ -1986,6 +1987,10 @@
             image = doc.createElement('img');
             image.src = url;
             this._loadingImages[url] = image;
+          } else {
+            if (ignoreNewCallback) {
+              return undefined;
+            }
           }
 
           var self = this;
@@ -1995,7 +2000,7 @@
             delete self._loadingImages[url];
             self._loadedImages[url]  = image;
             if (fn) {
-              fn.call(target, url, true);
+              fn.call(target, url, this, true);
             }
           }
 
@@ -2005,17 +2010,17 @@
             delete self._loadingImages[url];
             self._loadedImages[url] = null;
             if (fn) {
-              fn.call(target, url, false);
+              fn.call(target, url, null, false);
             }
           }
 
           image.addEventListener('load', loadSuccess, false);
           image.addEventListener('error', loadError, false);
-          return null;
+          return undefined;
         }
       }
 
-      InnerFileLoader.prototype.loadAudioAsync = function (url, fn, target) {
+      InnerFileLoader.prototype.loadAudioAsync = function (url, fn, target, ignoreNewCallback) {
         if (!__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isUndefined(this._loadedAudios[url])) {
           return this._loadedAudios[url];
         } else {
@@ -2024,7 +2029,12 @@
             audio = doc.createElement('audio');
             audio.src = url;
             this._loadingAudios[url] = audio;
+          } else {
+            if (ignoreNewCallback) {
+              return undefined;
+            }
           }
+
           var self = this;
           function loadSuccess() {
             this.removeEventListener('load', loadSuccess, false);
@@ -2032,7 +2042,7 @@
             delete self._loadingAudios[url];
             self._loadedImages[url] = audio;
             if (fn) {
-              fn.call(target, url, true);
+              fn.call(target, url, this, true);
             }
           }
 
@@ -2042,17 +2052,17 @@
             delete self._loadingAudios[url];
             self._loadedAudios[url] = null;
             if (fn) {
-              fn.call(target, url, false);
+              fn.call(target, url, null, false);
             }
           }
 
           audio.addEventListener('load', loadSuccess, false);
           audio.addEventListener('error', loadError, false);
-          return null;
+          return undefined;
         }
       }
 
-      InnerFileLoader.prototype.loadVideoAsync = function (url, fn, target) {
+      InnerFileLoader.prototype.loadVideoAsync = function (url, fn, target, ignoreNewCallback) {
         if (!__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isUndefined(this._loadedVideos[url])) {
           return this._loadedVideos[url];
         } else {
@@ -2061,7 +2071,12 @@
             video = doc.createElement('video');
             video.src = url;
             this._loadingVideos[url] = video;
+          } else {
+            if (ignoreNewCallback) {
+              return undefined;
+            }
           }
+
           var self = this;
           function loadSuccess() {
             this.removeEventListener('load', loadSuccess, false);
@@ -2069,7 +2084,7 @@
             delete self._loadingVideos[url];
             self._loadedVideos[url] = video;
             if (fn) {
-              fn.call(target, url, true);
+              fn.call(target, url, this, true);
             }
           }
 
@@ -2079,13 +2094,13 @@
             delete self._loadingVideos[url];
             self._loadedVideos[url] = null;
             if (fn) {
-              fn.call(target, url, false);
+              fn.call(target, url, null, false);
             }
           }
 
           video.addEventListener('load', loadSuccess, false);
           video.addEventListener('error', loadError, false);
-          return null;
+          return undefined;
         }
       }
 
@@ -2281,12 +2296,12 @@
           binders = binder.getRunParam('binders');
         } else {
           var node = binder.node;
-          var anis = this.animations;
+          var animations = this.animations;
           binders = [];
-          for (var i = 0, len = anis.length; i < len; ++i) {
+          for (var i = 0, len = animations.length; i < len; ++i) {
             binders.push(new __WEBPACK_IMPORTED_MODULE_2__binder__["a" /* default */]({
               node: node,
-              animation: anis[i]
+              animation: animations[i]
             }));
           }
           binder.setRunParam('init', true);
@@ -2346,11 +2361,11 @@
 
       InnerSchedulerAnimation.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('fn', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.fn, null));
-        this.defineNotifyProperty('target', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.target, null));
+        this.defineNotifyProperty('callbackFn', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.callbackFn, null));
+        this.defineNotifyProperty('callbackTarget', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.callbackTarget, null));
         this.defineNotifyProperty('interval', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.interval, 0));
         this.defineNotifyProperty('repeats', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.repeats, 0));
-        this.defineNotifyProperty('param', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.param, null));
+        this.defineNotifyProperty('params', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.params, null));
       }
 
       InnerSchedulerAnimation.prototype.execute = function (binder, deltaTime) {
@@ -2366,7 +2381,7 @@
           }
           sumTime += deltaTime;
           if (sumTime >= this.interval) {
-            this.fn.call(this.target, binder, this.param);
+            this.callbackFn.call(this.callbackTarget, binder, this.params);
             sumTime -= this.interval;
             repeats += 1;
           }
@@ -2384,10 +2399,10 @@
       }
 
       InnerSchedulerAnimation.prototype.destroy = function () {
-        this.fn = null;
-        this.target = null;
-        this.param = null;
-        this.super('destroy')
+        this.callbackFn = null;
+        this.callbackTarget = null;
+        this.params = null;
+        this.super('destroy');
       }
 
       return InnerSchedulerAnimation;
@@ -2420,7 +2435,7 @@
       InnerPropertyAnimation.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.defineNotifyProperty('property', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.property, ''));
-        this.defineNotifyProperty('targetOffset', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.targetOffset, 0));
+        this.defineNotifyProperty('offset', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.offset, 0));
         this.defineNotifyProperty('offsetFn', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.offsetFn, null));
       }
 
@@ -2437,9 +2452,9 @@
         sumTime += deltaTime;
         var node = binder.node, property = this.property;
         var offset = this.offsetFn.call(node, binder.animation, deltaTime, sumTime);
-        if ((offset - this.targetOffset) * (propertyOffset - this.targetOffset) <= 0) {
+        if ((offset - this.offset) * (propertyOffset - this.offset) <= 0) {
           binder.setRunParam('init', false);
-          node[property] = node[property] + this.targetOffset - propertyOffset;
+          node[property] = node[property] + this.offset - propertyOffset;
           return true;
         } else {
           binder.setRunParam('propertyOffset', offset);
@@ -2451,7 +2466,7 @@
 
       InnerPropertyAnimation.prototype.destroy = function () {
         this.property = null;
-        this.targetOffset = null;
+        this.offset = null;
         this.offsetFn = null;
         this.super('destroy');
       }
@@ -2625,10 +2640,10 @@
         functions.syncBackgroundBorderRender.call(this);
         functions.syncBackgroundBorderRenderInvalid.call(this);
 
-        this.addObserver('backgroundColorChanged', this.refresh, this, this);
-        this.addObserver('borderWidthChanged', this.refresh, this, this);
-        this.addObserver('borderColorChanged', this.refresh, this, this);
-        this.addObserver('borderRadiusChanged', this.refresh, this, this);
+        this.addObserver('backgroundColorChanged', this.dirty, this, this);
+        this.addObserver('borderWidthChanged', this.dirty, this, this);
+        this.addObserver('borderColorChanged', this.dirty, this, this);
+        this.addObserver('borderRadiusChanged', this.dirty, this, this);
 
         this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRender, this, this);
         this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRender, this, this);
@@ -3020,23 +3035,26 @@
                       params[7] = deltaProp;
                       syncQueue.push(new __WEBPACK_IMPORTED_MODULE_2__core_animation_property_animation__["a" /* default */]({
                         property: props[i2],
-                        targetOffset: deltaProp,
+                        offset: deltaProp,
                         offsetFn: propertyCurveTweenUpdate(params)
                       }));
                     } else {
                       asyncQueue.push(new __WEBPACK_IMPORTED_MODULE_2__core_animation_property_animation__["a" /* default */]({
                         property: props[i2],
-                        targetOffset: deltaProp,
+                        offset: deltaProp,
                         offsetFn: propertyLineTweenUpdate(deltaProp, deltaTime)
                       }));
                     }
                   } else {
                     asyncQueue.push(new __WEBPACK_IMPORTED_MODULE_1__core_animation_scheduler_animation__["a" /* default */]({
-                      fn: propertyUnTweenUpdate,
-                      target: undefined,
+                      callbackFn: propertyUnTweenUpdate,
+                      callbackTarget: undefined,
                       interval: deltaTime,
                       repeats: 1,
-                      param: {property: props[i2], value: currProp}
+                      params: {
+                        property: props[i2], 
+                        value: currProp
+                      }
                     }));
                   }
                   prevProps[props[i2]] = currProp;
@@ -3053,11 +3071,14 @@
                 }
                 if (i === 0 || (!__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isUndefined(currProp) && prevProp !== currProp)) {
                   asyncQueue.push(new __WEBPACK_IMPORTED_MODULE_1__core_animation_scheduler_animation__["a" /* default */]({
-                    fn: propertyUnTweenUpdate,
-                    target: undefined,
+                    callbackFn: propertyUnTweenUpdate,
+                    callbackTarget: undefined,
                     interval: frame.time - prevTime,
                     repeats: 1,
-                    param: {property: props[i2], value: currProp}
+                    param: {
+                      property: props[i2], 
+                      value: currProp
+                    }
                   }));
                   prevProps[props[i2]] = currProp;
                 }
@@ -3176,11 +3197,12 @@
       }
 
       function renderImage (sender, render, dirtyZones) {
-        var image = loadImage.call(this);
-        if (image !== null) {
-          var zoneInLocal = this.getZoneInLocal();
-          var offsetLeft = - zoneInLocal.left;
-          var offsetTop = - zoneInLocal.top;
+        var ctx = this._imageCtx;
+        var image = this.findApplication().loadImage(ctx.url, this.getID(), loadImageFinished, this);
+        if (image) {
+          var localZone = this.getLocalZone();
+          var offsetLeft = - localZone.left;
+          var offsetTop = - localZone.top;
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
             render.drawImageExt(image,
@@ -3191,12 +3213,12 @@
       }
       
       function renderImageClip (sender, render, dirtyZones) {
-        var image = loadImage.call(this);
-        if (image !== null) {
-          var zoneInLocal = this.getZoneInLocal();
-          var ctx = this._imageCtx;
-          var offsetLeft = ctx.x - zoneInLocal.left;
-          var offsetTop = ctx.y - zoneInLocal.top;
+        var ctx = this._imageCtx;
+        var image = this.findApplication().loadImage(ctx.url, this.getID(), loadImageFinished, this);
+        if (image) {
+          var localZone = this.getLocalZone();
+          var offsetLeft = ctx.x - localZone.left;
+          var offsetTop = ctx.y - localZone.top;
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
             render.drawImageExt(image,
@@ -3206,10 +3228,10 @@
         }
       }
 
-      function loadImage () {
+      function loadImageFinished (url, image, success, async) {
         var ctx = this._imageCtx;
-        var image = this.findApplication().loadImage(ctx.url, true);
-        if (ctx.invalid && image !== null) {
+        if (ctx.invalid && success) {
+          console.log('bb');
           if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isString(this.image)) {
             this.width = image.width;
             this.height = image.height;
@@ -3227,7 +3249,10 @@
           }
           ctx.invalid = false;
         }
-        return image;
+        if (async) {
+          console.log('aa');
+          this.dirty();
+        }
       }
 
       return {
@@ -3258,7 +3283,7 @@
         functions.syncImageRender.call(this);
         functions.syncImageContext.call(this);
 
-        this.addObserver('imageChanged', this.refresh, this, this);
+        this.addObserver('imageChanged', this.dirty, this, this);
 
         this.addObserver('imageChanged', functions.syncImageRender, this, this);
         this.addObserver('imageChanged', functions.syncImageContext, this, this);
@@ -3300,11 +3325,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   application.run();
   root.runAnimation(new PropertyAnimation({
     property: 'rotateZ',
-    targetOffset: Infinity,
+    offset: Infinity,
     offsetFn: function (animation, deltaTime, sumTime) {
       return sumTime / 1000;
     }
   }), null, null, false);
+
+  for (var i = 0; i < 10; ++i) {
+    root.addChildNode(new GTexture({
+      x: 20 * i,
+      y: 20 * i,
+      visible: true,
+      image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
+    }));
+  }
   
   // document.onclick = function () {
   //   console.log('yaya')
@@ -3726,21 +3760,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       }
 
       function syncTransform () {
-        this._transformCtx.needUpdate = true;
+        this._transformCtx.invalid = true;
       }
 
       function syncRenderSize () {
         var render = this._render;
         var renderZone = this._renderZone;
         var transformCtx = this._transformCtx;
-        if (!transformCtx.needUpdate) {
+        if (!transformCtx.invalid) {
           if (render.clientWidth !== this._clientWidth || render.clientHeight !== this._clientHeight) {
             this._clientWidth = render.clientWidth;
             this._clientHeight = render.clientHeight;
-            transformCtx.needUpdate = true;
+            transformCtx.invalid = true;
           }
         }
-        if (transformCtx.needUpdate) {
+        if (transformCtx.invalid) {
           var width = render.width;
           var height = render.height;
           var clientWidth = render.clientWidth;
@@ -3766,31 +3800,27 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
               break;
             }
           }
+          this._scaleX = width / clientWidth;
+          this._scaleY = height / clientHeight;
           render.width = width;
           render.height = height;
           renderZone.width = width;
           renderZone.height = height;
           renderZone.right = width;
           renderZone.bottom = height;
-          transformCtx.needUpdate = false;
-          this._scaleX = width / clientWidth;
-          this._scaleY = height / clientHeight;
-          this.refresh();
+          transformCtx.invalid = false;
         }
       }
 
-      function loadImageFinished (url, success) {
+      function loadImageFinished (url, image, success) {
         if (success) {
-          if (this._loaderCtx.images[url] && this._loaderCtx.images[url].refresh) {
-            this.receiveDirtyZone(null, {
-              left: this._renderZone.left,
-              top: this._renderZone.top,
-              right: this._renderZone.right,
-              bottom: this._renderZone.bottom,
-              width: this._renderZone.width,
-              height: this._renderZone.height
-            });
-            this.refresh();
+          var callbacks = this._loaderCtx.callbacks[url];
+          if (callbacks) {
+            for (var callbackId in callbacks) {
+              var callback = callbacks[callbackId];
+              callback.callbackFn.call(callback.callbackTarget, url, image, success, true);
+            }
+            delete this._loaderCtx.callbacks[url];
           }
         }
       }
@@ -3860,7 +3890,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
         this._prevLoopTime = 0;
         this._preCheckTime = 0;
-        this._refresh = true;
         this._timerTaskId = 0;
         this._events = [];
 
@@ -3868,9 +3897,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           manager: new __WEBPACK_IMPORTED_MODULE_7__animation_manager__["a" /* default */]({})
         };
         this._loaderCtx = {
-          images: {},
-          audios: {},
-          videos: {},
+          callbacks: {},
           loader: new __WEBPACK_IMPORTED_MODULE_8__io_file_loader__["a" /* default */]({})
         };
 
@@ -3879,7 +3906,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this._scaleX = 1;
         this._scaleY = 1;
         this._transformCtx = {
-          needUpdate: true,
+          invalid: true,
           transform: [1, 0, 0, 0, 1, 0]
         };
 
@@ -3902,18 +3929,27 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this._animationCtx.manager.removeAnimationByNode(node);
       }
 
-      InnerApplication.prototype.loadImage = function (url, refresh) {
-        var loaderCtx = this._loaderCtx;
-        var loader = loaderCtx.loader;
-        if (loaderCtx.images[url]) {
-          loaderCtx.images[url].refresh |= refresh;
-          var image = loader.loadImageAsync(url);
-          return image;
+      InnerApplication.prototype.loadImage = function (url, callbackId, callbackFn, callbackTarget) {
+        var image = this._loaderCtx.loader.loadImageAsync(url, functions.loadImageFinished, this, true); 
+        if (image === undefined) {
+          if (callbackId !== null && callbackFn !== null) {
+            var imageCallBacks = this._loaderCtx.callbacks[url];
+            if (!imageCallBacks) {
+              this._loaderCtx.callbacks[url] = imageCallBacks = {};
+            }
+            if (!imageCallBacks[callbackId]) {
+              imageCallBacks[callbackId] = {
+                callbackFn: callbackFn, 
+                callbackTarget: callbackTarget
+              }
+            }
+          }
+        } else if (image === null) {
+          callbackFn.call(callbackTarget, url, image, false, false);
         } else {
-          loaderCtx.images[url] = {refresh: refresh};
-          var image = loader.loadImageAsync(url, functions.loadImageFinished, this);
-          return image;
+          callbackFn.call(callbackTarget, url, image, true, false);
         }
+        return image;
       }
 
       InnerApplication.prototype.loadAudio = function (url) {
@@ -3961,10 +3997,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         return true;
       }
 
-      InnerApplication.prototype.refresh = function () {
-        this._refresh = true;
-      }
-
       InnerApplication.prototype.loop = function () {
         var now = (new Date()).getTime(), deltaTime = 0;
         if (this._prevLoopTime !== 0) {
@@ -3981,14 +4013,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         } else {
           this._preCheckTime += deltaTime;
         }
-        if (this._refresh) {
+
+        var dirtyZones = this._dirtyZones;
+        if (dirtyZones.length > 0) {
           var renderZone = this._renderZone;
-          var dirtyZones = this._dirtyZones;
           var root = this._root;
           var render = this._render;
-          var transformCtx = this._transformCtx;
+          var transform = this._transformCtx.transform;
           // 同步最新的结点转换
-          root._syncTransform(transformCtx.transform, transformCtx.transform, renderZone, transformCtx.needUpdate);
+          root._syncTransform(transform, transform, renderZone, false);
           // 重新计算脏矩形
           while (true) {
             if (!root._reportCurDirtyZone(this, dirtyZones)) {
@@ -4006,7 +4039,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           dirtyZones.splice(0, dirtyZones.length);
           // 矩阵回归到单位矩阵
           render.setTransform(1, 0, 0, 1, 0, 0);
-          this._refresh = false;
           this._dirtyZones = [];
         }
       }
@@ -4014,7 +4046,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       InnerApplication.prototype.run = function () {
         if (this._timerTaskId === 0) {
           if (this._root !== null) {
-            this._refresh = true;
             this.receiveDirtyZone(null, {
               left: this._renderZone.left,
               top: this._renderZone.top,
@@ -4351,14 +4382,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         functions.syncTextLayoutInvalid.call(this);
         functions.syncTextRenderInvalid.call(this);
 
-        this.addObserver('textChanged', this.refresh, this, this);
-        this.addObserver('fontSizeChanged', this.refresh, this, this);
-        this.addObserver('fontFamilyChanged', this.refresh, this, this);
-        this.addObserver('textColor', this.refresh, this, this);
-        this.addObserver('textHorAlignChanged', this.refresh, this, this);
-        this.addObserver('textVerAlignChanged', this.refresh, this, this);
-        this.addObserver('textLineHeightChanged', this.refresh, this, this);
-        this.addObserver('textLineNumChanged', this.refresh, this, this);
+        this.addObserver('textChanged', this.dirty, this, this);
+        this.addObserver('fontSizeChanged', this.dirty, this, this);
+        this.addObserver('fontFamilyChanged', this.dirty, this, this);
+        this.addObserver('textColor', this.dirty, this, this);
+        this.addObserver('textHorAlignChanged', this.dirty, this, this);
+        this.addObserver('textVerAlignChanged', this.dirty, this, this);
+        this.addObserver('textLineHeightChanged', this.dirty, this, this);
+        this.addObserver('textLineNumChanged', this.dirty, this, this);
 
         this.addObserver('textChanged', functions.syncTextRender, this, this);
 
@@ -4613,8 +4644,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       function renderSquareMapCache (sender, render, dirtyZones) {
         var ctx = this._mapCacheCtx.tile;
-        var zone = this.getZoneInLocal();
-        var mapNodeZone = this._mapNode.getZoneInLocal();
+        var zone = this.getLocalZone();
+        var mapNodeZone = this._mapNode.getLocalZone();
 
         var tileWidth = this.tileWidth;
         var tileHeight = this.tileHeight;
@@ -4661,6 +4692,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           var tileData = this.tileData;
           var tileImage = this.tileImage;
           var tileImageClip = this.tileImageClip;
+          var mapID = this.getID();
           for (var row = sRow, tileY = 0;
                row >= 0 && row < rowCount && tileY < newHeight;
                row += 1, tileY += tileHeight) {
@@ -4676,8 +4708,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
               if (imageClip) {
                 var image = tileImage[imageClip.imageId];
                 if (image) {
-                  var img = application.loadImage(image, true);
-                  if (img !== null) {
+                  var img = application.loadImage(image, mapID, loadImageFinished, this);
+                  if (img) {
                     foreRender.drawImageExt(img, image.x, image.y, image.width, image.height, tileX, tileY, tileWidth, tileHeight);
                   }
                 }
@@ -4714,6 +4746,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           var tileData = this.tileData;
           var tileImage = this.tileImage;
           var tileImageClip = this.tileImageClip;
+          var mapID = this.getID();
           for (var row = sRow, tileY = 0;
                row >= 0 && row < rowCount && tileY < newHeight;
                row += 1, tileY += tileHeight) {
@@ -4732,8 +4765,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
               if (imageClip) {
                 var image = tileImage[imageClip.imageId];
                 if (image) {
-                  var img = application.loadImage(image, true);
-                  if (img !== null) {
+                  var img = application.loadImage(image, mapID, loadImageFinished, this);
+                  if (img) {
                     foreRender.drawImageExt(img, image.x, image.y, image.width, image.height, tileX, tileY, tileWidth, tileHeight);
                   }
                 }
@@ -4749,8 +4782,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       function renderDiamondMapCache (sender, render, dirtyZones) {
         var ctx = this._mapCacheCtx.tile;
-        var zone = this.getZoneInLocal();
-        var mapNodeZone = this._mapNode.getZoneInLocal();
+        var zone = this.getLocalZone();
+        var mapNodeZone = this._mapNode.getLocalZone();
 
         var tileWidth = this.tileWidth;
         var tileHeight = this.tileHeight;
@@ -4806,6 +4839,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           var tileData = this.tileData;
           var tileImage = this.tileImage;
           var tileImageClip = this.tileImageClip;
+          var mapID = this.getID();
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
                startTileY < newHeight;
                startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
@@ -4829,8 +4863,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
               if (imageClip) {
                 var image = tileImage[imageClip.imageId];
                 if (image) {
-                  var img = application.loadImage(image, true);
-                  if (img !== null) {
+                  var img = application.loadImage(image, mapID, loadImageFinished, this);
+                  if (img) {
                     var srcX = image.x;
                     var srcY = image.y;
                     var srcWidth = image.width;
@@ -4895,6 +4929,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           var tileData = this.tileData;
           var tileImage = this.tileImage;
           var tileImageClip = this.tileImageClip;
+          var mapID = this.getID();
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
                startTileY < newHeight;
                startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
@@ -4918,8 +4953,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
               if (imageClip) {
                 var image = tileImage[imageClip.imageId];
                 if (image) {
-                  var img = application.loadImage(image, true);
-                  if (img !== null) {
+                  var img = application.loadImage(image, mapID, loadImageFinished, this);
+                  if (img) {
                     var halfImageWidth = image.width / 2;
                     var halfImageHeight = image.height / 2;
                     var srcX = image.x;
@@ -5056,6 +5091,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
         ctx.backInvalid = false;
         ctx.foreInvalid = false;
+      }
+
+      function loadImageFinished (url, image, success, async) {
+        if (async && success) {
+          this._mapCacheCtx.foreInvalid = true;
+          this._mapCacheCtx.backInvalid = true;
+          this.dirty();
+        }
       }
 
       return {

@@ -123,23 +123,26 @@ export default (
                       params[7] = deltaProp;
                       syncQueue.push(new PropertyAnimation({
                         property: props[i2],
-                        targetOffset: deltaProp,
+                        offset: deltaProp,
                         offsetFn: propertyCurveTweenUpdate(params)
                       }));
                     } else {
                       asyncQueue.push(new PropertyAnimation({
                         property: props[i2],
-                        targetOffset: deltaProp,
+                        offset: deltaProp,
                         offsetFn: propertyLineTweenUpdate(deltaProp, deltaTime)
                       }));
                     }
                   } else {
                     asyncQueue.push(new SchedulerAnimation({
-                      fn: propertyUnTweenUpdate,
-                      target: undefined,
+                      callbackFn: propertyUnTweenUpdate,
+                      callbackTarget: undefined,
                       interval: deltaTime,
                       repeats: 1,
-                      param: {property: props[i2], value: currProp}
+                      params: {
+                        property: props[i2], 
+                        value: currProp
+                      }
                     }));
                   }
                   prevProps[props[i2]] = currProp;
@@ -156,11 +159,14 @@ export default (
                 }
                 if (i === 0 || (!LangUtil.isUndefined(currProp) && prevProp !== currProp)) {
                   asyncQueue.push(new SchedulerAnimation({
-                    fn: propertyUnTweenUpdate,
-                    target: undefined,
+                    callbackFn: propertyUnTweenUpdate,
+                    callbackTarget: undefined,
                     interval: frame.time - prevTime,
                     repeats: 1,
-                    param: {property: props[i2], value: currProp}
+                    param: {
+                      property: props[i2], 
+                      value: currProp
+                    }
                   }));
                   prevProps[props[i2]] = currProp;
                 }

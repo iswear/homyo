@@ -14,7 +14,7 @@ export default (
 
       InnerManager.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this._aniBinders = [];
+        this._animationBinders = [];
         this._paused = false;
       }
 
@@ -26,18 +26,18 @@ export default (
         this._paused = false;
       }
 
-      InnerManager.prototype.addAnimation = function (node, animation, fn, target, loop) {
-        this._aniBinders.push(new Binder({
+      InnerManager.prototype.addAnimation = function (node, animation, callbackFn, callbackTarget, loop) {
+        this._animationBinders.push(new Binder({
           node: node,
           animation: animation,
-          fn: fn,
-          target: target,
+          callbackFn: callbackFn,
+          callbackTarget: callbackTarget,
           loop: loop
         }));
       }
 
       InnerManager.prototype.removeAnimationByNode = function (node) {
-        var binders = this._aniBinders;
+        var binders = this._animationBinders;
         for (var i = 0, len = binders.length; i < len; ++i) {
           var binder = binders[i];
           if (binder.node === node) {
@@ -49,7 +49,7 @@ export default (
       }
 
       InnerManager.prototype.removeAnimationByNodeAndAnimation = function (node, animation) {
-        var binders = this._aniBinders;
+        var binders = this._animationBinders;
         for (var i = 0, len = binders.length; i < len; ++i) {
           var binder = binders[i];
           if (binder.node === node && binder.animation === animation) {
@@ -62,7 +62,7 @@ export default (
 
       InnerManager.prototype.run = function (deltaTime) {
         if (!this._paused) {
-          var binders = this._aniBinders;
+          var binders = this._animationBinders;
           for (var i = 0, len = binders.length; i < len; ++i) {
             var binder = binders[i];
             if (binder.execute(deltaTime) && !binder.loop) {
@@ -82,7 +82,7 @@ export default (
       }
 
       InnerManager.prototype.destroy = function () {
-        this._aniBinders = null;
+        this._animationBinders = null;
         this.super('destroy');
       }
 

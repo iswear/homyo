@@ -185,8 +185,8 @@ export default (
 
       function renderSquareMapCache (sender, render, dirtyZones) {
         var ctx = this._mapCacheCtx.tile;
-        var zone = this.getZoneInLocal();
-        var mapNodeZone = this._mapNode.getZoneInLocal();
+        var zone = this.getLocalZone();
+        var mapNodeZone = this._mapNode.getLocalZone();
 
         var tileWidth = this.tileWidth;
         var tileHeight = this.tileHeight;
@@ -233,6 +233,7 @@ export default (
           var tileData = this.tileData;
           var tileImage = this.tileImage;
           var tileImageClip = this.tileImageClip;
+          var mapID = this.getID();
           for (var row = sRow, tileY = 0;
                row >= 0 && row < rowCount && tileY < newHeight;
                row += 1, tileY += tileHeight) {
@@ -248,8 +249,8 @@ export default (
               if (imageClip) {
                 var image = tileImage[imageClip.imageId];
                 if (image) {
-                  var img = application.loadImage(image, true);
-                  if (img !== null) {
+                  var img = application.loadImage(image, mapID, loadImageFinished, this);
+                  if (img) {
                     foreRender.drawImageExt(img, image.x, image.y, image.width, image.height, tileX, tileY, tileWidth, tileHeight);
                   }
                 }
@@ -286,6 +287,7 @@ export default (
           var tileData = this.tileData;
           var tileImage = this.tileImage;
           var tileImageClip = this.tileImageClip;
+          var mapID = this.getID();
           for (var row = sRow, tileY = 0;
                row >= 0 && row < rowCount && tileY < newHeight;
                row += 1, tileY += tileHeight) {
@@ -304,8 +306,8 @@ export default (
               if (imageClip) {
                 var image = tileImage[imageClip.imageId];
                 if (image) {
-                  var img = application.loadImage(image, true);
-                  if (img !== null) {
+                  var img = application.loadImage(image, mapID, loadImageFinished, this);
+                  if (img) {
                     foreRender.drawImageExt(img, image.x, image.y, image.width, image.height, tileX, tileY, tileWidth, tileHeight);
                   }
                 }
@@ -321,8 +323,8 @@ export default (
 
       function renderDiamondMapCache (sender, render, dirtyZones) {
         var ctx = this._mapCacheCtx.tile;
-        var zone = this.getZoneInLocal();
-        var mapNodeZone = this._mapNode.getZoneInLocal();
+        var zone = this.getLocalZone();
+        var mapNodeZone = this._mapNode.getLocalZone();
 
         var tileWidth = this.tileWidth;
         var tileHeight = this.tileHeight;
@@ -378,6 +380,7 @@ export default (
           var tileData = this.tileData;
           var tileImage = this.tileImage;
           var tileImageClip = this.tileImageClip;
+          var mapID = this.getID();
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
                startTileY < newHeight;
                startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
@@ -401,8 +404,8 @@ export default (
               if (imageClip) {
                 var image = tileImage[imageClip.imageId];
                 if (image) {
-                  var img = application.loadImage(image, true);
-                  if (img !== null) {
+                  var img = application.loadImage(image, mapID, loadImageFinished, this);
+                  if (img) {
                     var srcX = image.x;
                     var srcY = image.y;
                     var srcWidth = image.width;
@@ -467,6 +470,7 @@ export default (
           var tileData = this.tileData;
           var tileImage = this.tileImage;
           var tileImageClip = this.tileImageClip;
+          var mapID = this.getID();
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
                startTileY < newHeight;
                startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
@@ -490,8 +494,8 @@ export default (
               if (imageClip) {
                 var image = tileImage[imageClip.imageId];
                 if (image) {
-                  var img = application.loadImage(image, true);
-                  if (img !== null) {
+                  var img = application.loadImage(image, mapID, loadImageFinished, this);
+                  if (img) {
                     var halfImageWidth = image.width / 2;
                     var halfImageHeight = image.height / 2;
                     var srcX = image.x;
@@ -628,6 +632,14 @@ export default (
         }
         ctx.backInvalid = false;
         ctx.foreInvalid = false;
+      }
+
+      function loadImageFinished (url, image, success, async) {
+        if (async && success) {
+          this._mapCacheCtx.foreInvalid = true;
+          this._mapCacheCtx.backInvalid = true;
+          this.dirty();
+        }
       }
 
       return {

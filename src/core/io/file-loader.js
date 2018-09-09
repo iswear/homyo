@@ -23,7 +23,7 @@ export default (
         this._loadedVideos = {};
       }
 
-      InnerFileLoader.prototype.loadImageAsync = function (url, fn, target) {
+      InnerFileLoader.prototype.loadImageAsync = function (url, fn, target, ignoreNewCallback) {
         if (!LangUtil.isUndefined(this._loadedImages[url])) {
           return this._loadedImages[url];
         } else {
@@ -32,6 +32,10 @@ export default (
             image = doc.createElement('img');
             image.src = url;
             this._loadingImages[url] = image;
+          } else {
+            if (ignoreNewCallback) {
+              return undefined;
+            }
           }
 
           var self = this;
@@ -41,7 +45,7 @@ export default (
             delete self._loadingImages[url];
             self._loadedImages[url]  = image;
             if (fn) {
-              fn.call(target, url, true);
+              fn.call(target, url, this, true);
             }
           }
 
@@ -51,17 +55,17 @@ export default (
             delete self._loadingImages[url];
             self._loadedImages[url] = null;
             if (fn) {
-              fn.call(target, url, false);
+              fn.call(target, url, null, false);
             }
           }
 
           image.addEventListener('load', loadSuccess, false);
           image.addEventListener('error', loadError, false);
-          return null;
+          return undefined;
         }
       }
 
-      InnerFileLoader.prototype.loadAudioAsync = function (url, fn, target) {
+      InnerFileLoader.prototype.loadAudioAsync = function (url, fn, target, ignoreNewCallback) {
         if (!LangUtil.isUndefined(this._loadedAudios[url])) {
           return this._loadedAudios[url];
         } else {
@@ -70,7 +74,12 @@ export default (
             audio = doc.createElement('audio');
             audio.src = url;
             this._loadingAudios[url] = audio;
+          } else {
+            if (ignoreNewCallback) {
+              return undefined;
+            }
           }
+
           var self = this;
           function loadSuccess() {
             this.removeEventListener('load', loadSuccess, false);
@@ -78,7 +87,7 @@ export default (
             delete self._loadingAudios[url];
             self._loadedImages[url] = audio;
             if (fn) {
-              fn.call(target, url, true);
+              fn.call(target, url, this, true);
             }
           }
 
@@ -88,17 +97,17 @@ export default (
             delete self._loadingAudios[url];
             self._loadedAudios[url] = null;
             if (fn) {
-              fn.call(target, url, false);
+              fn.call(target, url, null, false);
             }
           }
 
           audio.addEventListener('load', loadSuccess, false);
           audio.addEventListener('error', loadError, false);
-          return null;
+          return undefined;
         }
       }
 
-      InnerFileLoader.prototype.loadVideoAsync = function (url, fn, target) {
+      InnerFileLoader.prototype.loadVideoAsync = function (url, fn, target, ignoreNewCallback) {
         if (!LangUtil.isUndefined(this._loadedVideos[url])) {
           return this._loadedVideos[url];
         } else {
@@ -107,7 +116,12 @@ export default (
             video = doc.createElement('video');
             video.src = url;
             this._loadingVideos[url] = video;
+          } else {
+            if (ignoreNewCallback) {
+              return undefined;
+            }
           }
+
           var self = this;
           function loadSuccess() {
             this.removeEventListener('load', loadSuccess, false);
@@ -115,7 +129,7 @@ export default (
             delete self._loadingVideos[url];
             self._loadedVideos[url] = video;
             if (fn) {
-              fn.call(target, url, true);
+              fn.call(target, url, this, true);
             }
           }
 
@@ -125,13 +139,13 @@ export default (
             delete self._loadingVideos[url];
             self._loadedVideos[url] = null;
             if (fn) {
-              fn.call(target, url, false);
+              fn.call(target, url, null, false);
             }
           }
 
           video.addEventListener('load', loadSuccess, false);
           video.addEventListener('error', loadError, false);
-          return null;
+          return undefined;
         }
       }
 

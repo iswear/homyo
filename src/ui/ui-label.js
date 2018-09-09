@@ -207,14 +207,14 @@ export default (
         functions.syncTextLayoutInvalid.call(this);
         functions.syncTextRenderInvalid.call(this);
 
-        this.addObserver('textChanged', this.refresh, this, this);
-        this.addObserver('fontSizeChanged', this.refresh, this, this);
-        this.addObserver('fontFamilyChanged', this.refresh, this, this);
-        this.addObserver('textColor', this.refresh, this, this);
-        this.addObserver('textHorAlignChanged', this.refresh, this, this);
-        this.addObserver('textVerAlignChanged', this.refresh, this, this);
-        this.addObserver('textLineHeightChanged', this.refresh, this, this);
-        this.addObserver('textLineNumChanged', this.refresh, this, this);
+        this.addObserver('textChanged', this.dirty, this, this);
+        this.addObserver('fontSizeChanged', this.dirty, this, this);
+        this.addObserver('fontFamilyChanged', this.dirty, this, this);
+        this.addObserver('textColor', this.dirty, this, this);
+        this.addObserver('textHorAlignChanged', this.dirty, this, this);
+        this.addObserver('textVerAlignChanged', this.dirty, this, this);
+        this.addObserver('textLineHeightChanged', this.dirty, this, this);
+        this.addObserver('textLineNumChanged', this.dirty, this, this);
 
         this.addObserver('textChanged', functions.syncTextRender, this, this);
 

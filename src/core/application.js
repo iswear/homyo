@@ -272,21 +272,21 @@ export default (
       }
 
       function syncTransform () {
-        this._transformCtx.needUpdate = true;
+        this._transformCtx.invalid = true;
       }
 
       function syncRenderSize () {
         var render = this._render;
         var renderZone = this._renderZone;
         var transformCtx = this._transformCtx;
-        if (!transformCtx.needUpdate) {
+        if (!transformCtx.invalid) {
           if (render.clientWidth !== this._clientWidth || render.clientHeight !== this._clientHeight) {
             this._clientWidth = render.clientWidth;
             this._clientHeight = render.clientHeight;
-            transformCtx.needUpdate = true;
+            transformCtx.invalid = true;
           }
         }
-        if (transformCtx.needUpdate) {
+        if (transformCtx.invalid) {
           var width = render.width;
           var height = render.height;
           var clientWidth = render.clientWidth;
@@ -312,31 +312,27 @@ export default (
               break;
             }
           }
+          this._scaleX = width / clientWidth;
+          this._scaleY = height / clientHeight;
           render.width = width;
           render.height = height;
           renderZone.width = width;
           renderZone.height = height;
           renderZone.right = width;
           renderZone.bottom = height;
-          transformCtx.needUpdate = false;
-          this._scaleX = width / clientWidth;
-          this._scaleY = height / clientHeight;
-          this.refresh();
+          transformCtx.invalid = false;
         }
       }
 
-      function loadImageFinished (url, success) {
+      function loadImageFinished (url, image, success) {
         if (success) {
-          if (this._loaderCtx.images[url] && this._loaderCtx.images[url].refresh) {
-            this.receiveDirtyZone(null, {
-              left: this._renderZone.left,
-              top: this._renderZone.top,
-              right: this._renderZone.right,
-              bottom: this._renderZone.bottom,
-              width: this._renderZone.width,
-              height: this._renderZone.height
-            });
-            this.refresh();
+          var callbacks = this._loaderCtx.callbacks[url];
+          if (callbacks) {
+            for (var callbackId in callbacks) {
+              var callback = callbacks[callbackId];
+              callback.callbackFn.call(callback.callbackTarget, url, image, success, true);
+            }
+            delete this._loaderCtx.callbacks[url];
           }
         }
       }
@@ -406,7 +402,6 @@ export default (
 
         this._prevLoopTime = 0;
         this._preCheckTime = 0;
-        this._refresh = true;
         this._timerTaskId = 0;
         this._events = [];
 
@@ -414,9 +409,7 @@ export default (
           manager: new AnimationManager({})
         };
         this._loaderCtx = {
-          images: {},
-          audios: {},
-          videos: {},
+          callbacks: {},
           loader: new FileLoader({})
         };
 
@@ -425,7 +418,7 @@ export default (
         this._scaleX = 1;
         this._scaleY = 1;
         this._transformCtx = {
-          needUpdate: true,
+          invalid: true,
           transform: [1, 0, 0, 0, 1, 0]
         };
 
@@ -448,18 +441,27 @@ export default (
         this._animationCtx.manager.removeAnimationByNode(node);
       }
 
-      InnerApplication.prototype.loadImage = function (url, refresh) {
-        var loaderCtx = this._loaderCtx;
-        var loader = loaderCtx.loader;
-        if (loaderCtx.images[url]) {
-          loaderCtx.images[url].refresh |= refresh;
-          var image = loader.loadImageAsync(url);
-          return image;
+      InnerApplication.prototype.loadImage = function (url, callbackId, callbackFn, callbackTarget) {
+        var image = this._loaderCtx.loader.loadImageAsync(url, functions.loadImageFinished, this, true); 
+        if (image === undefined) {
+          if (callbackId !== null && callbackFn !== null) {
+            var imageCallBacks = this._loaderCtx.callbacks[url];
+            if (!imageCallBacks) {
+              this._loaderCtx.callbacks[url] = imageCallBacks = {};
+            }
+            if (!imageCallBacks[callbackId]) {
+              imageCallBacks[callbackId] = {
+                callbackFn: callbackFn, 
+                callbackTarget: callbackTarget
+              }
+            }
+          }
+        } else if (image === null) {
+          callbackFn.call(callbackTarget, url, image, false, false);
         } else {
-          loaderCtx.images[url] = {refresh: refresh};
-          var image = loader.loadImageAsync(url, functions.loadImageFinished, this);
-          return image;
+          callbackFn.call(callbackTarget, url, image, true, false);
         }
+        return image;
       }
 
       InnerApplication.prototype.loadAudio = function (url) {
@@ -507,10 +509,6 @@ export default (
         return true;
       }
 
-      InnerApplication.prototype.refresh = function () {
-        this._refresh = true;
-      }
-
       InnerApplication.prototype.loop = function () {
         var now = (new Date()).getTime(), deltaTime = 0;
         if (this._prevLoopTime !== 0) {
@@ -527,14 +525,15 @@ export default (
         } else {
           this._preCheckTime += deltaTime;
         }
-        if (this._refresh) {
+
+        var dirtyZones = this._dirtyZones;
+        if (dirtyZones.length > 0) {
           var renderZone = this._renderZone;
-          var dirtyZones = this._dirtyZones;
           var root = this._root;
           var render = this._render;
-          var transformCtx = this._transformCtx;
+          var transform = this._transformCtx.transform;
           // 同步最新的结点转换
-          root._syncTransform(transformCtx.transform, transformCtx.transform, renderZone, transformCtx.needUpdate);
+          root._syncTransform(transform, transform, renderZone, false);
           // 重新计算脏矩形
           while (true) {
             if (!root._reportCurDirtyZone(this, dirtyZones)) {
@@ -552,7 +551,6 @@ export default (
           dirtyZones.splice(0, dirtyZones.length);
           // 矩阵回归到单位矩阵
           render.setTransform(1, 0, 0, 1, 0, 0);
-          this._refresh = false;
           this._dirtyZones = [];
         }
       }
@@ -560,7 +558,6 @@ export default (
       InnerApplication.prototype.run = function () {
         if (this._timerTaskId === 0) {
           if (this._root !== null) {
-            this._refresh = true;
             this.receiveDirtyZone(null, {
               left: this._renderZone.left,
               top: this._renderZone.top,
