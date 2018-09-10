@@ -30,6 +30,7 @@ import homyo from '../../main'
     var root = new GMap({
         width: 200,
         height: 200,
+        visible: true,
         mapTileType: 'square',
         mapTileWidth: 30,
         mapTileHeight: 30,
@@ -62,7 +63,7 @@ import homyo from '../../main'
     });
 
     application.run();
-    
+
     // root.runAnimation(new PropertyAnimation({
     //     property: 'rotateZ',
     //     offset: Infinity,

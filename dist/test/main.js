@@ -3335,6 +3335,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     var root = new GMap({
         width: 200,
         height: 200,
+        visible: true,
         mapTileType: 'square',
         mapTileWidth: 30,
         mapTileHeight: 30,
@@ -3367,7 +3368,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     });
 
     application.run();
-    
+
     // root.runAnimation(new PropertyAnimation({
     //     property: 'rotateZ',
     //     offset: Infinity,
@@ -4531,14 +4532,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.removeObserver('mapTileColsChanged', syncMapHeight, this, this);
         this.removeObserver('render', renderSquareMap, this, this);
         this.removeObserver('render', renderDiamondMap, this, this);
-        mapNode.removeObserver('frame', syncMapNodeX, this, this);
-        mapNode.removeObserver('frame', syncMapNodeY, this, this);
-        mapNode.removeObserver('frame', syncMapNodeAnchorX, this, this);
-        mapNode.removeObserver('frame', syncMapNodeAnchorY, this, this);
-        mapNode.removeObserver('frame', syncMapNodeWidthSquare, this, this);
-        mapNode.removeObserver('frame', syncMapNodeWidthDiamond, this, this);
-        mapNode.removeObserver('frame', syncMapNodeHeightSquare, this, this);
-        mapNode.removeObserver('frame', syncMapNodeHeightDiamond, this, this);
+        mapNode.removeObserver('frame', syncMapNodeX, this, mapNode);
+        mapNode.removeObserver('frame', syncMapNodeY, this, mapNode);
+        mapNode.removeObserver('frame', syncMapNodeAnchorX, this, mapNode);
+        mapNode.removeObserver('frame', syncMapNodeAnchorY, this, mapNode);
+        mapNode.removeObserver('frame', syncMapNodeWidthSquare, this, mapNode);
+        mapNode.removeObserver('frame', syncMapNodeWidthDiamond, this, mapNode);
+        mapNode.removeObserver('frame', syncMapNodeHeightSquare, this, mapNode);
+        mapNode.removeObserver('frame', syncMapNodeHeightDiamond, this, mapNode);
         if (this.mapTileType === 'square') {
           this.addObserver('mapXChanged', syncMapX, this, this);
           this.addObserver('mapYChanged', syncMapY, this, this);
@@ -4549,12 +4550,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           this.addObserver('mapTileHeightChanged', syncMapHeight, this, this);
           this.addObserver('mapTileRowsChanged', syncMapHeight, this, this);
           this.addObserver('render', renderSquareMap, this, this);
-          mapNode.addObserver('frame', syncMapNodeX, this, this);
-          mapNode.addObserver('frame', syncMapNodeY, this, this);
-          mapNode.addObserver('frame', syncMapNodeAnchorX, this, this);
-          mapNode.addObserver('frame', syncMapNodeAnchorY, this, this);
-          mapNode.addObserver('frame', syncMapNodeWidthSquare, this, this);
-          mapNode.addObserver('frame', syncMapNodeHeightSquare, this, this);
+          mapNode.addObserver('frame', syncMapNodeX, this, mapNode);
+          mapNode.addObserver('frame', syncMapNodeY, this, mapNode);
+          mapNode.addObserver('frame', syncMapNodeAnchorX, this, mapNode);
+          mapNode.addObserver('frame', syncMapNodeAnchorY, this, mapNode);
+          mapNode.addObserver('frame', syncMapNodeWidthSquare, this, mapNode);
+          mapNode.addObserver('frame', syncMapNodeHeightSquare, this, mapNode);
         } else if (this.mapTileType === 'diamond') {
           this.addObserver('mapXChanged', syncMapX, this, this);
           this.addObserver('mapYChanged', syncMapY, this, this);
@@ -4567,12 +4568,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           this.addObserver('mapTileRowsChanged', syncMapHeight, this, this);
           this.addObserver('mapTileColsChanged', syncMapHeight, this, this);
           this.addObserver('render', renderDiamondMap, this, this);
-          mapNode.addObserver('frame', syncMapNodeX, this, this);
-          mapNode.addObserver('frame', syncMapNodeY, this, this);
-          mapNode.addObserver('frame', syncMapNodeAnchorX, this, this);
-          mapNode.addObserver('frame', syncMapNodeAnchorY, this, this);
-          mapNode.addObserver('frame', syncMapNodeWidthDiamond, this, this);
-          mapNode.addObserver('frame', syncMapNodeHeightDiamond, this, this);
+          mapNode.addObserver('frame', syncMapNodeX, this, mapNode);
+          mapNode.addObserver('frame', syncMapNodeY, this, mapNode);
+          mapNode.addObserver('frame', syncMapNodeAnchorX, this, mapNode);
+          mapNode.addObserver('frame', syncMapNodeAnchorY, this, mapNode);
+          mapNode.addObserver('frame', syncMapNodeWidthDiamond, this, mapNode);
+          mapNode.addObserver('frame', syncMapNodeHeightDiamond, this, mapNode);
         }
       }
 
@@ -4582,7 +4583,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       function syncMapTilesRender () {
         var tileCtx = this._mapCacheCtx.tile;
-        tileCtx.needRender = (this.tileData && __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isArray(this.tileData)) ? true : false;
+        tileCtx.needRender = (this.mapTileData && __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isArray(this.mapTileData)) ? true : false;
         tileCtx.offsetInvalid = true;
         tileCtx.sizeInvalid = true;
         tileCtx.foreInvalid = true;
@@ -4677,7 +4678,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           tileCtx.foreInvalid = false;
         }
         // var backgroundCtx = ctx.background;
-        render.drawImage(this._mapCacheCtx.foreRender.getCanvas(), 0, 0);
+        render.drawImage(tileCtx.foreRender.getCanvas(), 0, 0);
       }
 
       function renderDiamondMap (sender, render, dirtyZones) {
@@ -4688,7 +4689,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           tileCtx.foreInvalid = false;
         }
         // var backgroundCtx = ctx.background;
-        render.drawImage(this._mapCacheCtx.foreRender.getCanvas(), 0, 0);
+        render.drawImage(tileCtx.foreRender.getCanvas(), 0, 0);
       }
 
       function renderSquareMapCache (sender, render, dirtyZones) {
@@ -4696,8 +4697,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var zone = this.getLocalZone();
         var mapNodeZone = this._mapNode.getLocalZone();
 
-        var tileWidth = this.tileWidth;
-        var tileHeight = this.tileHeight;
+        var tileWidth = this.mapTileWidth;
+        var tileHeight = this.mapTileHeight;
 
         var oldWidth = ctx.width;
         var oldHeight = ctx.height;
@@ -4738,9 +4739,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           }
 
           var application = this.findApplication();
-          var tileData = this.tileData;
-          var tileImage = this.tileImage;
-          var tileImageClip = this.tileImageClip;
+          var tileData = this.mapTileData;
+          var tileImage = this.mapTileImageIndex;
+          var tileImageClip = this.mapTileImageClipIndex;
           var mapID = this.getID();
           for (var row = sRow, tileY = 0;
                row >= 0 && row < rowCount && tileY < newHeight;
@@ -4792,9 +4793,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
               clipTarLeft, clipTarTop, clipWidth, clipHeight);
           }
           var application = this.findApplication();
-          var tileData = this.tileData;
-          var tileImage = this.tileImage;
-          var tileImageClip = this.tileImageClip;
+          var tileData = this.mapTileData;
+          var tileImage = this.mapTileImageIndex;
+          var tileImageClip = this.mapTileImageClipIndex;
           var mapID = this.getID();
           for (var row = sRow, tileY = 0;
                row >= 0 && row < rowCount && tileY < newHeight;
@@ -4834,8 +4835,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var zone = this.getLocalZone();
         var mapNodeZone = this._mapNode.getLocalZone();
 
-        var tileWidth = this.tileWidth;
-        var tileHeight = this.tileHeight;
+        var tileWidth = this.mapTileWidth;
+        var tileHeight = this.mapTileHeight;
         var halfTileWidth = tileWidth / 2;
         var halfTileHeight = tileHeight / 2;
 
@@ -4885,9 +4886,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             foreRender.clear();
           }
           var application = this.findApplication();
-          var tileData = this.tileData;
-          var tileImage = this.tileImage;
-          var tileImageClip = this.tileImageClip;
+          var tileData = this.mapTileData;
+          var tileImage = this.mapTileImageIndex;
+          var tileImageClip = this.mapTileImageClipIndex;
           var mapID = this.getID();
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
                startTileY < newHeight;
@@ -4975,9 +4976,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
           }
           var application = this.findApplication();
-          var tileData = this.tileData;
-          var tileImage = this.tileImage;
-          var tileImageClip = this.tileImageClip;
+          var tileData = this.mapTileData;
+          var tileImage = this.mapTileImageIndex;
+          var tileImageClip = this.mapTileImageClipIndex;
           var mapID = this.getID();
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
                startTileY < newHeight;
