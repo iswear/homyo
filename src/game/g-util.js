@@ -18,7 +18,7 @@ export default (
       'x', 'y', 'rotateZ', 'scaleX', 'scaleY', 'inclineX', 'inclineY', 'alpha', 'visible', 'img'
     ];
 
-    var tweenableNodeProps = {
+    var tweenNodeProps = {
       x: true,
       y: true,
       rotateZ: true,
@@ -107,7 +107,7 @@ export default (
                 if (!LangUtil.isUndefined(currProp) && prevProp !== currProp) {
                   var deltaProp = currProp - prevProp;
                   var deltaTime = frame.time - prevTime;
-                  if (tweenableNodeProps[props[i2]]) {
+                  if (tweenNodeProps[props[i2]]) {
                     if (frame.data.curves && frame.data.curves[props[i2]] && frame.data.curves[props[i2]].length === 8) {
                       var curve = frame.curves[props[i2]];
                       var params = [];

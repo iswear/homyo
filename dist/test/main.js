@@ -2930,7 +2930,7 @@
       'x', 'y', 'rotateZ', 'scaleX', 'scaleY', 'inclineX', 'inclineY', 'alpha', 'visible', 'img'
     ];
 
-    var tweenableNodeProps = {
+    var tweenNodeProps = {
       x: true,
       y: true,
       rotateZ: true,
@@ -3019,7 +3019,7 @@
                 if (!__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isUndefined(currProp) && prevProp !== currProp) {
                   var deltaProp = currProp - prevProp;
                   var deltaTime = frame.time - prevTime;
-                  if (tweenableNodeProps[props[i2]]) {
+                  if (tweenNodeProps[props[i2]]) {
                     if (frame.data.curves && frame.data.curves[props[i2]] && frame.data.curves[props[i2]].length === 8) {
                       var curve = frame.curves[props[i2]];
                       var params = [];
@@ -3318,7 +3318,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         width: 100,
         height: 100,
         visible: true,
-        text: '测试',
+        text: '测试feafeageageafeafafeafefeafeafeafeafewfeafefeafeafefeafefqefqfeawfeafea',
         backgroundColor: '#f00',
         borderWidth: 5,
         borderColor: '#0f0',
@@ -3338,13 +3338,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     });
 
     application.run();
-    root.runAnimation(new PropertyAnimation({
-        property: 'rotateZ',
-        offset: Infinity,
-        offsetFn: function (animation, deltaTime, sumTime) {
-            return sumTime / 1000;
-        }
-    }), null, null, false);
+    // root.runAnimation(new PropertyAnimation({
+    //     property: 'rotateZ',
+    //     offset: Infinity,
+    //     offsetFn: function (animation, deltaTime, sumTime) {
+    //         return sumTime / 1000;
+    //     }
+    // }), null, null, false);
 
     // for (var i = 0; i < 10; ++i) {
     //   root.addChildNode(new GTexture({
@@ -5248,7 +5248,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       function compileActions (actions) {
         this._actions = {};
-        if (actions) {R
+        if (actions) {
           for (var i = 0, len = actions.length; i < len; ++i) {
             var modelAction = actions[i];
             var modelActionFrames = modelAction.frames;

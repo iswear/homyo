@@ -34,7 +34,7 @@ export default (
 
       function compileActions (actions) {
         this._actions = {};
-        if (actions) {R
+        if (actions) {
           for (var i = 0, len = actions.length; i < len; ++i) {
             var modelAction = actions[i];
             var modelActionFrames = modelAction.frames;

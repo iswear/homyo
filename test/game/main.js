@@ -13,7 +13,7 @@ import homyo from '../../main'
         width: 100,
         height: 100,
         visible: true,
-        text: '测试',
+        text: '测试feafeageageafeafafeafefeafeafeafeafewfeafefeafeafefeafefqefqfeawfeafea',
         backgroundColor: '#f00',
         borderWidth: 5,
         borderColor: '#0f0',
@@ -33,13 +33,13 @@ import homyo from '../../main'
     });
 
     application.run();
-    root.runAnimation(new PropertyAnimation({
-        property: 'rotateZ',
-        offset: Infinity,
-        offsetFn: function (animation, deltaTime, sumTime) {
-            return sumTime / 1000;
-        }
-    }), null, null, false);
+    // root.runAnimation(new PropertyAnimation({
+    //     property: 'rotateZ',
+    //     offset: Infinity,
+    //     offsetFn: function (animation, deltaTime, sumTime) {
+    //         return sumTime / 1000;
+    //     }
+    // }), null, null, false);
 
     // for (var i = 0; i < 10; ++i) {
     //   root.addChildNode(new GTexture({
