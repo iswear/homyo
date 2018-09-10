@@ -3308,25 +3308,33 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 (function () {
     var Application = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.Application;
     var PropertyAnimation = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.animation.PropertyAnimation;
-    var GMap = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Map;
-    var GTexture = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Texture;
     var UILabel = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].ui.Label;
+    var GTexture = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Texture;
+    var GMap = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Map;
 
+    // var root = new UILabel({
+    //   x: 400,
+    //   y: 300,
+    //   width: 100,
+    //   height: 100,
+    //   visible: true,
+    //   text: '测试测试',
+    //   backgroundColor: '#f00',
+    //   borderWidth: 1,
+    //   borderColor: '#0f0',
+    //   borderRadius: 10
+    // });
 
-    var root = new UILabel({
-        x: 400,
-        y: 300,
-        width: 100,
-        height: 100,
-        visible: true,
-        text: '测试测试',
-        backgroundColor: '#f00',
-        borderWidth: 1,
-        borderColor: '#0f0',
-        borderRadius: 10
-    });
+    // var root = new GTexture({
+    //   x: 400,
+    //   y: 300,
+    //   visible: true,
+    //   image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
+    // });
 
     var root = new GMap({
+        width: 200,
+        height: 200,
         mapTileType: 'square',
         mapTileWidth: 30,
         mapTileHeight: 30,
@@ -3353,27 +3361,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         ]
     });
 
-
-    // var root = new GTexture({
-    //   x: 400,
-    //   y: 300,
-    //   visible: true,
-    //   image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
-    // });
-
     var application = new Application({
         canvas: document.getElementById('main'),
         root: root
     });
 
     application.run();
-    root.runAnimation(new PropertyAnimation({
-        property: 'rotateZ',
-        offset: Infinity,
-        offsetFn: function (animation, deltaTime, sumTime) {
-            return sumTime / 1000;
-        }
-    }), null, null, false);
+    
+    // root.runAnimation(new PropertyAnimation({
+    //     property: 'rotateZ',
+    //     offset: Infinity,
+    //     offsetFn: function (animation, deltaTime, sumTime) {
+    //         return sumTime / 1000;
+    //     }
+    // }), null, null, false);
 
     // for (var i = 0; i < 10; ++i) {
     //   root.addChildNode(new GTexture({
@@ -4676,6 +4677,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           tileCtx.foreInvalid = false;
         }
         // var backgroundCtx = ctx.background;
+        render.drawImage(this._mapCacheCtx.foreRender.getCanvas(), 0, 0);
       }
 
       function renderDiamondMap (sender, render, dirtyZones) {
@@ -4686,6 +4688,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           tileCtx.foreInvalid = false;
         }
         // var backgroundCtx = ctx.background;
+        render.drawImage(this._mapCacheCtx.foreRender.getCanvas(), 0, 0);
       }
 
       function renderSquareMapCache (sender, render, dirtyZones) {

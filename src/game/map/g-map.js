@@ -173,6 +173,7 @@ export default (
           tileCtx.foreInvalid = false;
         }
         // var backgroundCtx = ctx.background;
+        render.drawImage(this._mapCacheCtx.foreRender.getCanvas(), 0, 0);
       }
 
       function renderDiamondMap (sender, render, dirtyZones) {
@@ -183,6 +184,7 @@ export default (
           tileCtx.foreInvalid = false;
         }
         // var backgroundCtx = ctx.background;
+        render.drawImage(this._mapCacheCtx.foreRender.getCanvas(), 0, 0);
       }
 
       function renderSquareMapCache (sender, render, dirtyZones) {
