@@ -10,6 +10,8 @@ import CanvasRender from "../../core/render/canvas/canvas-render";
 
 export default (
   function () {
+    var doc = document;
+
     var functions = (function () {
       function syncMapNodeContext () {
         var mapNode = this._mapNode;
