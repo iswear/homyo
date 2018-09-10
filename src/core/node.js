@@ -49,8 +49,8 @@ export default (
       InnerNode.prototype.defInclineY = 0;
       InnerNode.prototype.defWidth = 0;
       InnerNode.prototype.defHeight = 0;
-      InnerNode.prototype.defAnchorX = 0;
-      InnerNode.prototype.defAnchorY = 0;
+      InnerNode.prototype.defAnchorX = 0.5;
+      InnerNode.prototype.defAnchorY = 0.5;
       InnerNode.prototype.defAlpha = 1;
       InnerNode.prototype.defVisible = false;
       InnerNode.prototype.defCursor = 'default';

@@ -503,8 +503,8 @@
       InnerNode.prototype.defInclineY = 0;
       InnerNode.prototype.defWidth = 0;
       InnerNode.prototype.defHeight = 0;
-      InnerNode.prototype.defAnchorX = 0;
-      InnerNode.prototype.defAnchorY = 0;
+      InnerNode.prototype.defAnchorX = 0.5;
+      InnerNode.prototype.defAnchorY = 0.5;
       InnerNode.prototype.defAlpha = 1;
       InnerNode.prototype.defVisible = false;
       InnerNode.prototype.defCursor = 'default';
@@ -2520,20 +2520,20 @@
         }
       }
 
-      function syncBackgroundBorderRenderInvalid() {
+      function syncBackgroundBorderRenderInvalid () {
         this._backgroundBorderCacheCtx.renderInvalid = true;
       }
       
-      function renderBackgroundAndBorder(sender, render, dirtyZones) {
+      function renderBackgroundAndBorder (sender, render, dirtyZones) {
         var ctx = this._backgroundBorderCacheCtx;
         if (ctx.renderInvalid) {
           renderBackgroundAndBorderCache.call(this, ctx.render);
           ctx.renderInvalid = false;
         }
-        var rectInLocal = this.getRectInLocal();
+        var localZone = this.getLocalZone();
         var cacheCanvas = ctx.render.getCanvas();
-        var offsetLeft = - rectInLocal.left;
-        var offsetTop = - rectInLocal.top;
+        var offsetLeft = - localZone.left;
+        var offsetTop = - localZone.top;
         for (var i = 0, len = dirtyZones.length; i < len; ++i) {
           var dirtyZone = dirtyZones[i];
           render.drawImageExt(cacheCanvas,
@@ -2542,25 +2542,25 @@
         }      
       }
       
-      function renderBackgroundAndBorderCache(render) {
+      function renderBackgroundAndBorderCache (render) {
         var ctx = this._backgroundBorderCacheCtx;
-        var rect = this.getRectInLocal();
+        var zone = this.getLocalZone();
         ctx.borderOffset = this.borderWidth / 2;
         ctx.borderRadius = this.borderRadius;
         ctx.backgroundOffset = ctx.borderOffset;
         ctx.backgroundRadius = this.borderRadius;
         ctx.clipOffset = this.borderWidth;
         ctx.clipRadius = this.borderRadius < ctx.borderOffset ? 0 : (this.borderRadius - ctx.borderOffset);
-        if (ctx.render.width !== rect.width || ctx.render.height !== rect.height) {
-          ctx.render.width = rect.width;
-          ctx.render.height = rect.height;
+        if (ctx.render.width !== zone.width || ctx.render.height !== zone.height) {
+          ctx.render.width = zone.width;
+          ctx.render.height = zone.height;
         } else {
           ctx.render.clear();
         }
         if (ctx.borderRadius > 0) {
-          renderRadiusPath(render, 0, 0, rect.width, rect.height, ctx.borderOffset, ctx.borderRadius);
+          renderRadiusPath(render, 0, 0, zone.width, zone.height, ctx.borderOffset, ctx.borderRadius);
         } else {
-          renderRectPath(render, 0, 0, rect.width, rect.height, ctx.borderOffset);
+          renderRectPath(render, 0, 0, zone.width, zone.height, ctx.borderOffset);
         }
         if (this.backgroundColor !== null) {
           render.fillStyle = this.backgroundColor;
@@ -2616,9 +2616,9 @@
 
       InnerUIView.prototype.defVisible = true;
       InnerUIView.prototype.defBackgroundColor = null;
+      InnerUIView.prototype.defBorderWidth = 0;
       InnerUIView.prototype.defBorderColor = null;
-      InnerUIView.prototype.defVisible = true;
-
+      InnerUIView.prototype.defBorderRadius = 0;
       InnerUIView.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.defineNotifyProperty('backgroundColor', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.backgroundColor, this.defBackgroundColor));
@@ -2659,11 +2659,11 @@
 
       InnerUIView.prototype.startClip = function (render) {
         var ctx = this._backgroundBorderCacheCtx;
-        var rect = this.getRectInLocal();
+        var zone = this.getLocalZone();
         if (ctx.clipRadius > 0) {
-          functions.renderRadiusPath(render, rect.left, rect.top, rect.right, rect.bottom, ctx.clipOffset, ctx.clipRadius);
+          functions.renderRadiusPath(render, zone.left, zone.top, zone.right, zone.bottom, ctx.clipOffset, ctx.clipRadius);
         } else {
-          functions.renderRectPath(render, rect.left, rect.top, rect.right, rect.bottom, ctx.clipOffset);
+          functions.renderRectPath(render, zone.left, zone.top, zone.right, zone.bottom, ctx.clipOffset);
         }
         render.clip();
       }
@@ -3306,44 +3306,59 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 (function () {
-  var Application = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.Application;
-  var PropertyAnimation = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.animation.PropertyAnimation;
-  var GTexture = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Texture;
+    var Application = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.Application;
+    var PropertyAnimation = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.animation.PropertyAnimation;
+    var GTexture = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Texture;
+    var UILabel = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].ui.Label;
 
-  var root = new GTexture({
-    x: 400,
-    y: 300,
-    visible: true,
-    image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
-  });
 
-  var application = new Application({
-    canvas: document.getElementById('main'),
-    root: root
-  });
+    var root = new UILabel({
+        x: 400,
+        y: 300,
+        width: 100,
+        height: 100,
+        visible: true,
+        text: '测试',
+        backgroundColor: '#f00',
+        borderWidth: 5,
+        borderColor: '#0f0',
+        borderRadius: 10
+    });
 
-  application.run();
-  root.runAnimation(new PropertyAnimation({
-    property: 'rotateZ',
-    offset: Infinity,
-    offsetFn: function (animation, deltaTime, sumTime) {
-      return sumTime / 1000;
-    }
-  }), null, null, false);
+    // var root = new GTexture({
+    //   x: 400,
+    //   y: 300,
+    //   visible: true,
+    //   image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
+    // });
 
-  for (var i = 0; i < 10; ++i) {
-    root.addChildNode(new GTexture({
-      x: 20 * i,
-      y: 20 * i,
-      visible: true,
-      image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
-    }));
-  }
-  
-  // document.onclick = function () {
-  //   console.log('yaya')
-  //   root.x += 10;
-  // }
+    var application = new Application({
+        canvas: document.getElementById('main'),
+        root: root
+    });
+
+    application.run();
+    root.runAnimation(new PropertyAnimation({
+        property: 'rotateZ',
+        offset: Infinity,
+        offsetFn: function (animation, deltaTime, sumTime) {
+            return sumTime / 1000;
+        }
+    }), null, null, false);
+
+    // for (var i = 0; i < 10; ++i) {
+    //   root.addChildNode(new GTexture({
+    //     x: 20 * i,
+    //     y: 20 * i,
+    //     visible: true,
+    //     image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
+    //   }));
+    // }
+
+    // document.onclick = function () {
+    //   console.log('yaya')
+    //   root.x += 10;
+    // }
 
 })();
 
@@ -4236,16 +4251,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           renderCache.renderInvalid = false;
         }
 
-        var rect = this.getRectInLocal();
-        var width = rect.width;
-        var height = rect.height;
+        var zone = this.getLocalZone();
+        var width = zone.width;
+        var height = zone.height;
 
         var contentWidth = width - this.borderWidth * 2;
         var contentHeight = height - this.borderWidth * 2;
 
         if (contentWidth > 0 && contentHeight > 0) {
-          var left = rect.left;
-          var top = rect.top;
+          var left = zone.left;
+          var top = zone.top;
 
           var cacheRender = renderCache.render;
           var cacheWidth = cacheRender.width;
@@ -4280,7 +4295,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           var cacheCanvas = cacheRender.getCanvas();
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
-            var crossRect = __WEBPACK_IMPORTED_MODULE_2__utils_geometry_util__["a" /* default */].getRectCross(desRect, dirtyZone);
+            var crossRect = __WEBPACK_IMPORTED_MODULE_2__utils_geometry_util__["a" /* default */].getZoneCross(desRect, dirtyZone);
             if (crossRect !== null) {
               render.drawImageExt(cacheCanvas,
                 crossRect.left + offsetLeft, crossRect.top + offsetTop, crossRect.width, crossRect.height,
@@ -4297,23 +4312,23 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       function renderLabelTextLayout () {
         var renderCache = this._textCacheCtx;
         if (this.textLineNum !== 1) {
-          var rect = this.getRectInLocal();
+          var zone = this.getLocalZone();
           var borderWidth = (this.borderWidth > 0 && this.borderColor !== null) ? this.borderWidth : 0;
-          renderCache.layout = __WEBPACK_IMPORTED_MODULE_1__utils_text_util__["a" /* default */].getTextLayoutInfo(this.text, renderCache._font, rect.width - 2 * borderWidth);
+          renderCache.layout = __WEBPACK_IMPORTED_MODULE_1__utils_text_util__["a" /* default */].getTextLayoutInfo(this.text, renderCache._font, zone.width - 2 * borderWidth);
         } else {
           renderCache.layout = __WEBPACK_IMPORTED_MODULE_1__utils_text_util__["a" /* default */].getTextLayoutInfo(this.text, renderCache._font, -1);
         }
       }
 
       function renderLabelTextCache () {
-        var rect = this.getRectInLocal();
+        var zone = this.getLocalZone();
         var renderCache = this._textCacheCtx;
         var layoutInfo = renderCache.layout;
         var lines = layoutInfo.lines;
         var lineHeight = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(this.textLineHeight, 1.5 * this.fontSize);
         var lineNum = (this.textLineNum < 1 || this.textLineNum > lines.length) ? lines.length : this.textLineNum;
         var render = renderCache.render;
-        var renderWidth = (lineNum === 1) ? layoutInfo.width : (rect.width - 2 * this.borderWidth);
+        var renderWidth = (lineNum === 1) ? layoutInfo.width : (zone.width - 2 * this.borderWidth);
         var renderHeight = lineHeight * lineNum + 1;
         if (render.width !== render.width || render.height !== renderHeight) {
           render.width = renderWidth;

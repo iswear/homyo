@@ -61,16 +61,16 @@ export default (
           renderCache.renderInvalid = false;
         }
 
-        var rect = this.getRectInLocal();
-        var width = rect.width;
-        var height = rect.height;
+        var zone = this.getLocalZone();
+        var width = zone.width;
+        var height = zone.height;
 
         var contentWidth = width - this.borderWidth * 2;
         var contentHeight = height - this.borderWidth * 2;
 
         if (contentWidth > 0 && contentHeight > 0) {
-          var left = rect.left;
-          var top = rect.top;
+          var left = zone.left;
+          var top = zone.top;
 
           var cacheRender = renderCache.render;
           var cacheWidth = cacheRender.width;
@@ -105,7 +105,7 @@ export default (
           var cacheCanvas = cacheRender.getCanvas();
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var dirtyZone = dirtyZones[i];
-            var crossRect = GeometryUtil.getRectCross(desRect, dirtyZone);
+            var crossRect = GeometryUtil.getZoneCross(desRect, dirtyZone);
             if (crossRect !== null) {
               render.drawImageExt(cacheCanvas,
                 crossRect.left + offsetLeft, crossRect.top + offsetTop, crossRect.width, crossRect.height,
@@ -122,23 +122,23 @@ export default (
       function renderLabelTextLayout () {
         var renderCache = this._textCacheCtx;
         if (this.textLineNum !== 1) {
-          var rect = this.getRectInLocal();
+          var zone = this.getLocalZone();
           var borderWidth = (this.borderWidth > 0 && this.borderColor !== null) ? this.borderWidth : 0;
-          renderCache.layout = TextUtil.getTextLayoutInfo(this.text, renderCache._font, rect.width - 2 * borderWidth);
+          renderCache.layout = TextUtil.getTextLayoutInfo(this.text, renderCache._font, zone.width - 2 * borderWidth);
         } else {
           renderCache.layout = TextUtil.getTextLayoutInfo(this.text, renderCache._font, -1);
         }
       }
 
       function renderLabelTextCache () {
-        var rect = this.getRectInLocal();
+        var zone = this.getLocalZone();
         var renderCache = this._textCacheCtx;
         var layoutInfo = renderCache.layout;
         var lines = layoutInfo.lines;
         var lineHeight = LangUtil.checkAndGet(this.textLineHeight, 1.5 * this.fontSize);
         var lineNum = (this.textLineNum < 1 || this.textLineNum > lines.length) ? lines.length : this.textLineNum;
         var render = renderCache.render;
-        var renderWidth = (lineNum === 1) ? layoutInfo.width : (rect.width - 2 * this.borderWidth);
+        var renderWidth = (lineNum === 1) ? layoutInfo.width : (zone.width - 2 * this.borderWidth);
         var renderHeight = lineHeight * lineNum + 1;
         if (render.width !== render.width || render.height !== renderHeight) {
           render.width = renderWidth;
