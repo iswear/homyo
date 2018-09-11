@@ -219,8 +219,8 @@ export default (
           ctx.offsetInvalid = false;
         }
 
-        var sRow = newLeft / tileWidth;
-        var sCol = newTop / tileHeight;
+        var sRow = newLeft < 0 ? 0 : newLeft / tileWidth;
+        var sCol = newTop < 0 ? 0 : newTop / tileHeight;
         var rowCount = this.mapTileRows;
         var colCount = this.mapTileCols;
         if (ctx.backInvalid) {
@@ -255,7 +255,7 @@ export default (
                 if (image) {
                   var img = application.loadImage(image, mapID, loadImageFinished, this);
                   if (img) {
-                    foreRender.drawImageExt(img, image.x, image.y, image.width, image.height, tileX, tileY, tileWidth, tileHeight);
+                    foreRender.drawImageExt(img, imageClip.x, imageClip.y, imageClip.width, imageClip.height, tileX, tileY, tileWidth, tileHeight);
                   }
                 }
               }
@@ -312,7 +312,7 @@ export default (
                 if (image) {
                   var img = application.loadImage(image, mapID, loadImageFinished, this);
                   if (img) {
-                    foreRender.drawImageExt(img, image.x, image.y, image.width, image.height, tileX, tileY, tileWidth, tileHeight);
+                    foreRender.drawImageExt(img, imageClip.x, imageClip.y, imageClip.width, imageClip.height, tileX, tileY, tileWidth, tileHeight);
                   }
                 }
               }
@@ -410,30 +410,30 @@ export default (
                 if (image) {
                   var img = application.loadImage(image, mapID, loadImageFinished, this);
                   if (img) {
-                    var srcX = image.x;
-                    var srcY = image.y;
-                    var srcWidth = image.width;
-                    var srcHeight = image.height;
+                    var srcX = imageClip.x;
+                    var srcY = imageClip.y;
+                    var srcWidth = imageClip.width;
+                    var srcHeight = imageClip.height;
                     var desX = tileX;
                     var desY = tileY;
                     var desWidth = tileWidth;
                     var desHeight = tileHeight;
                     if (desX < 0) {
-                      srcX += image.width / 2;
-                      srcWidth -= image.width / 2;
+                      srcX += imageClip.width / 2;
+                      srcWidth -= imageClip.width / 2;
                       desX += halfTileWidth;
                       desWidth -= halfTileWidth;
                     } else if (desX + tileWidth > newWidth) {
-                      srcWidth -= image.width / 2;
+                      srcWidth -= imageClip.width / 2;
                       desWidth -= halfTileWidth;
                     }
                     if (desY < 0) {
-                      srcY += image.height / 2;
-                      srcHeight -= image.height / 2;
+                      srcY += imageClip.height / 2;
+                      srcHeight -= imageClip.height / 2;
                       desY += halfTileHeight;
                       desHeight -= halfTileHeight;
                     } else if (desY + tileHeight > newWidth) {
-                      srcHeight -= image.height / 2;
+                      srcHeight -= imageClip.height / 2;
                       desHeight -= halfTileHeight;
                     }
                     foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
@@ -500,12 +500,12 @@ export default (
                 if (image) {
                   var img = application.loadImage(image, mapID, loadImageFinished, this);
                   if (img) {
-                    var halfImageWidth = image.width / 2;
-                    var halfImageHeight = image.height / 2;
-                    var srcX = image.x;
-                    var srcY = image.y;
-                    var srcWidth = image.width;
-                    var srcHeight = image.height;
+                    var halfImageWidth = imageClip.width / 2;
+                    var halfImageHeight = imageClip.height / 2;
+                    var srcX = imageClip.x;
+                    var srcY = imageClip.y;
+                    var srcWidth = imageClip.width;
+                    var srcHeight = imageClip.height;
                     var desX = tileX;
                     var desY = tileY;
                     var desWidth = tileWidth;
@@ -547,34 +547,34 @@ export default (
                             if (tileX + halfTileWidth === clipTarLeft) {
                               if (clipTarLeft > 0) {
                                 if (clipTarTop > 0) {
-                                  foreRender.drawImageExt(img, image.x, image.y, image.width, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x, imageClip.y, imageClip.width, halfImageHeight,
                                     tileX, tileY, tileWidth, halfTileHeight);
                                 }
-                                foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, halfImageWidth, halfImageHeight,
+                                foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, halfImageWidth, halfImageHeight,
                                   tileX, tileY + halfTileHeight, halfTileWidth, halfTileHeight);
                               } else {
                                 if (clipTarTop > 0) {
-                                  foreRender.drawImageExt(img, image.x + halfImageWidth, halfImageWidth, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x + halfImageWidth, halfImageWidth, halfImageHeight,
                                     tileX + halfTileWidth, tileY, halfTileWidth, halfTileHeight);
                                 }
                               }
                             } else if (tileX + halfTileWidth === clipTarRight) {
                               if (clipTarRight < newWidth) {
                                 if (clipTarTop > 0) {
-                                  foreRender.drawImageExt(img, image.x, image.y, image.width, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x, imageClip.y, imageClip.width, halfImageHeight,
                                     tileX, tileY, tileWidth, halfTileHeight);
                                 }
-                                foreRender.drawImageExt(img, image.x + halfImageWidth, image.y + halfImageHeight, halfImageWidth, halfImageHeight,
+                                foreRender.drawImageExt(img, imageClip.x + halfImageWidth, imageClip.y + halfImageHeight, halfImageWidth, halfImageHeight,
                                   tileX + halfTileWidth, tileY + halfTileHeight, halfTileWidth, halfTileHeight);
                               } else {
                                 if (clipTarTop > 0) {
-                                  foreRender.drawImageExt(img, image.x, image.y, halfImageWidth, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x, imageClip.y, halfImageWidth, halfImageHeight,
                                     tileX, tileY, halfTileWidth, halfTileHeight);
                                 }
                               }
                             } else {
                               if (clipTarTop > 0) {
-                                foreRender.drawImageExt(img, image.x, image.y, image.width, halfImageHeight,
+                                foreRender.drawImageExt(img, imageClip.x, imageClip.y, imageClip.width, halfImageHeight,
                                   tileX, tileY, tileWidth, halfTileHeight);
                               }
                             }
@@ -582,43 +582,43 @@ export default (
                             if (tileX + halfTileWidth === clipTarLeft) {
                               if (clipTarLeft > 0) {
                                 if (clipTarBottom < newHeight) {
-                                  foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, image.width, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, imageClip.width, halfImageHeight,
                                     tileX, tileY + halfTileHeight, tileWidth, halfTileHeight);
                                 }
-                                foreRender.drawImageExt(img, image.x, image.y, halfImageWidth, halfImageHeight,
+                                foreRender.drawImageExt(img, imageClip.x, imageClip.y, halfImageWidth, halfImageHeight,
                                   tileX, tileY, halfImageWidth, halfImageHeight);
                               } else {
                                 if (clipTarBottom < newHeight) {
-                                  foreRender.drawImageExt(img, image.x + halfImageWidth, image.y + halfImageHeight, halfImageWidth, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x + halfImageWidth, imageClip.y + halfImageHeight, halfImageWidth, halfImageHeight,
                                     tileX + halfTileWidth, tileY + halfTileHeight, halfTileWidth, halfTileHeight);
                                 }
                               }
                             } else if (tileX + halfTileWidth === clipTarRight) {
                               if (clipTarRight < newWidth) {
                                 if (clipTarBottom < newHeight) {
-                                  foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, image.width, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, imageClip.width, halfImageHeight,
                                     tileX, tileY + halfTileHeight, tileWidth, halfTileHeight);
                                 }
-                                foreRender.drawImageExt(img, image.x + halfImageWidth, image.y, halfImageWidth, halfImageHeight,
+                                foreRender.drawImageExt(img, imageClip.x + halfImageWidth, imageClip.y, halfImageWidth, halfImageHeight,
                                   tileX + halfTileWidth, tileY, halfTileWidth, halfTileHeight);
                               } else {
                                 if (clipTarBottom < newHeight) {
-                                  foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, halfImageWidth, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, halfImageWidth, halfImageHeight,
                                     tileX, tileY + halfImageHeight, halfTileWidth, halfTileHeight);
                                 }
                               }
                             } else {
                               if (clipTarBottom < newHeight) {
-                                foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, image.width, halfImageHeight,
+                                foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, imageClip.width, halfImageHeight,
                                   tileX, tileY + halfTileHeight, tileWidth, halfTileHeight);
                               }
                             }
                           } else {
                             if (tileX + halfTileWidth === clipTarLeft) {
-                              foreRender.drawImageExt(img, image.x, image.y, halfImageWidth, image.height,
+                              foreRender.drawImageExt(img, imageClip.x, imageClip.y, halfImageWidth, imageClip.height,
                                 tileX, tileY, halfTileWidth, tileHeight);
                             } else if (tileX + halfTileWidth === clipTarRight) {
-                              foreRender.drawImageExt(img, image.x + halfImageWidth, image.y, halfImageWidth, image.height,
+                              foreRender.drawImageExt(img, imageClip.x + halfImageWidth, imageClip.y, halfImageWidth, imageClip.height,
                                 tileX + halfTileWidth, tileY, halfTileWidth, tileHeight);
                             }
                           }
@@ -640,8 +640,9 @@ export default (
 
       function loadImageFinished (url, image, success, async) {
         if (async && success) {
-          this._mapCacheCtx.foreInvalid = true;
-          this._mapCacheCtx.backInvalid = true;
+          var tileCtx = this._mapCacheCtx.tile;
+          tileCtx.foreInvalid = true;
+          tileCtx.backInvalid = true;
           this.dirty();
         }
       }
@@ -669,8 +670,8 @@ export default (
         this.super('init', [conf]);
         this.defineNotifyProperty('mapX', LangUtil.checkAndGet(conf.mapX, 0));
         this.defineNotifyProperty('mapY', LangUtil.checkAndGet(conf.mapY, 0));
-        this.defineNotifyProperty('mapBackgroundImage', LangUtil.checkAndGet(conf.mapBackgroundImage, null));
         this.defineNotifyProperty('mapTileType', LangUtil.checkAndGet(conf.mapTileType, this.defMapTileType));
+        this.defineNotifyProperty('mapBackgroundImage', LangUtil.checkAndGet(conf.mapBackgroundImage, null));
         this.defineNotifyProperty('mapTileWidth', LangUtil.checkAndGet(conf.mapTileWidth, this.defMapTileWidth));
         this.defineNotifyProperty('mapTileHeight', LangUtil.checkAndGet(conf.mapTileHeight, this.defMapTileHeight));
         this.defineNotifyProperty('mapTileImageIndex', LangUtil.checkAndGet(conf.mapTileImageIndex, {}));

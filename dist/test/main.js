@@ -3306,90 +3306,94 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 (function () {
-    var Application = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.Application;
-    var PropertyAnimation = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.animation.PropertyAnimation;
-    var UILabel = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].ui.Label;
-    var GTexture = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Texture;
-    var GMap = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Map;
+  var Application = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.Application;
+  var PropertyAnimation = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].core.animation.PropertyAnimation;
+  var UILabel = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].ui.Label;
+  var GTexture = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Texture;
+  var GMap = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Map;
 
-    // var root = new UILabel({
-    //   x: 400,
-    //   y: 300,
-    //   width: 100,
-    //   height: 100,
-    //   visible: true,
-    //   text: '测试测试',
-    //   backgroundColor: '#f00',
-    //   borderWidth: 1,
-    //   borderColor: '#0f0',
-    //   borderRadius: 10
-    // });
+  // var root = new UILabel({
+  //   x: 400,
+  //   y: 300,
+  //   width: 100,
+  //   height: 100,
+  //   visible: true,
+  //   text: '测试测试',
+  //   backgroundColor: '#f00',
+  //   borderWidth: 1,
+  //   borderColor: '#0f0',
+  //   borderRadius: 10
+  // });
 
-    // var root = new GTexture({
-    //   x: 400,
-    //   y: 300,
-    //   visible: true,
-    //   image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
-    // });
+  // var root = new GTexture({
+  //   x: 400,
+  //   y: 300,
+  //   visible: true,
+  //   image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
+  // });
 
-    var root = new GMap({
-        width: 200,
-        height: 200,
-        visible: true,
-        mapTileType: 'square',
-        mapTileWidth: 30,
-        mapTileHeight: 30,
-        mapTileImageIndex: {
-            1: 'images/email.jpg'
-        },
-        mapTileImageClipIndex: {
-            1: {
-                imageId: 1,
-                x: 0,
-                y: 0,
-                width: 30,
-                height: 30
-            }
-        },
-        mapTileRows: 5,
-        mapTileCols: 5,
-        mapTileData: [
-            [1, 1, 1, 1, 1],
-            [1, 0, 0, 1, 1],
-            [1, 1, 0, 0, 1],
-            [1, 0, 0, 1, 1],
-            [1, 1, 1, 1, 1],
-        ]
-    });
+  var root = new GMap({
+    x: 400,
+    y: 300,
+    width: 200,
+    height: 200,
+    anchorX: 0.5,
+    anchorY: 0.5,
+    visible: true,
+    mapTileType: 'square',
+    mapTileWidth: 30,
+    mapTileHeight: 30,
+    mapTileImageIndex: {
+      1: 'images/email.jpg'
+    },
+    mapTileImageClipIndex: {
+      1: {
+        imageId: 1,
+        x: 0,
+        y: 0,
+        width: 30,
+        height: 30
+      }
+    },
+    mapTileRows: 5,
+    mapTileCols: 5,
+    mapTileData: [
+      [1, 1, 1, 1, 1],
+      [1, 0, 0, 1, 1],
+      [1, 1, 0, 0, 1],
+      [1, 0, 0, 1, 1],
+      [1, 1, 1, 1, 1],
+    ]
+  });
 
-    var application = new Application({
-        canvas: document.getElementById('main'),
-        root: root
-    });
+  var application = new Application({
+    canvas: document.getElementById('main'),
+    root: root
+  });
 
-    application.run();
+  application.run();
 
-    // root.runAnimation(new PropertyAnimation({
-    //     property: 'rotateZ',
-    //     offset: Infinity,
-    //     offsetFn: function (animation, deltaTime, sumTime) {
-    //         return sumTime / 1000;
-    //     }
-    // }), null, null, false);
+  // root.runAnimation(new PropertyAnimation({
+  //     property: 'rotateZ',
+  //     offset: Infinity,
+  //     offsetFn: function (animation, deltaTime, sumTime) {
+  //         return sumTime / 1000;
+  //     }
+  // }), null, null, false);
 
-    // for (var i = 0; i < 10; ++i) {
-    //   root.addChildNode(new GTexture({
-    //     x: 20 * i,
-    //     y: 20 * i,
-    //     visible: true,
-    //     image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
-    //   }));
-    // }
+  // for (var i = 0; i < 10; ++i) {
+  //   root.addChildNode(new GTexture({
+  //     x: 20 * i,
+  //     y: 20 * i,
+  //     visible: true,
+  //     image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
+  //   }));
+  // }
 
-    // document.onclick = function () {
-    //   console.log('yaya')
-    //   root.x += 10;
-    // }
+  // document.onclick = function () {
+  //   console.log('yaya')
+  //   root.x += 10;
+  // }
 
 })();
 
@@ -4724,8 +4728,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           ctx.offsetInvalid = false;
         }
 
-        var sRow = newLeft / tileWidth;
-        var sCol = newTop / tileHeight;
+        var sRow = newLeft < 0 ? 0 : newLeft / tileWidth;
+        var sCol = newTop < 0 ? 0 : newTop / tileHeight;
         var rowCount = this.mapTileRows;
         var colCount = this.mapTileCols;
         if (ctx.backInvalid) {
@@ -4760,7 +4764,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 if (image) {
                   var img = application.loadImage(image, mapID, loadImageFinished, this);
                   if (img) {
-                    foreRender.drawImageExt(img, image.x, image.y, image.width, image.height, tileX, tileY, tileWidth, tileHeight);
+                    foreRender.drawImageExt(img, imageClip.x, imageClip.y, imageClip.width, imageClip.height, tileX, tileY, tileWidth, tileHeight);
                   }
                 }
               }
@@ -4817,7 +4821,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 if (image) {
                   var img = application.loadImage(image, mapID, loadImageFinished, this);
                   if (img) {
-                    foreRender.drawImageExt(img, image.x, image.y, image.width, image.height, tileX, tileY, tileWidth, tileHeight);
+                    foreRender.drawImageExt(img, imageClip.x, imageClip.y, imageClip.width, imageClip.height, tileX, tileY, tileWidth, tileHeight);
                   }
                 }
               }
@@ -4915,30 +4919,30 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 if (image) {
                   var img = application.loadImage(image, mapID, loadImageFinished, this);
                   if (img) {
-                    var srcX = image.x;
-                    var srcY = image.y;
-                    var srcWidth = image.width;
-                    var srcHeight = image.height;
+                    var srcX = imageClip.x;
+                    var srcY = imageClip.y;
+                    var srcWidth = imageClip.width;
+                    var srcHeight = imageClip.height;
                     var desX = tileX;
                     var desY = tileY;
                     var desWidth = tileWidth;
                     var desHeight = tileHeight;
                     if (desX < 0) {
-                      srcX += image.width / 2;
-                      srcWidth -= image.width / 2;
+                      srcX += imageClip.width / 2;
+                      srcWidth -= imageClip.width / 2;
                       desX += halfTileWidth;
                       desWidth -= halfTileWidth;
                     } else if (desX + tileWidth > newWidth) {
-                      srcWidth -= image.width / 2;
+                      srcWidth -= imageClip.width / 2;
                       desWidth -= halfTileWidth;
                     }
                     if (desY < 0) {
-                      srcY += image.height / 2;
-                      srcHeight -= image.height / 2;
+                      srcY += imageClip.height / 2;
+                      srcHeight -= imageClip.height / 2;
                       desY += halfTileHeight;
                       desHeight -= halfTileHeight;
                     } else if (desY + tileHeight > newWidth) {
-                      srcHeight -= image.height / 2;
+                      srcHeight -= imageClip.height / 2;
                       desHeight -= halfTileHeight;
                     }
                     foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
@@ -5005,12 +5009,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 if (image) {
                   var img = application.loadImage(image, mapID, loadImageFinished, this);
                   if (img) {
-                    var halfImageWidth = image.width / 2;
-                    var halfImageHeight = image.height / 2;
-                    var srcX = image.x;
-                    var srcY = image.y;
-                    var srcWidth = image.width;
-                    var srcHeight = image.height;
+                    var halfImageWidth = imageClip.width / 2;
+                    var halfImageHeight = imageClip.height / 2;
+                    var srcX = imageClip.x;
+                    var srcY = imageClip.y;
+                    var srcWidth = imageClip.width;
+                    var srcHeight = imageClip.height;
                     var desX = tileX;
                     var desY = tileY;
                     var desWidth = tileWidth;
@@ -5052,34 +5056,34 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                             if (tileX + halfTileWidth === clipTarLeft) {
                               if (clipTarLeft > 0) {
                                 if (clipTarTop > 0) {
-                                  foreRender.drawImageExt(img, image.x, image.y, image.width, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x, imageClip.y, imageClip.width, halfImageHeight,
                                     tileX, tileY, tileWidth, halfTileHeight);
                                 }
-                                foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, halfImageWidth, halfImageHeight,
+                                foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, halfImageWidth, halfImageHeight,
                                   tileX, tileY + halfTileHeight, halfTileWidth, halfTileHeight);
                               } else {
                                 if (clipTarTop > 0) {
-                                  foreRender.drawImageExt(img, image.x + halfImageWidth, halfImageWidth, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x + halfImageWidth, halfImageWidth, halfImageHeight,
                                     tileX + halfTileWidth, tileY, halfTileWidth, halfTileHeight);
                                 }
                               }
                             } else if (tileX + halfTileWidth === clipTarRight) {
                               if (clipTarRight < newWidth) {
                                 if (clipTarTop > 0) {
-                                  foreRender.drawImageExt(img, image.x, image.y, image.width, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x, imageClip.y, imageClip.width, halfImageHeight,
                                     tileX, tileY, tileWidth, halfTileHeight);
                                 }
-                                foreRender.drawImageExt(img, image.x + halfImageWidth, image.y + halfImageHeight, halfImageWidth, halfImageHeight,
+                                foreRender.drawImageExt(img, imageClip.x + halfImageWidth, imageClip.y + halfImageHeight, halfImageWidth, halfImageHeight,
                                   tileX + halfTileWidth, tileY + halfTileHeight, halfTileWidth, halfTileHeight);
                               } else {
                                 if (clipTarTop > 0) {
-                                  foreRender.drawImageExt(img, image.x, image.y, halfImageWidth, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x, imageClip.y, halfImageWidth, halfImageHeight,
                                     tileX, tileY, halfTileWidth, halfTileHeight);
                                 }
                               }
                             } else {
                               if (clipTarTop > 0) {
-                                foreRender.drawImageExt(img, image.x, image.y, image.width, halfImageHeight,
+                                foreRender.drawImageExt(img, imageClip.x, imageClip.y, imageClip.width, halfImageHeight,
                                   tileX, tileY, tileWidth, halfTileHeight);
                               }
                             }
@@ -5087,43 +5091,43 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                             if (tileX + halfTileWidth === clipTarLeft) {
                               if (clipTarLeft > 0) {
                                 if (clipTarBottom < newHeight) {
-                                  foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, image.width, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, imageClip.width, halfImageHeight,
                                     tileX, tileY + halfTileHeight, tileWidth, halfTileHeight);
                                 }
-                                foreRender.drawImageExt(img, image.x, image.y, halfImageWidth, halfImageHeight,
+                                foreRender.drawImageExt(img, imageClip.x, imageClip.y, halfImageWidth, halfImageHeight,
                                   tileX, tileY, halfImageWidth, halfImageHeight);
                               } else {
                                 if (clipTarBottom < newHeight) {
-                                  foreRender.drawImageExt(img, image.x + halfImageWidth, image.y + halfImageHeight, halfImageWidth, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x + halfImageWidth, imageClip.y + halfImageHeight, halfImageWidth, halfImageHeight,
                                     tileX + halfTileWidth, tileY + halfTileHeight, halfTileWidth, halfTileHeight);
                                 }
                               }
                             } else if (tileX + halfTileWidth === clipTarRight) {
                               if (clipTarRight < newWidth) {
                                 if (clipTarBottom < newHeight) {
-                                  foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, image.width, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, imageClip.width, halfImageHeight,
                                     tileX, tileY + halfTileHeight, tileWidth, halfTileHeight);
                                 }
-                                foreRender.drawImageExt(img, image.x + halfImageWidth, image.y, halfImageWidth, halfImageHeight,
+                                foreRender.drawImageExt(img, imageClip.x + halfImageWidth, imageClip.y, halfImageWidth, halfImageHeight,
                                   tileX + halfTileWidth, tileY, halfTileWidth, halfTileHeight);
                               } else {
                                 if (clipTarBottom < newHeight) {
-                                  foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, halfImageWidth, halfImageHeight,
+                                  foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, halfImageWidth, halfImageHeight,
                                     tileX, tileY + halfImageHeight, halfTileWidth, halfTileHeight);
                                 }
                               }
                             } else {
                               if (clipTarBottom < newHeight) {
-                                foreRender.drawImageExt(img, image.x, image.y + halfImageHeight, image.width, halfImageHeight,
+                                foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, imageClip.width, halfImageHeight,
                                   tileX, tileY + halfTileHeight, tileWidth, halfTileHeight);
                               }
                             }
                           } else {
                             if (tileX + halfTileWidth === clipTarLeft) {
-                              foreRender.drawImageExt(img, image.x, image.y, halfImageWidth, image.height,
+                              foreRender.drawImageExt(img, imageClip.x, imageClip.y, halfImageWidth, imageClip.height,
                                 tileX, tileY, halfTileWidth, tileHeight);
                             } else if (tileX + halfTileWidth === clipTarRight) {
-                              foreRender.drawImageExt(img, image.x + halfImageWidth, image.y, halfImageWidth, image.height,
+                              foreRender.drawImageExt(img, imageClip.x + halfImageWidth, imageClip.y, halfImageWidth, imageClip.height,
                                 tileX + halfTileWidth, tileY, halfTileWidth, tileHeight);
                             }
                           }
@@ -5145,8 +5149,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       function loadImageFinished (url, image, success, async) {
         if (async && success) {
-          this._mapCacheCtx.foreInvalid = true;
-          this._mapCacheCtx.backInvalid = true;
+          var tileCtx = this._mapCacheCtx.tile;
+          tileCtx.foreInvalid = true;
+          tileCtx.backInvalid = true;
           this.dirty();
         }
       }
@@ -5174,8 +5179,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.super('init', [conf]);
         this.defineNotifyProperty('mapX', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapX, 0));
         this.defineNotifyProperty('mapY', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapY, 0));
-        this.defineNotifyProperty('mapBackgroundImage', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapBackgroundImage, null));
         this.defineNotifyProperty('mapTileType', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapTileType, this.defMapTileType));
+        this.defineNotifyProperty('mapBackgroundImage', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapBackgroundImage, null));
         this.defineNotifyProperty('mapTileWidth', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapTileWidth, this.defMapTileWidth));
         this.defineNotifyProperty('mapTileHeight', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapTileHeight, this.defMapTileHeight));
         this.defineNotifyProperty('mapTileImageIndex', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.mapTileImageIndex, {}));
