@@ -173,7 +173,13 @@ export default (
           tileCtx.foreInvalid = false;
         }
         // var backgroundCtx = ctx.background;
-        render.drawImage(tileCtx.foreRender.getCanvas(), 0, 0);
+        var mapZone = this.getLocalZone();
+        var mapNodeZone = this._mapNode.getLocalZone();
+        render.fillStyle = '#f00';
+        render.fillRect(mapZone.left, mapZone.top, mapZone.width, mapZone.height);
+        render.fillStyle = '#0f0';
+        render.fillRect(this._mapNode.x - 5, this._mapNode.y - 5, 10, 10);
+        render.drawImage(tileCtx.foreRender.getCanvas(), mapNodeZone.left + this._mapNode.x, mapNodeZone.top + this._mapNode.y);
       }
 
       function renderDiamondMap (sender, render, dirtyZones) {
@@ -184,7 +190,13 @@ export default (
           tileCtx.foreInvalid = false;
         }
         // var backgroundCtx = ctx.background;
-        render.drawImage(tileCtx.foreRender.getCanvas(), 0, 0);
+        var mapZone = this.getLocalZone();
+        var mapNodeZone = this._mapNode.getLocalZone();
+        render.fillStyle = '#f00';
+        render.fillRect(mapZone.left, mapZone.top, mapZone.width, mapZone.height);
+        render.fillStyle = '#0f0';
+        render.fillRect(this._mapNode.x - 5, this._mapNode.y - 5, 10, 10);
+        render.drawImage(tileCtx.foreRender.getCanvas(), mapNodeZone.left + this._mapNode.x, mapNodeZone.top + this._mapNode.y);
       }
 
       function renderSquareMapCache (sender, render, dirtyZones) {

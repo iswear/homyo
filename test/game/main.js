@@ -27,6 +27,40 @@ import homyo from '../../main'
   //   image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
   // });
 
+  // var root = new GMap({
+  //   x: 400,
+  //   y: 300,
+  //   width: 200,
+  //   height: 200,
+  //   anchorX: 0.5,
+  //   anchorY: 0.5,
+  //   visible: true,
+  //   mapTileType: 'diamond',
+  //   mapTileWidth: 30,
+  //   mapTileHeight: 30,
+  //   mapTileImageIndex: {
+  //     1: 'images/email.jpg'
+  //   },
+  //   mapTileImageClipIndex: {
+  //     1: {
+  //       imageId: 1,
+  //       x: 0,
+  //       y: 0,
+  //       width: 30,
+  //       height: 30
+  //     }
+  //   },
+  //   mapTileRows: 5,
+  //   mapTileCols: 5,
+  //   mapTileData: [
+  //     [1, 1, 1, 1, 1],
+  //     [1, 0, 0, 1, 1],
+  //     [1, 1, 0, 0, 1],
+  //     [1, 0, 0, 1, 1],
+  //     [1, 1, 1, 1, 1],
+  //   ]
+  // });
+
   var root = new GMap({
     x: 400,
     y: 300,
@@ -35,28 +69,28 @@ import homyo from '../../main'
     anchorX: 0.5,
     anchorY: 0.5,
     visible: true,
-    mapTileType: 'square',
+    mapTileType: 'diamond',
     mapTileWidth: 30,
     mapTileHeight: 30,
     mapTileImageIndex: {
-      1: 'images/email.jpg'
+      1: 'images/203-4.png'
     },
     mapTileImageClipIndex: {
       1: {
         imageId: 1,
         x: 0,
         y: 0,
-        width: 30,
-        height: 30
+        width: 128,
+        height: 64
       }
     },
     mapTileRows: 5,
     mapTileCols: 5,
     mapTileData: [
       [1, 1, 1, 1, 1],
-      [1, 0, 0, 1, 1],
-      [1, 1, 0, 0, 1],
-      [1, 0, 0, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1],
     ]
   });

@@ -3332,6 +3332,40 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   //   image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
   // });
 
+  // var root = new GMap({
+  //   x: 400,
+  //   y: 300,
+  //   width: 200,
+  //   height: 200,
+  //   anchorX: 0.5,
+  //   anchorY: 0.5,
+  //   visible: true,
+  //   mapTileType: 'diamond',
+  //   mapTileWidth: 30,
+  //   mapTileHeight: 30,
+  //   mapTileImageIndex: {
+  //     1: 'images/email.jpg'
+  //   },
+  //   mapTileImageClipIndex: {
+  //     1: {
+  //       imageId: 1,
+  //       x: 0,
+  //       y: 0,
+  //       width: 30,
+  //       height: 30
+  //     }
+  //   },
+  //   mapTileRows: 5,
+  //   mapTileCols: 5,
+  //   mapTileData: [
+  //     [1, 1, 1, 1, 1],
+  //     [1, 0, 0, 1, 1],
+  //     [1, 1, 0, 0, 1],
+  //     [1, 0, 0, 1, 1],
+  //     [1, 1, 1, 1, 1],
+  //   ]
+  // });
+
   var root = new GMap({
     x: 400,
     y: 300,
@@ -3340,28 +3374,28 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     anchorX: 0.5,
     anchorY: 0.5,
     visible: true,
-    mapTileType: 'square',
+    mapTileType: 'diamond',
     mapTileWidth: 30,
     mapTileHeight: 30,
     mapTileImageIndex: {
-      1: 'images/email.jpg'
+      1: 'images/203-4.png'
     },
     mapTileImageClipIndex: {
       1: {
         imageId: 1,
         x: 0,
         y: 0,
-        width: 30,
-        height: 30
+        width: 128,
+        height: 64
       }
     },
     mapTileRows: 5,
     mapTileCols: 5,
     mapTileData: [
       [1, 1, 1, 1, 1],
-      [1, 0, 0, 1, 1],
-      [1, 1, 0, 0, 1],
-      [1, 0, 0, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1],
     ]
   });
@@ -4682,7 +4716,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           tileCtx.foreInvalid = false;
         }
         // var backgroundCtx = ctx.background;
-        render.drawImage(tileCtx.foreRender.getCanvas(), 0, 0);
+        var mapZone = this.getLocalZone();
+        var mapNodeZone = this._mapNode.getLocalZone();
+        render.fillStyle = '#f00';
+        render.fillRect(mapZone.left, mapZone.top, mapZone.width, mapZone.height);
+        render.fillStyle = '#0f0';
+        render.fillRect(this._mapNode.x - 5, this._mapNode.y - 5, 10, 10);
+        render.drawImage(tileCtx.foreRender.getCanvas(), mapNodeZone.left + this._mapNode.x, mapNodeZone.top + this._mapNode.y);
       }
 
       function renderDiamondMap (sender, render, dirtyZones) {
@@ -4693,7 +4733,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           tileCtx.foreInvalid = false;
         }
         // var backgroundCtx = ctx.background;
-        render.drawImage(tileCtx.foreRender.getCanvas(), 0, 0);
+        var mapZone = this.getLocalZone();
+        var mapNodeZone = this._mapNode.getLocalZone();
+        render.fillStyle = '#f00';
+        render.fillRect(mapZone.left, mapZone.top, mapZone.width, mapZone.height);
+        render.fillStyle = '#0f0';
+        render.fillRect(this._mapNode.x - 5, this._mapNode.y - 5, 10, 10);
+        render.drawImage(tileCtx.foreRender.getCanvas(), mapNodeZone.left + this._mapNode.x, mapNodeZone.top + this._mapNode.y);
       }
 
       function renderSquareMapCache (sender, render, dirtyZones) {
