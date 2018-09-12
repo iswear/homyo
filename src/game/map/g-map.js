@@ -87,14 +87,14 @@ export default (
 
       function syncMapNodeX () {
         if (this._mapCacheCtx.mapXInvalid) {
-          this._mapNode.x = this.mapX;
+          this._mapNode.x = - this.mapX;
           this._mapCacheCtx.mapXInvalid = false;
         }
       }
 
       function syncMapNodeY () {
         if (this._mapCacheCtx.mapYInvalid) {
-          this._mapNode.y = this.mapY;
+          this._mapNode.y = - this.mapY;
           this._mapCacheCtx.mapYInvalid = false;
         }
       }
@@ -172,14 +172,24 @@ export default (
           renderSquareMapCache.call(this, tileCtx);
           tileCtx.foreInvalid = false;
         }
-        // var backgroundCtx = ctx.background;
         var mapZone = this.getLocalZone();
         var mapNodeZone = this._mapNode.getLocalZone();
-        render.fillStyle = '#f00';
-        render.fillRect(mapZone.left, mapZone.top, mapZone.width, mapZone.height);
-        render.fillStyle = '#0f0';
-        render.fillRect(this._mapNode.x - 5, this._mapNode.y - 5, 10, 10);
-        render.drawImage(tileCtx.foreRender.getCanvas(), mapNodeZone.left + this._mapNode.x, mapNodeZone.top + this._mapNode.y);
+        /* test */
+        render.lineWidth = 1;
+        render.strokeStyle = '#f00';
+        render.strokeRect(mapZone.left, mapZone.top, mapZone.width, mapZone.height);
+        render.strokeStyle = '#0f0';
+        render.strokeRect(mapNodeZone.left - this.mapX, mapNodeZone.top - this.mapY, mapNodeZone.width, mapNodeZone.height);
+        /* test */
+        var offsetLeft = this.mapX - mapNodeZone.left - tileCtx.left;
+        var offsetTop = this.mapY - mapNodeZone.top - tileCtx.top;
+        var canvas = tileCtx.foreRender.getCanvas();
+        for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+          var dirtyZone = dirtyZones[i];
+          render.drawImageExt(canvas, 
+            dirtyZone.left + offsetLeft, dirtyZone.top + offsetTop, dirtyZone.width, dirtyZone.height, 
+            dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
+        }
       }
 
       function renderDiamondMap (sender, render, dirtyZones) {
@@ -189,14 +199,24 @@ export default (
           renderDiamondMapCache.call(this, tileCtx);
           tileCtx.foreInvalid = false;
         }
-        // var backgroundCtx = ctx.background;
         var mapZone = this.getLocalZone();
         var mapNodeZone = this._mapNode.getLocalZone();
-        render.fillStyle = '#f00';
-        render.fillRect(mapZone.left, mapZone.top, mapZone.width, mapZone.height);
-        render.fillStyle = '#0f0';
-        render.fillRect(this._mapNode.x - 5, this._mapNode.y - 5, 10, 10);
-        render.drawImage(tileCtx.foreRender.getCanvas(), mapNodeZone.left + this._mapNode.x, mapNodeZone.top + this._mapNode.y);
+        /* test */
+        render.lineWidth = 1;
+        render.strokeStyle = '#f00';
+        render.strokeRect(mapZone.left, mapZone.top, mapZone.width, mapZone.height);
+        render.strokeStyle = '#0f0';
+        render.strokeRect(mapNodeZone.left - this.mapX, mapNodeZone.top - this.mapY, mapNodeZone.width, mapNodeZone.height);
+        /* test */
+        var offsetLeft = this.mapX - mapNodeZone.left - tileCtx.left;
+        var offsetTop = this.mapY - mapNodeZone.top - tileCtx.top;
+        var canvas = tileCtx.foreRender.getCanvas();
+        for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+          var dirtyZone = dirtyZones[i];
+          render.drawImageExt(canvas, 
+            dirtyZone.left + offsetLeft, dirtyZone.top + offsetTop, dirtyZone.width, dirtyZone.height, 
+            dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
+        }
       }
 
       function renderSquareMapCache (sender, render, dirtyZones) {
@@ -207,32 +227,32 @@ export default (
         var tileWidth = this.mapTileWidth;
         var tileHeight = this.mapTileHeight;
 
-        var oldWidth = ctx.width;
-        var oldHeight = ctx.height;
-        var newWidth = oldWidth;
-        var newHeight = oldHeight;
-        if (ctx.sizeInvalid) {
-          newWidth = Math.ceil(this.width / tileWidth) * tileWidth;
-          newHeight = Math.ceil(this.height / tileHeight) * tileHeight;
-          ctx.width = newWidth;
-          ctx.height = newHeight;
-          ctx.sizeInvalid = false;
-        }
-
         var oldLeft = ctx.left;
         var oldTop = ctx.top;
         var newLeft = oldLeft;
         var newTop = oldTop;
         if (ctx.offsetInvalid) {
-          newLeft = Math.floor(((zone.left - this.mapX - mapNodeZone.left) / tileWidth)) * tileWidth;
-          newTop = Math.floor(((zone.top - this.mapY - mapNodeZone.top) / tileHeight)) * tileHeight;
+          newLeft = Math.floor(((zone.left + this.mapX - mapNodeZone.left) / tileWidth)) * tileWidth;
+          newTop = Math.floor(((zone.top + this.mapY - mapNodeZone.top) / tileHeight)) * tileHeight;
           ctx.left = newLeft;
           ctx.top = newTop;
           ctx.offsetInvalid = false;
         }
 
-        var sRow = newLeft < 0 ? 0 : newLeft / tileWidth;
-        var sCol = newTop < 0 ? 0 : newTop / tileHeight;
+        var oldWidth = ctx.width;
+        var oldHeight = ctx.height;
+        var newWidth = oldWidth;
+        var newHeight = oldHeight;
+        if (ctx.sizeInvalid) {
+          newWidth = Math.ceil((this.width + zone.left + this.mapX - mapNodeZone.left) / tileWidth) * tileWidth - newLeft;
+          newHeight = Math.ceil((this.height + zone.top + this.mapY - mapNodeZone.top) / tileHeight) * tileHeight - newTop;
+          ctx.width = newWidth;
+          ctx.height = newHeight;
+          ctx.sizeInvalid = false;
+        }
+
+        var sRow = newLeft / tileWidth;
+        var sCol = newTop / tileHeight;
         var rowCount = this.mapTileRows;
         var colCount = this.mapTileCols;
         if (ctx.backInvalid) {
@@ -250,13 +270,15 @@ export default (
           var tileImage = this.mapTileImageIndex;
           var tileImageClip = this.mapTileImageClipIndex;
           var mapID = this.getID();
-          for (var row = sRow, tileY = 0;
-               row >= 0 && row < rowCount && tileY < newHeight;
-               row += 1, tileY += tileHeight) {
+          for (var row = sRow, tileY = 0; row < rowCount && tileY < newHeight; row += 1, tileY += tileHeight) {
+            if (row < 0) {
+              continue;
+            }
             var tileRow = tileData[row];
-            for (var col = sCol, tileX = 0;
-                 col >= 0 && col < colCount && tileX < newWidth;
-                 col += 1, tileX += tileWidth) {
+            for (var col = sCol, tileX = 0; col < colCount && tileX < newWidth; col += 1, tileX += tileWidth) {
+              if (col < 0) {
+                continue;
+              }
               var tileCell = tileRow[col];
               if (!tileCell) {
                 continue;
@@ -304,13 +326,12 @@ export default (
           var tileImage = this.mapTileImageIndex;
           var tileImageClip = this.mapTileImageClipIndex;
           var mapID = this.getID();
-          for (var row = sRow, tileY = 0;
-               row >= 0 && row < rowCount && tileY < newHeight;
-               row += 1, tileY += tileHeight) {
+          for (var row = sRow, tileY = 0; row < rowCount && tileY < newHeight; row += 1, tileY += tileHeight) {
+            if (row < 0) {
+              continue;
+            }
             var tileRow = tileData[row];
-            for (var col = sCol, tileX = 0;
-                 col >= 0 && col < colCount && tileX < newWidth;
-                 col += 1, tileX += tileWidth) {
+            for (var col = sCol, tileX = 0; col < colCount && tileX < newWidth; col += 1, tileX += tileWidth) {
               if (clip && tileX >= clipTarLeft && tileX < clipTarRight && tileY >= clipTarTop && tileY < clipTarBottom) {
                 continue;
               }
@@ -347,8 +368,8 @@ export default (
         var halfTileWidth = tileWidth / 2;
         var halfTileHeight = tileHeight / 2;
 
-        var containerLeft = zone.left - this.mapX - mapNodeZone.left - this.mapTileRows * halfTileWidth;
-        var containerTop = zone.top - this.mapY - mapNodeZone.top;
+        var containerLeft = zone.left + this.mapX - mapNodeZone.left - this.mapTileRows * halfTileWidth;
+        var containerTop = zone.top + this.mapY - mapNodeZone.top;
         var containerRight = containerLeft + this.width;
         var containerBottom = containerTop + this.height;
 
@@ -398,14 +419,14 @@ export default (
           var tileImageClip = this.mapTileImageClipIndex;
           var mapID = this.getID();
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
-               startTileY < newHeight;
-               startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
+            startTileY < newHeight;
+            startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
             if (startRow < 0 || startCol >= colCount) {
               break;
             }
             for (var row = startRow, col = startCol, tileX = startTileX, tileY = startTileY;
-                 tileX < newWidth;
-                 row -= 1, col += 1, tileX += tileWidth) {
+              tileX < newWidth;
+              row -= 1, col += 1, tileX += tileWidth) {
               if (row < 0 || col >= colCount) {
                 break;
               }
@@ -488,8 +509,8 @@ export default (
           var tileImageClip = this.mapTileImageClipIndex;
           var mapID = this.getID();
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
-               startTileY < newHeight;
-               startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
+            startTileY < newHeight;
+            startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
             if (startRow < 0 || startCol >= colCount) {
               break;
             }

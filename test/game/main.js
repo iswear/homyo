@@ -30,12 +30,14 @@ import homyo from '../../main'
   // var root = new GMap({
   //   x: 400,
   //   y: 300,
+  //   mapX: 45,
+  //   mapY: 45,
   //   width: 200,
   //   height: 200,
   //   anchorX: 0.5,
   //   anchorY: 0.5,
   //   visible: true,
-  //   mapTileType: 'diamond',
+  //   mapTileType: 'square',
   //   mapTileWidth: 30,
   //   mapTileHeight: 30,
   //   mapTileImageIndex: {
