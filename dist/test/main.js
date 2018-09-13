@@ -4788,14 +4788,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var newWidth = Math.ceil((this.width + zone.left + this.mapX - mapNodeZone.left) / tileWidth) * tileWidth - newLeft;
         var newHeight = Math.ceil((this.height + zone.top + this.mapY - mapNodeZone.top) / tileHeight) * tileHeight - newTop;
 
-        var sRow = newLeft / tileWidth;
-        var sCol = newTop / tileHeight;
+        var sRow = newTop / tileHeight;
+        var sCol = newLeft / tileWidth;
         var rowCount = this.mapTileRows;
         var colCount = this.mapTileCols;
         if (ctx.backInvalid) {
           var foreRender = ctx.backRender;
           var backRender = ctx.foreRender;
-          if (foreRender.width !== newWidth && foreRender.height !== newHeight) {
+          if (foreRender.width !== newWidth || foreRender.height !== newHeight) {
             foreRender.width = newWidth;
             foreRender.height = newHeight;
           } else {
@@ -4837,7 +4837,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         } else if (newWidth !== oldWidth || newHeight !== oldHeight || newLeft !== oldLeft || newTop !== oldTop) {
           var foreRender = ctx.backRender;
           var backRender = ctx.foreRender;
-          if (foreRender.width !== newWidth && foreRender.height !== newHeight) {
+          if (foreRender.width !== newWidth || foreRender.height !== newHeight) {
             foreRender.width = newWidth;
             foreRender.height = newHeight;
           } else {
@@ -4858,6 +4858,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             clipTarBottom = clipHeight + clipTarTop;
             foreRender.drawImageExt(backRender.getCanvas(), newLeft > oldLeft ? (newLeft - oldLeft) : 0, newTop > oldTop ? (newTop - oldTop) : 0, clipWidth, clipHeight,
               clipTarLeft, clipTarTop, clipWidth, clipHeight);
+            foreRender.strokeStyle = '#00f';
+            foreRender.strokeRect(clipTarLeft, clipTarTop, clipWidth, clipHeight);
           }
           var application = this.findApplication();
           var tileData = this.mapTileData;
@@ -4865,11 +4867,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           var tileImageClip = this.mapTileImageClipIndex;
           var mapID = this.getID();
           for (var row = sRow, tileY = 0; row < rowCount && tileY < newHeight; row += 1, tileY += tileHeight) {
+            console.log(row, rowCount);
             if (row < 0) {
               continue;
             }
             var tileRow = tileData[row];
             for (var col = sCol, tileX = 0; col < colCount && tileX < newWidth; col += 1, tileX += tileWidth) {
+              if (col < 0) {
+                continue;
+              }
               if (clip && tileX >= clipTarLeft && tileX < clipTarRight && tileY >= clipTarTop && tileY < clipTarBottom) {
                 continue;
               }
@@ -4935,7 +4941,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         if (ctx.backInvalid) {
           var foreRender = ctx.backRender;
           var backRender = ctx.foreRender;
-          if (foreRender.width !== newWidth && foreRender.height !== newHeight) {
+          if (foreRender.width !== newWidth || foreRender.height !== newHeight) {
             foreRender.width = newWidth;
             foreRender.height = newHeight;
           } else {
@@ -5021,7 +5027,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         } else if (newWidth !== oldWidth || newHeight !== oldHeight || newLeft !== oldLeft || newTop !== oldTop) {
           var foreRender = ctx.backRender;
           var backRender = ctx.foreRender;
-          if (foreRender.width !== newWidth && foreRender.height !== newHeight) {
+          if (foreRender.width !== newWidth || foreRender.height !== newHeight) {
             foreRender.width = newWidth;
             foreRender.height = newHeight;
           } else {
@@ -5041,8 +5047,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             clipTarBottom = clipHeight + clipTarTop;
             foreRender.drawImageExt(backRender.getCanvas(), newLeft > oldLeft ? (newLeft - oldLeft) : 0, newTop > oldTop ? (newTop - oldTop) : 0, clipWidth, clipHeight,
               clipTarLeft, clipTarTop, clipWidth, clipHeight);
-            foreRender.strokeStyle = '#00f';
-            foreRender.strokeRect(clipTarLeft, clipTarTop, clipWidth, clipHeight);
           }
           var application = this.findApplication();
           var tileData = this.mapTileData;
