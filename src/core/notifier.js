@@ -13,12 +13,13 @@ export default (
           return this.$properties[name];
         }
       }
+
       function notifyPropertySetter (name, eventName) {
         return function (val) {
           var oldVal = this.$properties[name];
           if (oldVal !== val) {
             this.$properties[name] = val;
-            this.postNotification(eventName, this, [val, oldVal]);
+            this.postNotification(eventName, [val, oldVal]);
           }
         }
       }
@@ -42,10 +43,9 @@ export default (
        * @param name 观察消息名称
        * @param fn 回调函数
        * @param target 回调this
-       * @param sender 指定发送者
        * @param order 排序
        */
-      InnerNotifier.prototype.addObserver = function (name, fn, target, sender, order) {
+      InnerNotifier.prototype.addObserver = function (name, fn, target, order) {
         var observers = this._observers[name];
         if (!observers) {
           observers = [];
@@ -55,7 +55,6 @@ export default (
         var newObserver = {
           fn: fn,
           target: target,
-          sender: sender,
           order: order
         };
         for (var i = 0, len = observers.length; i < len; ++i) {
@@ -73,15 +72,14 @@ export default (
        * @param name 事件名称
        * @param fn 回调函数
        * @param target this
-       * @param sender 发送者
        */
-      InnerNotifier.prototype.removeObserver = function (name, fn, target, sender) {
+      InnerNotifier.prototype.removeObserver = function (name, fn, target) {
         var observers = this._observers[name];
         if (observers) {
           var observer;
           for (var i = 0, len = observers.length; i < len; ++i) {
             observer = observers[i];
-            if (observer.fn === fn && observer.target === target && observer.sender === sender) {
+            if (observer.fn === fn && observer.target === target) {
               observers.splice(i, 1);
               i--;
               len--;
@@ -99,38 +97,37 @@ export default (
         return this._observers[name];
       }
 
-      InnerNotifier.prototype.getObserverByAllParams = function (name, fn, target, sender) {
+      InnerNotifier.prototype.getObserverByAllParams = function (name, fn, target) {
         var observers = this._observers[name];
         if (observers) {
           var observer;
           for (var i = 0, len = observers.length; i < len; ++i) {
             observer = observers[i];
-            if (observer.fn === fn && observer.target === target && observer.sender === sender) {
+            if (observer.fn === fn && observer.target === target) {
               return observer;
             }
           }
         }
         return null;
       }
+      
       /**
        * 发送消息
        * @param name
        * @param params
        * @param sender
        */
-      InnerNotifier.prototype.postNotification = function (name, sender, params) {
+      InnerNotifier.prototype.postNotification = function (name, params) {
         var observers = this._observers[name];
         if (observers) {
           var len = observers.length;
           if (len > 0) {
             params = params ? params : [];
-            params.unshift(sender);
+            params.unshift(this);
             var observer;
             for (var i = 0; i < len; ++i) {
               observer = observers[i];
-              if (observer.sender === sender || observer.sender === null) {
-                observer.fn.apply(observer.target, params);
-              }
+              observer.fn.apply(observer.target, params);
             }
           }
         }

@@ -2,6 +2,7 @@
  * Created by iswear on 2017/8/12.
  */
 var path = require('path');
+var uglify = require('uglifyjs-webpack-plugin');
 
 // module.exports = {
 //   entry: './main.js',
@@ -18,7 +19,10 @@ module.exports = env => {
       output: {
         filename: 'main.js',
         path: path.resolve(__dirname, 'dist/test')
-      }
+      },
+      plugins: [
+        // new uglify()
+      ]
     }
   } else {
     return {
@@ -26,7 +30,10 @@ module.exports = env => {
       output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist/build')
-      }
+      },
+      plugins: [
+        // new uglify()
+      ]
     };
   }
 };

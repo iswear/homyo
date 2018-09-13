@@ -75,7 +75,7 @@ export default (
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          this.postNotification('touchstart', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
+          this.postNotification('touchstart', [eventPreProcessMobile.call(this, ee, touches[i])]);
         }
       }
 
@@ -85,7 +85,7 @@ export default (
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = eventPreProcessMobile(this, ee, touches[i]);
           if (eArg.move) {
-            this.postNotification('touchmove', this, [eArg]);
+            this.postNotification('touchmove', [eArg]);
           }
         }
       }
@@ -94,7 +94,7 @@ export default (
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          this.postNotification('touchend', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
+          this.postNotification('touchend', [eventPreProcessMobile.call(this, ee, touches[i])]);
         }
       }
 
@@ -102,7 +102,7 @@ export default (
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          this.postNotification('touchcancel', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
+          this.postNotification('touchcancel', [eventPreProcessMobile.call(this, ee, touches[i])]);
         }
       }
 
@@ -112,7 +112,7 @@ export default (
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
-          this.postNotification('touchstart', this, [eArg]);
+          this.postNotification('touchstart', [eArg]);
           root._dispatchMouseTouchEvent('touchstart', eArg);
           eArg.stopPropagation();
           eArg.preventDefault();
@@ -126,7 +126,7 @@ export default (
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
           if (eArg.move) {
-            this.postNotification('touchmove', this, [eArg]);
+            this.postNotification('touchmove', [eArg]);
             root._dispatchMouseTouchEvent('touchmove', eArg);
           }
           eArg.stopPropagation();
@@ -140,7 +140,7 @@ export default (
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
-          this.postNotification('touchend', this, [eArg]);
+          this.postNotification('touchend', [eArg]);
           root._dispatchMouseTouchEvent('touchend', eArg);
           eArg.stopPropagation();
           eArg.preventDefault();
@@ -153,7 +153,7 @@ export default (
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
-          this.postNotification('touchend', this, [eArg]);
+          this.postNotification('touchend', [eArg]);
           root._dispatchMouseTouchEvent('touchend', eArg);
           eArg.stopPropagation();
           eArg.preventDefault();
@@ -161,32 +161,32 @@ export default (
       }
 
       function eventKeyDownDoc (e) {
-        this.postNotification('keydown', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        this.postNotification('keydown', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
 
       function eventKeyPressDoc (e) {
-        this.postNotification('keypress', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        this.postNotification('keypress', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
 
       function eventKeyUpDoc (e) {
-        this.postNotification('keyup', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        this.postNotification('keyup', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
 
       function eventMouseDownDoc (e) {
-        this.postNotification('mousedown', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        this.postNotification('mousedown', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
 
       function eventMouseMoveDoc (e) {
-        this.postNotification('mousemove', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        this.postNotification('mousemove', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
 
       function eventMouseUpDoc (e) {
-        this.postNotification('mouseup', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        this.postNotification('mouseup', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
 
       function eventClickCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('click', this, [eArg]);
+        this.postNotification('click', [eArg]);
         this._root._dispatchMouseTouchEvent('click', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -194,7 +194,7 @@ export default (
 
       function eventDblClickCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('dblclick', this, [eArg]);
+        this.postNotification('dblclick', [eArg]);
         this._root._dispatchMouseTouchEvent('dblclick', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -202,7 +202,7 @@ export default (
 
       function eventContextMenuCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('contextmenu', this, [eArg]);
+        this.postNotification('contextmenu', [eArg]);
         this._root._dispatchMouseTouchEvent('contextmenu', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -210,7 +210,7 @@ export default (
 
       function eventMouseDownCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('mousedown', this, [eArg]);
+        this.postNotification('mousedown', [eArg]);
         this._root._dispatchMouseTouchEvent('mousedown', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -218,7 +218,7 @@ export default (
 
       function eventMouseMoveCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('mousemove', this, [eArg]);
+        this.postNotification('mousemove', [eArg]);
         this._root._dispatchMouseTouchEvent('mousemove', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -226,7 +226,7 @@ export default (
 
       function eventMouseUpCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('mouseup', this, [eArg]);
+        this.postNotification('mouseup', [eArg]);
         this._root._dispatchMouseTouchEvent('mouseup', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -234,7 +234,7 @@ export default (
 
       function eventMouseWheelCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('wheel', this, [eArg]);
+        this.postNotification('wheel', [eArg]);
         this._root._dispatchMouseTouchEvent('wheel', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -294,21 +294,18 @@ export default (
           switch (this.scaleMode) {
             case 1: {
               height = width * clientHeight / clientWidth;
-              this.postNotification('resize', this, [width, height]);
+              this.postNotification('resize', [width, height]);
               break;
             }
             case 2: {
               width = height * clientWidth / clientHeight;
-              this.postNotification('resize', this, [width, height]);
-              break;
-            }
-            case 3: {
+              this.postNotification('resize', [width, height]);
               break;
             }
             default: {
               width = clientWidth;
               height = clientHeight;
-              this.postNotification('resize', this, [width, height]);
+              this.postNotification('resize', [width, height]);
               break;
             }
           }
@@ -413,8 +410,8 @@ export default (
           loader: new FileLoader({})
         };
 
-        this._clientWidth = this._render.clientWidth;
-        this._clientHeight = this._render.clientHeight;
+        this._clientWidth = 0;
+        this._clientHeight = 0;
         this._scaleX = 1;
         this._scaleY = 1;
         this._transformCtx = {
@@ -426,7 +423,7 @@ export default (
         functions.syncTransform.call(this);
         functions.syncRenderSize.call(this);
 
-        this.addObserver('scaleModeChanged', functions.syncTransform, this, this);
+        this.addObserver('scaleModeChanged', functions.syncTransform, this);
       }
 
       InnerApplication.prototype.runNodeAnimation = function (node, animation, fn, target, loop) {
@@ -567,7 +564,7 @@ export default (
               height: this._renderZone.height
             });
             this._timerTaskId = TimerUtil.addAnimationTask(this.loop, this);
-            this.postNotification('resize', this, [this._render.width, this._render.height]);
+            this.postNotification('resize', [this._render.width, this._render.height]);
           }
         }
       }

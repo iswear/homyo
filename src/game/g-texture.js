@@ -10,13 +10,13 @@ export default (
   function () {
     var functions = (function () {
       function syncImageRender () {
-        this.removeObserver('render', renderImage, this, this);
-        this.removeObserver('render', renderImageClip, this, this);
+        this.removeObserver('render', renderImage, this);
+        this.removeObserver('render', renderImageClip, this);
         if (this.image !== null && this.image !== '') {
           if (LangUtil.isString(this.image)) {
-            this.addObserver('render', renderImage, this, this);
+            this.addObserver('render', renderImage, this);
           } else {
-            this.addObserver('render', renderImageClip, this, this);
+            this.addObserver('render', renderImageClip, this);
           }
         }
       }
@@ -121,10 +121,10 @@ export default (
         functions.syncImageRender.call(this);
         functions.syncImageContext.call(this);
 
-        this.addObserver('imageChanged', this.dirty, this, this);
+        this.addObserver('imageChanged', this.dirty, this);
 
-        this.addObserver('imageChanged', functions.syncImageRender, this, this);
-        this.addObserver('imageChanged', functions.syncImageContext, this, this);
+        this.addObserver('imageChanged', functions.syncImageRender, this);
+        this.addObserver('imageChanged', functions.syncImageContext, this);
       }
 
       return InnerGTexture;

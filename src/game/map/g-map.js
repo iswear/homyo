@@ -14,61 +14,56 @@ export default (
 
     var functions = (function () {
       function syncMapNodeContext () {
-        var mapNode = this._mapNode;
-        this.removeObserver('mapXChanged', syncMapX, this, this);
-        this.removeObserver('mapYChanged', syncMapX, this, this);
-        this.removeObserver('anchorXChanged', syncMapAnchorX, this, this);
-        this.removeObserver('anchorYChanged', syncMapAnchorY, this, this);
-        this.removeObserver('mapTileWidthChanged', syncMapWidth, this, this);
-        this.removeObserver('mapTileRowsChanged', syncMapWidth, this, this);
-        this.removeObserver('mapTileColsChanged', syncMapWidth, this, this);
-        this.removeObserver('mapTileHeightChanged', syncMapHeight, this, this);
-        this.removeObserver('mapTileRowsChanged', syncMapHeight, this, this);
-        this.removeObserver('mapTileColsChanged', syncMapHeight, this, this);
-        this.removeObserver('render', renderSquareMap, this, this);
-        this.removeObserver('render', renderDiamondMap, this, this);
-        mapNode.removeObserver('frame', syncMapNodeX, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeY, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeAnchorX, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeAnchorY, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeWidthSquare, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeWidthDiamond, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeHeightSquare, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeHeightDiamond, this, mapNode);
+        this.removeObserver('mapXChanged', syncMapX, this);
+        this.removeObserver('mapYChanged', syncMapY, this);
+        this.removeObserver('anchorXChanged', syncMapAnchorX, this);
+        this.removeObserver('anchorYChanged', syncMapAnchorY, this);
+        this.removeObserver('mapTileWidthChanged', syncMapSquareWidth, this);
+        this.removeObserver('mapTileColsChanged', syncMapSquareWidth, this);
+        this.removeObserver('mapTileHeightChanged', syncMapSquareHeight, this);
+        this.removeObserver('mapTileRowsChanged', syncMapSquareHeight, this);
+        this.removeObserver('mapTileWidthChanged', syncMapDiamondWidth, this);
+        this.removeObserver('mapTileRowsChanged', syncMapDiamondWidth, this);
+        this.removeObserver('mapTileColsChanged', syncMapDiamondWidth, this);
+        this.removeObserver('mapTileHeightChanged', syncMapDiamondHeight, this);
+        this.removeObserver('mapTileRowsChanged', syncMapDiamondHeight, this);
+        this.removeObserver('mapTileColsChanged', syncMapDiamondHeight, this);
+        this.removeObserver('render', renderSquareMap, this);
+        this.removeObserver('render', renderDiamondMap, this);
         if (this.mapTileType === 'square') {
-          this.addObserver('mapXChanged', syncMapX, this, this);
-          this.addObserver('mapYChanged', syncMapY, this, this);
-          this.addObserver('anchorXChanged', syncMapAnchorX, this, this);
-          this.addObserver('anchorYChanged', syncMapAnchorY, this, this);
-          this.addObserver('mapTileWidthChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileColsChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileHeightChanged', syncMapHeight, this, this);
-          this.addObserver('mapTileRowsChanged', syncMapHeight, this, this);
-          this.addObserver('render', renderSquareMap, this, this);
-          mapNode.addObserver('frame', syncMapNodeX, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeY, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeAnchorX, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeAnchorY, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeWidthSquare, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeHeightSquare, this, mapNode);
+          this.addObserver('mapXChanged', syncMapX, this);
+          this.addObserver('mapYChanged', syncMapY, this);
+          this.addObserver('anchorXChanged', syncMapAnchorX, this);
+          this.addObserver('anchorYChanged', syncMapAnchorY, this);
+          this.addObserver('mapTileWidthChanged', syncMapSquareWidth, this);
+          this.addObserver('mapTileColsChanged', syncMapSquareWidth, this);
+          this.addObserver('mapTileHeightChanged', syncMapSquareHeight, this);
+          this.addObserver('mapTileRowsChanged', syncMapSquareHeight, this);
+          this.addObserver('render', renderSquareMap, this);
+          syncMapX.call(this);
+          syncMapY.call(this);
+          syncMapAnchorX.call(this);
+          syncMapAnchorY.call(this);
+          syncMapSquareWidth.call(this);
+          syncMapSquareHeight.call(this);
         } else if (this.mapTileType === 'diamond') {
-          this.addObserver('mapXChanged', syncMapX, this, this);
-          this.addObserver('mapYChanged', syncMapY, this, this);
-          this.addObserver('anchorXChanged', syncMapAnchorX, this, this);
-          this.addObserver('anchorYChanged', syncMapAnchorY, this, this);
-          this.addObserver('mapTileWidthChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileRowsChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileColsChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileHeightChanged', syncMapHeight, this, this);
-          this.addObserver('mapTileRowsChanged', syncMapHeight, this, this);
-          this.addObserver('mapTileColsChanged', syncMapHeight, this, this);
-          this.addObserver('render', renderDiamondMap, this, this);
-          mapNode.addObserver('frame', syncMapNodeX, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeY, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeAnchorX, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeAnchorY, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeWidthDiamond, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeHeightDiamond, this, mapNode);
+          this.addObserver('mapXChanged', syncMapX, this);
+          this.addObserver('mapYChanged', syncMapY, this);
+          this.addObserver('anchorXChanged', syncMapAnchorX, this);
+          this.addObserver('anchorYChanged', syncMapAnchorY, this);
+          this.addObserver('mapTileWidthChanged', syncMapDiamondWidth, this);
+          this.addObserver('mapTileRowsChanged', syncMapDiamondWidth, this);
+          this.addObserver('mapTileColsChanged', syncMapDiamondWidth, this);
+          this.addObserver('mapTileHeightChanged', syncMapDiamondHeight, this);
+          this.addObserver('mapTileRowsChanged', syncMapDiamondHeight, this);
+          this.addObserver('mapTileColsChanged', syncMapDiamondHeight, this);
+          this.addObserver('render', renderDiamondMap, this);
+          syncMapX.call(this);
+          syncMapY.call(this);
+          syncMapAnchorX.call(this);
+          syncMapAnchorY.call(this);
+          syncMapDiamondWidth.call(this);
+          syncMapDiamondHeight.call(this);
         }
       }
 
@@ -85,84 +80,36 @@ export default (
         tileCtx.backInvalid = true;
       }
 
-      function syncMapNodeX () {
-        if (this._mapCacheCtx.mapXInvalid) {
-          this._mapNode.x = - this.mapX;
-          this._mapCacheCtx.mapXInvalid = false;
-        }
-      }
-
-      function syncMapNodeY () {
-        if (this._mapCacheCtx.mapYInvalid) {
-          this._mapNode.y = - this.mapY;
-          this._mapCacheCtx.mapYInvalid = false;
-        }
-      }
-
-      function syncMapNodeAnchorX () {
-        if (this._mapCacheCtx.mapAnchorXInvalid) {
-          this._mapNode.anchorX = this.anchorX;
-          this._mapCacheCtx.mapAnchorXInvalid = false;
-        }
-      }
-
-      function syncMapNodeAnchorY () {
-        if (this._mapCacheCtx.mapAnchorYInvalid) {
-          this._mapNode.anchorY = this.anchorY;
-          this._mapCacheCtx.mapAnchorYInvalid = false;
-        }
-      }
-
-      function syncMapNodeWidthSquare () {
-        if (this._mapCacheCtx.mapWidthInvalid) {
-          this._mapNode.width = this.mapTileWidth * this.mapTileCols;
-          this._mapCacheCtx.mapWidthInvalid = false;
-        }
-      }
-
-      function syncMapNodeWidthDiamond () {
-        if (this._mapCacheCtx.mapWidthInvalid) {
-          this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
-          this._mapCacheCtx.mapWidthInvalid = false;
-        }
-      }
-
-      function syncMapNodeHeightSquare () {
-        if (this._mapCacheCtx.mapHeightInvalid) {
-          this._mapNode.height = this.mapTileHeight * this.mapTileRows;
-          this._mapCacheCtx.mapHeightInvalid = false;
-        }
-      }
-
-      function syncMapNodeHeightDiamond () {
-        if (this._mapCacheCtx.mapHeightInvalid) {
-          this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
-          this._mapCacheCtx.mapHeightInvalid = false;
-        }
-      }
-
       function syncMapX () {
-        this._mapCacheCtx.mapXInvalid = true;
+        this._mapNode.x = - this.mapX;
       }
 
       function syncMapY () {
-        this._mapCacheCtx.mapYInvalid = true;
-      }
-
-      function syncMapWidth () {
-        this._mapCacheCtx.mapWidthInvalid = true;
-      }
-
-      function syncMapHeight () {
-        this._mapCacheCtx.mapHeightInvalid = true;
+        this._mapNode.y = - this.mapY;
       }
 
       function syncMapAnchorX () {
-        this._mapCacheCtx.mapAnchorXInvalid = true;
+        this._mapNode.anchorX = this.anchorX;
       }
 
       function syncMapAnchorY () {
-        this._mapCacheCtx.mapAnchorYInvalid = true;
+        this._mapNode.anchorY = this.anchorY;
+      }
+
+      function syncMapSquareWidth () {
+        this._mapNode.width = this.mapTileWidth * this.mapTileCols;
+      }
+
+      function syncMapSquareHeight () {
+        this._mapNode.height = this.mapTileHeight * this.mapTileRows;
+      }
+
+      function syncMapDiamondWidth () {
+        this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
+      }
+
+      function syncMapDiamondHeight () {
+        this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
       }
 
       function renderSquareMap (sender, render, dirtyZones) {
@@ -383,7 +330,7 @@ export default (
         var newLeft = oldLeft;
         var newTop = oldTop;
         if (ctx.offsetInvalid) {
-          newLeft = ((sCol - sRow - 1) * halfTileWidth) + containerLeft;
+          newLeft = ((sCol - sRow - 1) * halfTileWidth) + this.mapTileRows * halfTileWidth;
           newTop = (sCol + sRow) * halfTileHeight;
           ctx.left = newLeft;
           ctx.top = newTop;
@@ -395,8 +342,8 @@ export default (
         var newWidth = oldWidth;
         var newHeight = oldHeight;
         if (ctx.sizeInvalid) {
-          newWidth = (eCol - eRow + 1) * halfTileWidth - newLeft;
-          newHeight = (eCol + eRow + 2) * halfTileHeight - newTop;
+          newWidth = (eCol - eRow - sCol + sRow + 2) * halfTileWidth;
+          newHeight = (eCol + eRow - sCol - sRow + 2) * halfTileHeight;
           ctx.width = newWidth;
           ctx.height = newHeight;
           ctx.sizeInvalid = false;
@@ -420,7 +367,7 @@ export default (
           var mapID = this.getID();
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
             startTileY < newHeight;
-            startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
+            startTileY += halfTileHeight) {
             if (startRow < 0 || startCol >= colCount) {
               break;
             }
@@ -475,6 +422,13 @@ export default (
                 }
               }
             }
+            if (startTileX === 0) {
+              startTileX = -halfTileWidth;
+              startRow += 1;
+            } else {
+              startTileX = 0;
+              startCol += 1;
+            }
           }
           ctx.foreRender = foreRender;
           ctx.backRender = backRender;
@@ -510,7 +464,7 @@ export default (
           var mapID = this.getID();
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
             startTileY < newHeight;
-            startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
+            startTileY += halfTileHeight) {
             if (startRow < 0 || startCol >= colCount) {
               break;
             }
@@ -665,6 +619,13 @@ export default (
                 }
               }
             }
+            if (startTileX === 0) {
+              startTileX = -halfTileWidth;
+              startRow += 1;
+            } else {
+              startTileX = 0;
+              startCol += 1;
+            }
           }
         }
         ctx.backInvalid = false;
@@ -719,12 +680,6 @@ export default (
         this.addChildNode(this._mapNode);
 
         this._mapCacheCtx = {
-          mapXInvalid: true,
-          mapYInvalid: true,
-          mapWidthInvalid: true,
-          mapHeightInvalid: true,
-          mapAnchorXInvalid: true,
-          mapAnchorYInvalid: true,
           background: {
             needRender: false,
           },
@@ -743,13 +698,15 @@ export default (
           }
         };
 
+        doc.body.appendChild(this._mapCacheCtx.tile.foreRender.getCanvas());
+
         functions.syncMapNodeContext.call(this);
         functions.syncMapBackgroundRender.call(this);
         functions.syncMapTilesRender.call(this);
 
-        this.addObserver('mapTileTypeChanged', functions.syncMapNodeContext, this, this);
-        this.addObserver('mapBackgroundImageChanged', functions.syncMapBackgroundRender, this, this);
-        this.addObserver('mapTileDataChanged', functions.syncMapTilesRender, this, this);
+        this.addObserver('mapTileTypeChanged', functions.syncMapNodeContext, this);
+        this.addObserver('mapBackgroundImageChanged', functions.syncMapBackgroundRender, this);
+        this.addObserver('mapTileDataChanged', functions.syncMapTilesRender, this);
       }
 
       InnerGMap.prototype.addModel = function (model) {

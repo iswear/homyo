@@ -33,10 +33,10 @@ export default (
 
         functions.syncViewPort.call(this);
 
-        this.addObserver('viewPortXChanged', functions.syncViewPort, this, this);
-        this.addObserver('viewPortYChanged', functions.syncViewPort, this, this);
-        this.addObserver('viewPortWidthChanged', functions.syncViewPort, this, this);
-        this.addObserver('viewPortHeightChanged', functions.syncViewPort, this, this);
+        this.addObserver('viewPortXChanged', functions.syncViewPort, this);
+        this.addObserver('viewPortYChanged', functions.syncViewPort, this);
+        this.addObserver('viewPortWidthChanged', functions.syncViewPort, this);
+        this.addObserver('viewPortHeightChanged', functions.syncViewPort, this);
       }
 
       InnerWebglRender.prototype.createAndCompileShader = function (type, source) {

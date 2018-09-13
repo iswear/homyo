@@ -30,8 +30,8 @@ import homyo from '../../main'
   // var root = new GMap({
   //   x: 400,
   //   y: 300,
-  //   mapX: 45,
-  //   mapY: 45,
+  //   // mapX: 45,
+  //   // mapY: 45,
   //   width: 200,
   //   height: 200,
   //   anchorX: 0.5,
@@ -66,6 +66,8 @@ import homyo from '../../main'
   var root = new GMap({
     x: 400,
     y: 300,
+    mapX: 10,
+    mapY: 10,
     width: 200,
     height: 200,
     anchorX: 0.5,
@@ -121,9 +123,9 @@ import homyo from '../../main'
   //   }));
   // }
 
-  // document.onclick = function () {
-  //   console.log('yaya')
-  //   root.x += 10;
-  // }
+  document.onclick = function () {
+    console.log('yaya');
+    root.mapX += 10;
+  }
 
 })();

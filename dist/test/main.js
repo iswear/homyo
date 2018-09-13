@@ -268,12 +268,13 @@
           return this.$properties[name];
         }
       }
+
       function notifyPropertySetter (name, eventName) {
         return function (val) {
           var oldVal = this.$properties[name];
           if (oldVal !== val) {
             this.$properties[name] = val;
-            this.postNotification(eventName, this, [val, oldVal]);
+            this.postNotification(eventName, [val, oldVal]);
           }
         }
       }
@@ -297,10 +298,9 @@
        * @param name 观察消息名称
        * @param fn 回调函数
        * @param target 回调this
-       * @param sender 指定发送者
        * @param order 排序
        */
-      InnerNotifier.prototype.addObserver = function (name, fn, target, sender, order) {
+      InnerNotifier.prototype.addObserver = function (name, fn, target, order) {
         var observers = this._observers[name];
         if (!observers) {
           observers = [];
@@ -310,7 +310,6 @@
         var newObserver = {
           fn: fn,
           target: target,
-          sender: sender,
           order: order
         };
         for (var i = 0, len = observers.length; i < len; ++i) {
@@ -328,15 +327,14 @@
        * @param name 事件名称
        * @param fn 回调函数
        * @param target this
-       * @param sender 发送者
        */
-      InnerNotifier.prototype.removeObserver = function (name, fn, target, sender) {
+      InnerNotifier.prototype.removeObserver = function (name, fn, target) {
         var observers = this._observers[name];
         if (observers) {
           var observer;
           for (var i = 0, len = observers.length; i < len; ++i) {
             observer = observers[i];
-            if (observer.fn === fn && observer.target === target && observer.sender === sender) {
+            if (observer.fn === fn && observer.target === target) {
               observers.splice(i, 1);
               i--;
               len--;
@@ -354,38 +352,37 @@
         return this._observers[name];
       }
 
-      InnerNotifier.prototype.getObserverByAllParams = function (name, fn, target, sender) {
+      InnerNotifier.prototype.getObserverByAllParams = function (name, fn, target) {
         var observers = this._observers[name];
         if (observers) {
           var observer;
           for (var i = 0, len = observers.length; i < len; ++i) {
             observer = observers[i];
-            if (observer.fn === fn && observer.target === target && observer.sender === sender) {
+            if (observer.fn === fn && observer.target === target) {
               return observer;
             }
           }
         }
         return null;
       }
+      
       /**
        * 发送消息
        * @param name
        * @param params
        * @param sender
        */
-      InnerNotifier.prototype.postNotification = function (name, sender, params) {
+      InnerNotifier.prototype.postNotification = function (name, params) {
         var observers = this._observers[name];
         if (observers) {
           var len = observers.length;
           if (len > 0) {
             params = params ? params : [];
-            params.unshift(sender);
+            params.unshift(this);
             var observer;
             for (var i = 0; i < len; ++i) {
               observer = observers[i];
-              if (observer.sender === sender || observer.sender === null) {
-                observer.fn.apply(observer.target, params);
-              }
+              observer.fn.apply(observer.target, params);
             }
           }
         }
@@ -468,10 +465,10 @@
       function syncClipRender () {
         if (this.clip) {
           if (this.getObserverByAllParams('render', this.startClip, this, this) === null) {
-            this.addObserver('render', this.startClip, this, this, 0);
+            this.addObserver('render', this.startClip, this, 0);
           }
         } else {
-          this.removeObserver('render', this.startClip, this, this);
+          this.removeObserver('render', this.startClip, this);
         }
       }
 
@@ -506,7 +503,7 @@
       InnerNode.prototype.defAnchorX = 0.5;
       InnerNode.prototype.defAnchorY = 0.5;
       InnerNode.prototype.defAlpha = 1;
-      InnerNode.prototype.defVisible = false;
+      InnerNode.prototype.defVisible = true;
       InnerNode.prototype.defCursor = 'default';
       InnerNode.prototype.defInteractive = false;
       InnerNode.prototype.defClip = false;
@@ -576,36 +573,36 @@
         functions.syncLocalTransform.call(this);
         functions.syncLocalZone.call(this);
 
-        this.addObserver('xChanged', this.dirty, this, this);
-        this.addObserver('yChanged', this.dirty, this, this);
-        this.addObserver('rotateZChanged', this.dirty, this, this);
-        this.addObserver('scaleXChanged', this.dirty, this, this);
-        this.addObserver('scaleYChanged', this.dirty, this, this);
-        this.addObserver('inclineXChanged', this.dirty, this, this);
-        this.addObserver('inclineYChanged', this.dirty, this, this);
-        this.addObserver('widthChanged', this.dirty, this, this);
-        this.addObserver('heightChanged', this.dirty, this, this);
-        this.addObserver('anchorXChanged', this.dirty, this, this);
-        this.addObserver('anchorYChanged', this.dirty, this, this);
-        this.addObserver('alphaChanged', this.dirty, this, this);
-        this.addObserver('visibleChanged', this.dirty, this, this);
+        this.addObserver('xChanged', this.dirty, this);
+        this.addObserver('yChanged', this.dirty, this);
+        this.addObserver('rotateZChanged', this.dirty, this);
+        this.addObserver('scaleXChanged', this.dirty, this);
+        this.addObserver('scaleYChanged', this.dirty, this);
+        this.addObserver('inclineXChanged', this.dirty, this);
+        this.addObserver('inclineYChanged', this.dirty, this);
+        this.addObserver('widthChanged', this.dirty, this);
+        this.addObserver('heightChanged', this.dirty, this);
+        this.addObserver('anchorXChanged', this.dirty, this);
+        this.addObserver('anchorYChanged', this.dirty, this);
+        this.addObserver('alphaChanged', this.dirty, this);
+        this.addObserver('visibleChanged', this.dirty, this);
 
-        this.addObserver('clipChanged', functions.syncClipRender, this, this);
+        this.addObserver('clipChanged', functions.syncClipRender, this);
 
-        this.addObserver('xChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('yChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('rotateZChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('scaleXChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('scaleYChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('inclineXChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('inclineYChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('parentChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('xChanged', functions.syncLocalTransform, this);
+        this.addObserver('yChanged', functions.syncLocalTransform, this);
+        this.addObserver('rotateZChanged', functions.syncLocalTransform, this);
+        this.addObserver('scaleXChanged', functions.syncLocalTransform, this);
+        this.addObserver('scaleYChanged', functions.syncLocalTransform, this);
+        this.addObserver('inclineXChanged', functions.syncLocalTransform, this);
+        this.addObserver('inclineYChanged', functions.syncLocalTransform, this);
+        this.addObserver('parentChanged', functions.syncLocalTransform, this);
 
 
-        this.addObserver('widthChanged', functions.syncLocalZone, this, this);
-        this.addObserver('heightChanged', functions.syncLocalZone, this, this);
-        this.addObserver('anchorXChanged', functions.syncLocalZone, this, this);
-        this.addObserver('anchorYChanged', functions.syncLocalZone, this, this);
+        this.addObserver('widthChanged', functions.syncLocalZone, this);
+        this.addObserver('heightChanged', functions.syncLocalZone, this);
+        this.addObserver('anchorXChanged', functions.syncLocalZone, this);
+        this.addObserver('anchorYChanged', functions.syncLocalZone, this);
       }
 
       InnerNode.prototype.getID = function () {
@@ -876,7 +873,7 @@
       }
 
       InnerNode.prototype._syncTransform = function (parentWTransform, parentWReverseTransform, renderZone, parentUpdateTransform) {
-        this.postNotification('frame', this);
+        this.postNotification('frame');
         var transformCtx = this._transformCtx;
         var zoneCtx = this._zoneCtx;
         var dirtyCtx = this._dirtyCtx;
@@ -931,7 +928,9 @@
 
       InnerNode.prototype.dirty = function () {
         var app = this.findApplication();
-        this._reportOriDirtyZone(app);
+        if (app !== null) {
+          this._reportOriDirtyZone(app);
+        }
       }
 
       InnerNode.prototype._reportOriDirtyZone = function (app) {
@@ -1005,7 +1004,7 @@
               render.globalAplha = alpha;
               // 绘制自身
               if (dirtyCtx.curReported) {
-                this.postNotification('render', this, [render, [this._zoneCtx.local]]);
+                this.postNotification('render', [render, [this._zoneCtx.local]]);
                 this._dispatchChildrenRender(render, alpha, renderZone, dirtyZones);
                 this.stopClip();
               } else {
@@ -1022,7 +1021,7 @@
                   }
                 }
                 if (crossDirtyZones.length > 0) {
-                  this.postNotification('render', this, [render, crossDirtyZones]);
+                  this.postNotification('render', [render, crossDirtyZones]);
                   this._dispatchChildrenRender(render, alpha, renderZone, dirtyZones);
                   this.stopClip();
                 }
@@ -1038,7 +1037,7 @@
                 render.globalAplha = alpha;
                 // 绘制自身
                 if (dirtyCtx.curReported) {
-                  this.postNotification('render', this, [render, [this._zoneCtx.local]]);
+                  this.postNotification('render', [render, [this._zoneCtx.local]]);
                 } else {
                   var worldZone = this._zoneCtx.world;
                   var crossDirtyZones = [];
@@ -1053,7 +1052,7 @@
                     }
                   }
                   if (crossDirtyZones.length > 0) {
-                    this.postNotification('render', this, [render, crossDirtyZones]);
+                    this.postNotification('render', [render, crossDirtyZones]);
                   }
                 }
               }
@@ -1109,13 +1108,13 @@
 
           if (targetInChildren) {
             if (e.bubble) {
-              this.postNotification(name, this, [e]);
+              this.postNotification(name, [e]);
             }
             return true;
           } else {
             if (result) {
               if (this.interactive) {
-                this.postNotification(name, this, [e]);
+                this.postNotification(name, [e]);
               }
               return true;
             } else {
@@ -2503,11 +2502,11 @@
       function syncBackgroundBorderRender() {
         var ctx = this._backgroundBorderCacheCtx;
         if (this.backgroundColor === null && (this.borderColor === null || this.borderWidth <= 0)) {
-          this.removeObserver('render', renderBackgroundAndBorder, this, this);
+          this.removeObserver('render', renderBackgroundAndBorder, this);
           ctx.render = null;
         } else {
           if (this.getObserverByAllParams('render', renderBackgroundAndBorder, this, this) === null) {
-            this.addObserver('render', renderBackgroundAndBorder, this, this, -Infinity);
+            this.addObserver('render', renderBackgroundAndBorder, this, -Infinity);
           }
           if (ctx.render === null) {
             ctx.renderInvalid = true;
@@ -2640,21 +2639,21 @@
         functions.syncBackgroundBorderRender.call(this);
         functions.syncBackgroundBorderRenderInvalid.call(this);
 
-        this.addObserver('backgroundColorChanged', this.dirty, this, this);
-        this.addObserver('borderWidthChanged', this.dirty, this, this);
-        this.addObserver('borderColorChanged', this.dirty, this, this);
-        this.addObserver('borderRadiusChanged', this.dirty, this, this);
+        this.addObserver('backgroundColorChanged', this.dirty, this);
+        this.addObserver('borderWidthChanged', this.dirty, this);
+        this.addObserver('borderColorChanged', this.dirty, this);
+        this.addObserver('borderRadiusChanged', this.dirty, this);
 
-        this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRender, this, this);
-        this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRender, this, this);
-        this.addObserver('borderColorChanged', functions.syncBackgroundBorderRender, this, this);
+        this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRender, this);
+        this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRender, this);
+        this.addObserver('borderColorChanged', functions.syncBackgroundBorderRender, this);
 
-        this.addObserver('widthChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
-        this.addObserver('heightChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
-        this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
-        this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
-        this.addObserver('borderColorChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
-        this.addObserver('borderRadiusChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
+        this.addObserver('widthChanged', functions.syncBackgroundBorderRenderInvalid, this);
+        this.addObserver('heightChanged', functions.syncBackgroundBorderRenderInvalid, this);
+        this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRenderInvalid, this);
+        this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRenderInvalid, this);
+        this.addObserver('borderColorChanged', functions.syncBackgroundBorderRenderInvalid, this);
+        this.addObserver('borderRadiusChanged', functions.syncBackgroundBorderRenderInvalid, this);
       }
 
       InnerUIView.prototype.startClip = function (render) {
@@ -2674,7 +2673,6 @@
     return UIView;
   }
 )());
-
 
 
 
@@ -3172,13 +3170,13 @@
   function () {
     var functions = (function () {
       function syncImageRender () {
-        this.removeObserver('render', renderImage, this, this);
-        this.removeObserver('render', renderImageClip, this, this);
+        this.removeObserver('render', renderImage, this);
+        this.removeObserver('render', renderImageClip, this);
         if (this.image !== null && this.image !== '') {
           if (__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].isString(this.image)) {
-            this.addObserver('render', renderImage, this, this);
+            this.addObserver('render', renderImage, this);
           } else {
-            this.addObserver('render', renderImageClip, this, this);
+            this.addObserver('render', renderImageClip, this);
           }
         }
       }
@@ -3283,10 +3281,10 @@
         functions.syncImageRender.call(this);
         functions.syncImageContext.call(this);
 
-        this.addObserver('imageChanged', this.dirty, this, this);
+        this.addObserver('imageChanged', this.dirty, this);
 
-        this.addObserver('imageChanged', functions.syncImageRender, this, this);
-        this.addObserver('imageChanged', functions.syncImageContext, this, this);
+        this.addObserver('imageChanged', functions.syncImageRender, this);
+        this.addObserver('imageChanged', functions.syncImageContext, this);
       }
 
       return InnerGTexture;
@@ -3335,8 +3333,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   // var root = new GMap({
   //   x: 400,
   //   y: 300,
-  //   mapX: 45,
-  //   mapY: 45,
+  //   // mapX: 45,
+  //   // mapY: 45,
   //   width: 200,
   //   height: 200,
   //   anchorX: 0.5,
@@ -3371,6 +3369,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   var root = new GMap({
     x: 400,
     y: 300,
+    mapX: 10,
+    mapY: 10,
     width: 200,
     height: 200,
     anchorX: 0.5,
@@ -3426,10 +3426,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   //   }));
   // }
 
-  // document.onclick = function () {
-  //   console.log('yaya')
-  //   root.x += 10;
-  // }
+  document.onclick = function () {
+    console.log('yaya');
+    root.mapX += 10;
+  }
 
 })();
 
@@ -3649,7 +3649,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          this.postNotification('touchstart', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
+          this.postNotification('touchstart', [eventPreProcessMobile.call(this, ee, touches[i])]);
         }
       }
 
@@ -3659,7 +3659,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = eventPreProcessMobile(this, ee, touches[i]);
           if (eArg.move) {
-            this.postNotification('touchmove', this, [eArg]);
+            this.postNotification('touchmove', [eArg]);
           }
         }
       }
@@ -3668,7 +3668,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          this.postNotification('touchend', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
+          this.postNotification('touchend', [eventPreProcessMobile.call(this, ee, touches[i])]);
         }
       }
 
@@ -3676,7 +3676,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          this.postNotification('touchcancel', this, [eventPreProcessMobile.call(this, ee, touches[i])]);
+          this.postNotification('touchcancel', [eventPreProcessMobile.call(this, ee, touches[i])]);
         }
       }
 
@@ -3686,7 +3686,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
-          this.postNotification('touchstart', this, [eArg]);
+          this.postNotification('touchstart', [eArg]);
           root._dispatchMouseTouchEvent('touchstart', eArg);
           eArg.stopPropagation();
           eArg.preventDefault();
@@ -3700,7 +3700,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
           if (eArg.move) {
-            this.postNotification('touchmove', this, [eArg]);
+            this.postNotification('touchmove', [eArg]);
             root._dispatchMouseTouchEvent('touchmove', eArg);
           }
           eArg.stopPropagation();
@@ -3714,7 +3714,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
-          this.postNotification('touchend', this, [eArg]);
+          this.postNotification('touchend', [eArg]);
           root._dispatchMouseTouchEvent('touchend', eArg);
           eArg.stopPropagation();
           eArg.preventDefault();
@@ -3727,7 +3727,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
-          this.postNotification('touchend', this, [eArg]);
+          this.postNotification('touchend', [eArg]);
           root._dispatchMouseTouchEvent('touchend', eArg);
           eArg.stopPropagation();
           eArg.preventDefault();
@@ -3735,32 +3735,32 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       }
 
       function eventKeyDownDoc (e) {
-        this.postNotification('keydown', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        this.postNotification('keydown', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
 
       function eventKeyPressDoc (e) {
-        this.postNotification('keypress', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        this.postNotification('keypress', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
 
       function eventKeyUpDoc (e) {
-        this.postNotification('keyup', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        this.postNotification('keyup', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
 
       function eventMouseDownDoc (e) {
-        this.postNotification('mousedown', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        this.postNotification('mousedown', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
 
       function eventMouseMoveDoc (e) {
-        this.postNotification('mousemove', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        this.postNotification('mousemove', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
 
       function eventMouseUpDoc (e) {
-        this.postNotification('mouseup', this, [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        this.postNotification('mouseup', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
       }
 
       function eventClickCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('click', this, [eArg]);
+        this.postNotification('click', [eArg]);
         this._root._dispatchMouseTouchEvent('click', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -3768,7 +3768,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       function eventDblClickCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('dblclick', this, [eArg]);
+        this.postNotification('dblclick', [eArg]);
         this._root._dispatchMouseTouchEvent('dblclick', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -3776,7 +3776,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       function eventContextMenuCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('contextmenu', this, [eArg]);
+        this.postNotification('contextmenu', [eArg]);
         this._root._dispatchMouseTouchEvent('contextmenu', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -3784,7 +3784,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       function eventMouseDownCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('mousedown', this, [eArg]);
+        this.postNotification('mousedown', [eArg]);
         this._root._dispatchMouseTouchEvent('mousedown', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -3792,7 +3792,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       function eventMouseMoveCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('mousemove', this, [eArg]);
+        this.postNotification('mousemove', [eArg]);
         this._root._dispatchMouseTouchEvent('mousemove', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -3800,7 +3800,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       function eventMouseUpCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('mouseup', this, [eArg]);
+        this.postNotification('mouseup', [eArg]);
         this._root._dispatchMouseTouchEvent('mouseup', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -3808,7 +3808,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       function eventMouseWheelCanvas (e) {
         var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
-        this.postNotification('wheel', this, [eArg]);
+        this.postNotification('wheel', [eArg]);
         this._root._dispatchMouseTouchEvent('wheel', eArg);
         eArg.stopPropagation();
         eArg.preventDefault();
@@ -3868,21 +3868,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           switch (this.scaleMode) {
             case 1: {
               height = width * clientHeight / clientWidth;
-              this.postNotification('resize', this, [width, height]);
+              this.postNotification('resize', [width, height]);
               break;
             }
             case 2: {
               width = height * clientWidth / clientHeight;
-              this.postNotification('resize', this, [width, height]);
-              break;
-            }
-            case 3: {
+              this.postNotification('resize', [width, height]);
               break;
             }
             default: {
               width = clientWidth;
               height = clientHeight;
-              this.postNotification('resize', this, [width, height]);
+              this.postNotification('resize', [width, height]);
               break;
             }
           }
@@ -3987,8 +3984,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           loader: new __WEBPACK_IMPORTED_MODULE_8__io_file_loader__["a" /* default */]({})
         };
 
-        this._clientWidth = this._render.clientWidth;
-        this._clientHeight = this._render.clientHeight;
+        this._clientWidth = 0;
+        this._clientHeight = 0;
         this._scaleX = 1;
         this._scaleY = 1;
         this._transformCtx = {
@@ -4000,7 +3997,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         functions.syncTransform.call(this);
         functions.syncRenderSize.call(this);
 
-        this.addObserver('scaleModeChanged', functions.syncTransform, this, this);
+        this.addObserver('scaleModeChanged', functions.syncTransform, this);
       }
 
       InnerApplication.prototype.runNodeAnimation = function (node, animation, fn, target, loop) {
@@ -4141,7 +4138,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
               height: this._renderZone.height
             });
             this._timerTaskId = __WEBPACK_IMPORTED_MODULE_1__utils_timer_util__["a" /* default */].addAnimationTask(this.loop, this);
-            this.postNotification('resize', this, [this._render.width, this._render.height]);
+            this.postNotification('resize', [this._render.width, this._render.height]);
           }
         }
       }
@@ -4221,10 +4218,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
         functions.syncViewPort.call(this);
 
-        this.addObserver('viewPortXChanged', functions.syncViewPort, this, this);
-        this.addObserver('viewPortYChanged', functions.syncViewPort, this, this);
-        this.addObserver('viewPortWidthChanged', functions.syncViewPort, this, this);
-        this.addObserver('viewPortHeightChanged', functions.syncViewPort, this, this);
+        this.addObserver('viewPortXChanged', functions.syncViewPort, this);
+        this.addObserver('viewPortYChanged', functions.syncViewPort, this);
+        this.addObserver('viewPortWidthChanged', functions.syncViewPort, this);
+        this.addObserver('viewPortHeightChanged', functions.syncViewPort, this);
       }
 
       InnerWebglRender.prototype.createAndCompileShader = function (type, source) {
@@ -4278,11 +4275,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       function syncTextRender () {
         var ctx = this._textCacheCtx;
         if (this.text === null || this.text.trim().length === 0) {
-          this.removeObserver('render', renderLabelText, this, this);
+          this.removeObserver('render', renderLabelText, this);
           ctx.render = null;
         } else {
-          if (this.getObserverByAllParams('render', renderLabelText, this, this) === null) {
-            this.addObserver('render', renderLabelText, this, this);
+          if (this.getObserverByAllParams('render', renderLabelText, this) === null) {
+            this.addObserver('render', renderLabelText, this);
           }
           if (ctx.render === null) {
             ctx.renderInvalid = true;
@@ -4468,33 +4465,33 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         functions.syncTextLayoutInvalid.call(this);
         functions.syncTextRenderInvalid.call(this);
 
-        this.addObserver('textChanged', this.dirty, this, this);
-        this.addObserver('fontSizeChanged', this.dirty, this, this);
-        this.addObserver('fontFamilyChanged', this.dirty, this, this);
-        this.addObserver('textColor', this.dirty, this, this);
-        this.addObserver('textHorAlignChanged', this.dirty, this, this);
-        this.addObserver('textVerAlignChanged', this.dirty, this, this);
-        this.addObserver('textLineHeightChanged', this.dirty, this, this);
-        this.addObserver('textLineNumChanged', this.dirty, this, this);
+        this.addObserver('textChanged', this.dirty, this);
+        this.addObserver('fontSizeChanged', this.dirty, this);
+        this.addObserver('fontFamilyChanged', this.dirty, this);
+        this.addObserver('textColor', this.dirty, this);
+        this.addObserver('textHorAlignChanged', this.dirty, this);
+        this.addObserver('textVerAlignChanged', this.dirty, this);
+        this.addObserver('textLineHeightChanged', this.dirty, this);
+        this.addObserver('textLineNumChanged', this.dirty, this);
 
-        this.addObserver('textChanged', functions.syncTextRender, this, this);
+        this.addObserver('textChanged', functions.syncTextRender, this);
 
-        this.addObserver('fontSizeChanged', functions.syncTextFontInvalid, this, this);
-        this.addObserver('fontFamilyChanged', functions.syncTextFontInvalid, this, this);
+        this.addObserver('fontSizeChanged', functions.syncTextFontInvalid, this);
+        this.addObserver('fontFamilyChanged', functions.syncTextFontInvalid, this);
 
-        this.addObserver('widthChanged', functions.syncTextLayoutInvalid, this, this);
-        this.addObserver('textChanged', functions.syncTextLayoutInvalid, this, this);
-        this.addObserver('fontSizeChanged', functions.syncTextLayoutInvalid, this, this);
-        this.addObserver('fontFamilyChanged', functions.syncTextFontInvalid, this, this);
+        this.addObserver('widthChanged', functions.syncTextLayoutInvalid, this);
+        this.addObserver('textChanged', functions.syncTextLayoutInvalid, this);
+        this.addObserver('fontSizeChanged', functions.syncTextLayoutInvalid, this);
+        this.addObserver('fontFamilyChanged', functions.syncTextFontInvalid, this);
 
-        this.addObserver('widthChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('textChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('fontSizeChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('fontFamilyChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('textColorChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('textHorAlignChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('textLineHeightChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('textLineNumChanged', functions.syncTextRenderInvalid, this, this);
+        this.addObserver('widthChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('textChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('fontSizeChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('fontFamilyChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('textColorChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('textHorAlignChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('textLineHeightChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('textLineNumChanged', functions.syncTextRenderInvalid, this);
       }
 
       return InnerUILabel;
@@ -4559,61 +4556,56 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
     var functions = (function () {
       function syncMapNodeContext () {
-        var mapNode = this._mapNode;
-        this.removeObserver('mapXChanged', syncMapX, this, this);
-        this.removeObserver('mapYChanged', syncMapX, this, this);
-        this.removeObserver('anchorXChanged', syncMapAnchorX, this, this);
-        this.removeObserver('anchorYChanged', syncMapAnchorY, this, this);
-        this.removeObserver('mapTileWidthChanged', syncMapWidth, this, this);
-        this.removeObserver('mapTileRowsChanged', syncMapWidth, this, this);
-        this.removeObserver('mapTileColsChanged', syncMapWidth, this, this);
-        this.removeObserver('mapTileHeightChanged', syncMapHeight, this, this);
-        this.removeObserver('mapTileRowsChanged', syncMapHeight, this, this);
-        this.removeObserver('mapTileColsChanged', syncMapHeight, this, this);
-        this.removeObserver('render', renderSquareMap, this, this);
-        this.removeObserver('render', renderDiamondMap, this, this);
-        mapNode.removeObserver('frame', syncMapNodeX, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeY, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeAnchorX, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeAnchorY, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeWidthSquare, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeWidthDiamond, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeHeightSquare, this, mapNode);
-        mapNode.removeObserver('frame', syncMapNodeHeightDiamond, this, mapNode);
+        this.removeObserver('mapXChanged', syncMapX, this);
+        this.removeObserver('mapYChanged', syncMapY, this);
+        this.removeObserver('anchorXChanged', syncMapAnchorX, this);
+        this.removeObserver('anchorYChanged', syncMapAnchorY, this);
+        this.removeObserver('mapTileWidthChanged', syncMapSquareWidth, this);
+        this.removeObserver('mapTileColsChanged', syncMapSquareWidth, this);
+        this.removeObserver('mapTileHeightChanged', syncMapSquareHeight, this);
+        this.removeObserver('mapTileRowsChanged', syncMapSquareHeight, this);
+        this.removeObserver('mapTileWidthChanged', syncMapDiamondWidth, this);
+        this.removeObserver('mapTileRowsChanged', syncMapDiamondWidth, this);
+        this.removeObserver('mapTileColsChanged', syncMapDiamondWidth, this);
+        this.removeObserver('mapTileHeightChanged', syncMapDiamondHeight, this);
+        this.removeObserver('mapTileRowsChanged', syncMapDiamondHeight, this);
+        this.removeObserver('mapTileColsChanged', syncMapDiamondHeight, this);
+        this.removeObserver('render', renderSquareMap, this);
+        this.removeObserver('render', renderDiamondMap, this);
         if (this.mapTileType === 'square') {
-          this.addObserver('mapXChanged', syncMapX, this, this);
-          this.addObserver('mapYChanged', syncMapY, this, this);
-          this.addObserver('anchorXChanged', syncMapAnchorX, this, this);
-          this.addObserver('anchorYChanged', syncMapAnchorY, this, this);
-          this.addObserver('mapTileWidthChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileColsChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileHeightChanged', syncMapHeight, this, this);
-          this.addObserver('mapTileRowsChanged', syncMapHeight, this, this);
-          this.addObserver('render', renderSquareMap, this, this);
-          mapNode.addObserver('frame', syncMapNodeX, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeY, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeAnchorX, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeAnchorY, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeWidthSquare, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeHeightSquare, this, mapNode);
+          this.addObserver('mapXChanged', syncMapX, this);
+          this.addObserver('mapYChanged', syncMapY, this);
+          this.addObserver('anchorXChanged', syncMapAnchorX, this);
+          this.addObserver('anchorYChanged', syncMapAnchorY, this);
+          this.addObserver('mapTileWidthChanged', syncMapSquareWidth, this);
+          this.addObserver('mapTileColsChanged', syncMapSquareWidth, this);
+          this.addObserver('mapTileHeightChanged', syncMapSquareHeight, this);
+          this.addObserver('mapTileRowsChanged', syncMapSquareHeight, this);
+          this.addObserver('render', renderSquareMap, this);
+          syncMapX.call(this);
+          syncMapY.call(this);
+          syncMapAnchorX.call(this);
+          syncMapAnchorY.call(this);
+          syncMapSquareWidth.call(this);
+          syncMapSquareHeight.call(this);
         } else if (this.mapTileType === 'diamond') {
-          this.addObserver('mapXChanged', syncMapX, this, this);
-          this.addObserver('mapYChanged', syncMapY, this, this);
-          this.addObserver('anchorXChanged', syncMapAnchorX, this, this);
-          this.addObserver('anchorYChanged', syncMapAnchorY, this, this);
-          this.addObserver('mapTileWidthChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileRowsChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileColsChanged', syncMapWidth, this, this);
-          this.addObserver('mapTileHeightChanged', syncMapHeight, this, this);
-          this.addObserver('mapTileRowsChanged', syncMapHeight, this, this);
-          this.addObserver('mapTileColsChanged', syncMapHeight, this, this);
-          this.addObserver('render', renderDiamondMap, this, this);
-          mapNode.addObserver('frame', syncMapNodeX, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeY, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeAnchorX, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeAnchorY, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeWidthDiamond, this, mapNode);
-          mapNode.addObserver('frame', syncMapNodeHeightDiamond, this, mapNode);
+          this.addObserver('mapXChanged', syncMapX, this);
+          this.addObserver('mapYChanged', syncMapY, this);
+          this.addObserver('anchorXChanged', syncMapAnchorX, this);
+          this.addObserver('anchorYChanged', syncMapAnchorY, this);
+          this.addObserver('mapTileWidthChanged', syncMapDiamondWidth, this);
+          this.addObserver('mapTileRowsChanged', syncMapDiamondWidth, this);
+          this.addObserver('mapTileColsChanged', syncMapDiamondWidth, this);
+          this.addObserver('mapTileHeightChanged', syncMapDiamondHeight, this);
+          this.addObserver('mapTileRowsChanged', syncMapDiamondHeight, this);
+          this.addObserver('mapTileColsChanged', syncMapDiamondHeight, this);
+          this.addObserver('render', renderDiamondMap, this);
+          syncMapX.call(this);
+          syncMapY.call(this);
+          syncMapAnchorX.call(this);
+          syncMapAnchorY.call(this);
+          syncMapDiamondWidth.call(this);
+          syncMapDiamondHeight.call(this);
         }
       }
 
@@ -4630,84 +4622,36 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         tileCtx.backInvalid = true;
       }
 
-      function syncMapNodeX () {
-        if (this._mapCacheCtx.mapXInvalid) {
-          this._mapNode.x = - this.mapX;
-          this._mapCacheCtx.mapXInvalid = false;
-        }
-      }
-
-      function syncMapNodeY () {
-        if (this._mapCacheCtx.mapYInvalid) {
-          this._mapNode.y = - this.mapY;
-          this._mapCacheCtx.mapYInvalid = false;
-        }
-      }
-
-      function syncMapNodeAnchorX () {
-        if (this._mapCacheCtx.mapAnchorXInvalid) {
-          this._mapNode.anchorX = this.anchorX;
-          this._mapCacheCtx.mapAnchorXInvalid = false;
-        }
-      }
-
-      function syncMapNodeAnchorY () {
-        if (this._mapCacheCtx.mapAnchorYInvalid) {
-          this._mapNode.anchorY = this.anchorY;
-          this._mapCacheCtx.mapAnchorYInvalid = false;
-        }
-      }
-
-      function syncMapNodeWidthSquare () {
-        if (this._mapCacheCtx.mapWidthInvalid) {
-          this._mapNode.width = this.mapTileWidth * this.mapTileCols;
-          this._mapCacheCtx.mapWidthInvalid = false;
-        }
-      }
-
-      function syncMapNodeWidthDiamond () {
-        if (this._mapCacheCtx.mapWidthInvalid) {
-          this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
-          this._mapCacheCtx.mapWidthInvalid = false;
-        }
-      }
-
-      function syncMapNodeHeightSquare () {
-        if (this._mapCacheCtx.mapHeightInvalid) {
-          this._mapNode.height = this.mapTileHeight * this.mapTileRows;
-          this._mapCacheCtx.mapHeightInvalid = false;
-        }
-      }
-
-      function syncMapNodeHeightDiamond () {
-        if (this._mapCacheCtx.mapHeightInvalid) {
-          this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
-          this._mapCacheCtx.mapHeightInvalid = false;
-        }
-      }
-
       function syncMapX () {
-        this._mapCacheCtx.mapXInvalid = true;
+        this._mapNode.x = - this.mapX;
       }
 
       function syncMapY () {
-        this._mapCacheCtx.mapYInvalid = true;
-      }
-
-      function syncMapWidth () {
-        this._mapCacheCtx.mapWidthInvalid = true;
-      }
-
-      function syncMapHeight () {
-        this._mapCacheCtx.mapHeightInvalid = true;
+        this._mapNode.y = - this.mapY;
       }
 
       function syncMapAnchorX () {
-        this._mapCacheCtx.mapAnchorXInvalid = true;
+        this._mapNode.anchorX = this.anchorX;
       }
 
       function syncMapAnchorY () {
-        this._mapCacheCtx.mapAnchorYInvalid = true;
+        this._mapNode.anchorY = this.anchorY;
+      }
+
+      function syncMapSquareWidth () {
+        this._mapNode.width = this.mapTileWidth * this.mapTileCols;
+      }
+
+      function syncMapSquareHeight () {
+        this._mapNode.height = this.mapTileHeight * this.mapTileRows;
+      }
+
+      function syncMapDiamondWidth () {
+        this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
+      }
+
+      function syncMapDiamondHeight () {
+        this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
       }
 
       function renderSquareMap (sender, render, dirtyZones) {
@@ -4928,7 +4872,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var newLeft = oldLeft;
         var newTop = oldTop;
         if (ctx.offsetInvalid) {
-          newLeft = ((sCol - sRow - 1) * halfTileWidth) + containerLeft;
+          newLeft = ((sCol - sRow - 1) * halfTileWidth) + this.mapTileRows * halfTileWidth;
           newTop = (sCol + sRow) * halfTileHeight;
           ctx.left = newLeft;
           ctx.top = newTop;
@@ -4940,8 +4884,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var newWidth = oldWidth;
         var newHeight = oldHeight;
         if (ctx.sizeInvalid) {
-          newWidth = (eCol - eRow + 1) * halfTileWidth - newLeft;
-          newHeight = (eCol + eRow + 2) * halfTileHeight - newTop;
+          newWidth = (eCol - eRow - sCol + sRow + 2) * halfTileWidth;
+          newHeight = (eCol + eRow - sCol - sRow + 2) * halfTileHeight;
           ctx.width = newWidth;
           ctx.height = newHeight;
           ctx.sizeInvalid = false;
@@ -4965,7 +4909,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           var mapID = this.getID();
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
             startTileY < newHeight;
-            startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
+            startTileY += halfTileHeight) {
             if (startRow < 0 || startCol >= colCount) {
               break;
             }
@@ -5020,6 +4964,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 }
               }
             }
+            if (startTileX === 0) {
+              startTileX = -halfTileWidth;
+              startRow += 1;
+            } else {
+              startTileX = 0;
+              startCol += 1;
+            }
           }
           ctx.foreRender = foreRender;
           ctx.backRender = backRender;
@@ -5055,7 +5006,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           var mapID = this.getID();
           for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight;
             startTileY < newHeight;
-            startTileX = (startTileX !== 0 ? 0 : -halfTileWidth), startTileY += halfTileHeight, startRow += 1, startCol += 1) {
+            startTileY += halfTileHeight) {
             if (startRow < 0 || startCol >= colCount) {
               break;
             }
@@ -5210,6 +5161,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 }
               }
             }
+            if (startTileX === 0) {
+              startTileX = -halfTileWidth;
+              startRow += 1;
+            } else {
+              startTileX = 0;
+              startCol += 1;
+            }
           }
         }
         ctx.backInvalid = false;
@@ -5264,12 +5222,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.addChildNode(this._mapNode);
 
         this._mapCacheCtx = {
-          mapXInvalid: true,
-          mapYInvalid: true,
-          mapWidthInvalid: true,
-          mapHeightInvalid: true,
-          mapAnchorXInvalid: true,
-          mapAnchorYInvalid: true,
           background: {
             needRender: false,
           },
@@ -5288,13 +5240,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           }
         };
 
+        doc.body.appendChild(this._mapCacheCtx.tile.foreRender.getCanvas());
+
         functions.syncMapNodeContext.call(this);
         functions.syncMapBackgroundRender.call(this);
         functions.syncMapTilesRender.call(this);
 
-        this.addObserver('mapTileTypeChanged', functions.syncMapNodeContext, this, this);
-        this.addObserver('mapBackgroundImageChanged', functions.syncMapBackgroundRender, this, this);
-        this.addObserver('mapTileDataChanged', functions.syncMapTilesRender, this, this);
+        this.addObserver('mapTileTypeChanged', functions.syncMapNodeContext, this);
+        this.addObserver('mapBackgroundImageChanged', functions.syncMapBackgroundRender, this);
+        this.addObserver('mapTileDataChanged', functions.syncMapTilesRender, this);
       }
 
       InnerGMap.prototype.addModel = function (model) {

@@ -17,11 +17,11 @@ export default (
       function syncTextRender () {
         var ctx = this._textCacheCtx;
         if (this.text === null || this.text.trim().length === 0) {
-          this.removeObserver('render', renderLabelText, this, this);
+          this.removeObserver('render', renderLabelText, this);
           ctx.render = null;
         } else {
-          if (this.getObserverByAllParams('render', renderLabelText, this, this) === null) {
-            this.addObserver('render', renderLabelText, this, this);
+          if (this.getObserverByAllParams('render', renderLabelText, this) === null) {
+            this.addObserver('render', renderLabelText, this);
           }
           if (ctx.render === null) {
             ctx.renderInvalid = true;
@@ -207,33 +207,33 @@ export default (
         functions.syncTextLayoutInvalid.call(this);
         functions.syncTextRenderInvalid.call(this);
 
-        this.addObserver('textChanged', this.dirty, this, this);
-        this.addObserver('fontSizeChanged', this.dirty, this, this);
-        this.addObserver('fontFamilyChanged', this.dirty, this, this);
-        this.addObserver('textColor', this.dirty, this, this);
-        this.addObserver('textHorAlignChanged', this.dirty, this, this);
-        this.addObserver('textVerAlignChanged', this.dirty, this, this);
-        this.addObserver('textLineHeightChanged', this.dirty, this, this);
-        this.addObserver('textLineNumChanged', this.dirty, this, this);
+        this.addObserver('textChanged', this.dirty, this);
+        this.addObserver('fontSizeChanged', this.dirty, this);
+        this.addObserver('fontFamilyChanged', this.dirty, this);
+        this.addObserver('textColor', this.dirty, this);
+        this.addObserver('textHorAlignChanged', this.dirty, this);
+        this.addObserver('textVerAlignChanged', this.dirty, this);
+        this.addObserver('textLineHeightChanged', this.dirty, this);
+        this.addObserver('textLineNumChanged', this.dirty, this);
 
-        this.addObserver('textChanged', functions.syncTextRender, this, this);
+        this.addObserver('textChanged', functions.syncTextRender, this);
 
-        this.addObserver('fontSizeChanged', functions.syncTextFontInvalid, this, this);
-        this.addObserver('fontFamilyChanged', functions.syncTextFontInvalid, this, this);
+        this.addObserver('fontSizeChanged', functions.syncTextFontInvalid, this);
+        this.addObserver('fontFamilyChanged', functions.syncTextFontInvalid, this);
 
-        this.addObserver('widthChanged', functions.syncTextLayoutInvalid, this, this);
-        this.addObserver('textChanged', functions.syncTextLayoutInvalid, this, this);
-        this.addObserver('fontSizeChanged', functions.syncTextLayoutInvalid, this, this);
-        this.addObserver('fontFamilyChanged', functions.syncTextFontInvalid, this, this);
+        this.addObserver('widthChanged', functions.syncTextLayoutInvalid, this);
+        this.addObserver('textChanged', functions.syncTextLayoutInvalid, this);
+        this.addObserver('fontSizeChanged', functions.syncTextLayoutInvalid, this);
+        this.addObserver('fontFamilyChanged', functions.syncTextFontInvalid, this);
 
-        this.addObserver('widthChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('textChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('fontSizeChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('fontFamilyChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('textColorChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('textHorAlignChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('textLineHeightChanged', functions.syncTextRenderInvalid, this, this);
-        this.addObserver('textLineNumChanged', functions.syncTextRenderInvalid, this, this);
+        this.addObserver('widthChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('textChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('fontSizeChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('fontFamilyChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('textColorChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('textHorAlignChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('textLineHeightChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('textLineNumChanged', functions.syncTextRenderInvalid, this);
       }
 
       return InnerUILabel;

@@ -14,10 +14,10 @@ export default (
       function syncClipRender () {
         if (this.clip) {
           if (this.getObserverByAllParams('render', this.startClip, this, this) === null) {
-            this.addObserver('render', this.startClip, this, this, 0);
+            this.addObserver('render', this.startClip, this, 0);
           }
         } else {
-          this.removeObserver('render', this.startClip, this, this);
+          this.removeObserver('render', this.startClip, this);
         }
       }
 
@@ -52,7 +52,7 @@ export default (
       InnerNode.prototype.defAnchorX = 0.5;
       InnerNode.prototype.defAnchorY = 0.5;
       InnerNode.prototype.defAlpha = 1;
-      InnerNode.prototype.defVisible = false;
+      InnerNode.prototype.defVisible = true;
       InnerNode.prototype.defCursor = 'default';
       InnerNode.prototype.defInteractive = false;
       InnerNode.prototype.defClip = false;
@@ -122,36 +122,36 @@ export default (
         functions.syncLocalTransform.call(this);
         functions.syncLocalZone.call(this);
 
-        this.addObserver('xChanged', this.dirty, this, this);
-        this.addObserver('yChanged', this.dirty, this, this);
-        this.addObserver('rotateZChanged', this.dirty, this, this);
-        this.addObserver('scaleXChanged', this.dirty, this, this);
-        this.addObserver('scaleYChanged', this.dirty, this, this);
-        this.addObserver('inclineXChanged', this.dirty, this, this);
-        this.addObserver('inclineYChanged', this.dirty, this, this);
-        this.addObserver('widthChanged', this.dirty, this, this);
-        this.addObserver('heightChanged', this.dirty, this, this);
-        this.addObserver('anchorXChanged', this.dirty, this, this);
-        this.addObserver('anchorYChanged', this.dirty, this, this);
-        this.addObserver('alphaChanged', this.dirty, this, this);
-        this.addObserver('visibleChanged', this.dirty, this, this);
+        this.addObserver('xChanged', this.dirty, this);
+        this.addObserver('yChanged', this.dirty, this);
+        this.addObserver('rotateZChanged', this.dirty, this);
+        this.addObserver('scaleXChanged', this.dirty, this);
+        this.addObserver('scaleYChanged', this.dirty, this);
+        this.addObserver('inclineXChanged', this.dirty, this);
+        this.addObserver('inclineYChanged', this.dirty, this);
+        this.addObserver('widthChanged', this.dirty, this);
+        this.addObserver('heightChanged', this.dirty, this);
+        this.addObserver('anchorXChanged', this.dirty, this);
+        this.addObserver('anchorYChanged', this.dirty, this);
+        this.addObserver('alphaChanged', this.dirty, this);
+        this.addObserver('visibleChanged', this.dirty, this);
 
-        this.addObserver('clipChanged', functions.syncClipRender, this, this);
+        this.addObserver('clipChanged', functions.syncClipRender, this);
 
-        this.addObserver('xChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('yChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('rotateZChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('scaleXChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('scaleYChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('inclineXChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('inclineYChanged', functions.syncLocalTransform, this, this);
-        this.addObserver('parentChanged', functions.syncLocalTransform, this, this);
+        this.addObserver('xChanged', functions.syncLocalTransform, this);
+        this.addObserver('yChanged', functions.syncLocalTransform, this);
+        this.addObserver('rotateZChanged', functions.syncLocalTransform, this);
+        this.addObserver('scaleXChanged', functions.syncLocalTransform, this);
+        this.addObserver('scaleYChanged', functions.syncLocalTransform, this);
+        this.addObserver('inclineXChanged', functions.syncLocalTransform, this);
+        this.addObserver('inclineYChanged', functions.syncLocalTransform, this);
+        this.addObserver('parentChanged', functions.syncLocalTransform, this);
 
 
-        this.addObserver('widthChanged', functions.syncLocalZone, this, this);
-        this.addObserver('heightChanged', functions.syncLocalZone, this, this);
-        this.addObserver('anchorXChanged', functions.syncLocalZone, this, this);
-        this.addObserver('anchorYChanged', functions.syncLocalZone, this, this);
+        this.addObserver('widthChanged', functions.syncLocalZone, this);
+        this.addObserver('heightChanged', functions.syncLocalZone, this);
+        this.addObserver('anchorXChanged', functions.syncLocalZone, this);
+        this.addObserver('anchorYChanged', functions.syncLocalZone, this);
       }
 
       InnerNode.prototype.getID = function () {
@@ -422,7 +422,7 @@ export default (
       }
 
       InnerNode.prototype._syncTransform = function (parentWTransform, parentWReverseTransform, renderZone, parentUpdateTransform) {
-        this.postNotification('frame', this);
+        this.postNotification('frame');
         var transformCtx = this._transformCtx;
         var zoneCtx = this._zoneCtx;
         var dirtyCtx = this._dirtyCtx;
@@ -477,7 +477,9 @@ export default (
 
       InnerNode.prototype.dirty = function () {
         var app = this.findApplication();
-        this._reportOriDirtyZone(app);
+        if (app !== null) {
+          this._reportOriDirtyZone(app);
+        }
       }
 
       InnerNode.prototype._reportOriDirtyZone = function (app) {
@@ -551,7 +553,7 @@ export default (
               render.globalAplha = alpha;
               // 绘制自身
               if (dirtyCtx.curReported) {
-                this.postNotification('render', this, [render, [this._zoneCtx.local]]);
+                this.postNotification('render', [render, [this._zoneCtx.local]]);
                 this._dispatchChildrenRender(render, alpha, renderZone, dirtyZones);
                 this.stopClip();
               } else {
@@ -568,7 +570,7 @@ export default (
                   }
                 }
                 if (crossDirtyZones.length > 0) {
-                  this.postNotification('render', this, [render, crossDirtyZones]);
+                  this.postNotification('render', [render, crossDirtyZones]);
                   this._dispatchChildrenRender(render, alpha, renderZone, dirtyZones);
                   this.stopClip();
                 }
@@ -584,7 +586,7 @@ export default (
                 render.globalAplha = alpha;
                 // 绘制自身
                 if (dirtyCtx.curReported) {
-                  this.postNotification('render', this, [render, [this._zoneCtx.local]]);
+                  this.postNotification('render', [render, [this._zoneCtx.local]]);
                 } else {
                   var worldZone = this._zoneCtx.world;
                   var crossDirtyZones = [];
@@ -599,7 +601,7 @@ export default (
                     }
                   }
                   if (crossDirtyZones.length > 0) {
-                    this.postNotification('render', this, [render, crossDirtyZones]);
+                    this.postNotification('render', [render, crossDirtyZones]);
                   }
                 }
               }
@@ -655,13 +657,13 @@ export default (
 
           if (targetInChildren) {
             if (e.bubble) {
-              this.postNotification(name, this, [e]);
+              this.postNotification(name, [e]);
             }
             return true;
           } else {
             if (result) {
               if (this.interactive) {
-                this.postNotification(name, this, [e]);
+                this.postNotification(name, [e]);
               }
               return true;
             } else {

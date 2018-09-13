@@ -15,11 +15,11 @@ export default (
       function syncBackgroundBorderRender() {
         var ctx = this._backgroundBorderCacheCtx;
         if (this.backgroundColor === null && (this.borderColor === null || this.borderWidth <= 0)) {
-          this.removeObserver('render', renderBackgroundAndBorder, this, this);
+          this.removeObserver('render', renderBackgroundAndBorder, this);
           ctx.render = null;
         } else {
           if (this.getObserverByAllParams('render', renderBackgroundAndBorder, this, this) === null) {
-            this.addObserver('render', renderBackgroundAndBorder, this, this, -Infinity);
+            this.addObserver('render', renderBackgroundAndBorder, this, -Infinity);
           }
           if (ctx.render === null) {
             ctx.renderInvalid = true;
@@ -152,21 +152,21 @@ export default (
         functions.syncBackgroundBorderRender.call(this);
         functions.syncBackgroundBorderRenderInvalid.call(this);
 
-        this.addObserver('backgroundColorChanged', this.dirty, this, this);
-        this.addObserver('borderWidthChanged', this.dirty, this, this);
-        this.addObserver('borderColorChanged', this.dirty, this, this);
-        this.addObserver('borderRadiusChanged', this.dirty, this, this);
+        this.addObserver('backgroundColorChanged', this.dirty, this);
+        this.addObserver('borderWidthChanged', this.dirty, this);
+        this.addObserver('borderColorChanged', this.dirty, this);
+        this.addObserver('borderRadiusChanged', this.dirty, this);
 
-        this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRender, this, this);
-        this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRender, this, this);
-        this.addObserver('borderColorChanged', functions.syncBackgroundBorderRender, this, this);
+        this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRender, this);
+        this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRender, this);
+        this.addObserver('borderColorChanged', functions.syncBackgroundBorderRender, this);
 
-        this.addObserver('widthChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
-        this.addObserver('heightChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
-        this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
-        this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
-        this.addObserver('borderColorChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
-        this.addObserver('borderRadiusChanged', functions.syncBackgroundBorderRenderInvalid, this, this);
+        this.addObserver('widthChanged', functions.syncBackgroundBorderRenderInvalid, this);
+        this.addObserver('heightChanged', functions.syncBackgroundBorderRenderInvalid, this);
+        this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRenderInvalid, this);
+        this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRenderInvalid, this);
+        this.addObserver('borderColorChanged', functions.syncBackgroundBorderRenderInvalid, this);
+        this.addObserver('borderRadiusChanged', functions.syncBackgroundBorderRenderInvalid, this);
       }
 
       InnerUIView.prototype.startClip = function (render) {
@@ -186,5 +186,4 @@ export default (
     return UIView;
   }
 )();
-
 
