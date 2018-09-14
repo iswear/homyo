@@ -8,8 +8,7 @@ import SchedulerAnimation from '../core/animation/scheduler-animation';
 import PropertyAnimation from '../core/animation/property-animation';
 import QueueAnimation from '../core/animation/queue-animation';
 
-export default (
-  function () {
+export default (function () {
     var rootNodeProps = [
       'rotateZ', 'scaleX', 'scaleY', 'inclineX', 'inclineY', 'alpha', 'visible', 'img'
     ];

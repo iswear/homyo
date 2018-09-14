@@ -7,8 +7,7 @@ import LangUtil from '../utils/lang-util';
 import Node from '../core/node';
 import GTexture from './g-texture';
 
-export default (
-  function () {
+export default (function () {
     var GTextureNode = (function () {
       var InnerGTextureNode = LangUtil.extend(Node);
 

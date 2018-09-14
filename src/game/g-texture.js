@@ -6,8 +6,7 @@
 import LangUtil from '../utils/lang-util';
 import Node from '../core/node';
 
-export default (
-  function () {
+export default (function () {
     var functions = (function () {
       function syncImageRender () {
         this.removeObserver('render', renderImage, this);

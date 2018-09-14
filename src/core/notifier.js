@@ -5,8 +5,7 @@
  */
 import LangUtil from '../utils/lang-util';
 
-export default (
-  function () {
+export default (function () {
     var functions = (function () {
       function notifyPropertyGetter (name) {
         return function () {

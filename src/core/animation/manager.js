@@ -7,8 +7,7 @@ import LangUtil from '../../utils/lang-util';
 import Notifier from '../notifier';
 import Binder from './binder';
 
-export default (
-  function () {
+export default (function () {
     var Manager = (function () {
       var InnerManager = LangUtil.extend(Notifier);
 

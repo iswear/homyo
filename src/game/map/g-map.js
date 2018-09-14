@@ -8,8 +8,7 @@ import LangUtil from '../../utils/lang-util';
 import Node from '../../core/node';
 import CanvasRender from "../../core/render/canvas/canvas-render";
 
-export default (
-  function () {
+export default (function () {
     var doc = document;
 
     var functions = (function () {

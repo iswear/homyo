@@ -14,8 +14,7 @@ import CanvasRender from './render/canvas/canvas-render';
 import AnimationManager from './animation/manager';
 import FileLoader from './io/file-loader';
 
-export default (
-  function () {
+export default (function () {
     var win = window;
     var docEle = document.documentElement;
 

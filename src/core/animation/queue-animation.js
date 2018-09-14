@@ -7,8 +7,7 @@ import LangUtil from '../../utils/lang-util';
 import BaseAnimation from './base-animation';
 import Binder from './binder';
 
-export default (
-  function () {
+export default (function () {
     var QueueAnimation = (function () {
       var InnerQueueAnimation = LangUtil.extend(BaseAnimation);
 

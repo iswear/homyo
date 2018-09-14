@@ -6,8 +6,7 @@
 import LangUtil from '../../utils/lang-util';
 import BaseAnimation from './base-animation';
 
-export default (
-  function () {
+export default (function () {
     var PropertyAnimation = (function () {
       var InnerPropertyAnimation = LangUtil.extend(BaseAnimation);
 

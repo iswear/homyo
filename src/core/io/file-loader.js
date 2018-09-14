@@ -6,8 +6,7 @@
 import LangUtil from '../../utils/lang-util';
 import Notifier from '../notifier';
 
-export default (
-  function () {
+export default (function () {
     var doc = document;
 
     var FileLoader = (function () {

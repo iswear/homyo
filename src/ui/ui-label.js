@@ -9,8 +9,7 @@ import GeometryUtil from '../utils/geometry-util';
 import UIView from './ui-view';
 import CanvasRender from '../core/render/canvas/canvas-render';
 
-export default (
-  function () {
+export default (function () {
     var doc = document;
 
     var functions = (function () {

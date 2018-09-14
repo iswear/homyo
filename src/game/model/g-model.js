@@ -8,8 +8,7 @@ import Notifier from '../../core/notifier';
 import GUtil from '../g-util';
 import GNode from '../g-texture-node';
 
-export default (
-  function () {
+export default (function () {
     var functions = (function () {
       function createNode (conf) {
         var node = new GNode(conf.node);

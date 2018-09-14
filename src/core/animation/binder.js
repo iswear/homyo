@@ -15,8 +15,7 @@ import Notifier from '../notifier';
  *    target:
  * }
  */
-export default (
-  function () {
+export default (function () {
     var Binder = (function () {
       var InnerBinder = LangUtil.extend(Notifier);
 

@@ -6,8 +6,7 @@
 import LangUtil from '../../../utils/lang-util';
 import Notifier from '../../notifier';
 
-export default (
-  function () {
+export default (function () {
     var functions = (function () {
       function contextPropertyGetter (name) {
         return function () {

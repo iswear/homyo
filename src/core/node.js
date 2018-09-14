@@ -8,8 +8,7 @@ import Notifier from './notifier';
 import MatrixUtil from '../utils/matrix-util';
 import GeometryUtil from '../utils/geometry-util';
 
-export default (
-  function () {
+export default (function () {
     var functions = (function () {
       function syncClipRender () {
         if (this.clip) {
