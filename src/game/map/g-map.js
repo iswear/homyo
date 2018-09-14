@@ -287,8 +287,10 @@ export default (
             clipTarBottom = clipHeight + clipTarTop;
             foreRender.drawImageExt(backRender.getCanvas(), newLeft > oldLeft ? (newLeft - oldLeft) : 0, newTop > oldTop ? (newTop - oldTop) : 0, clipWidth, clipHeight,
               clipTarLeft, clipTarTop, clipWidth, clipHeight);
+            /* test */
             foreRender.strokeStyle = '#00f';
             foreRender.strokeRect(clipTarLeft, clipTarTop, clipWidth, clipHeight);
+            /* test */
           }
           var application = this.findApplication();
           var tileData = this.mapTileData;
@@ -475,6 +477,10 @@ export default (
             clipTarBottom = clipHeight + clipTarTop;
             foreRender.drawImageExt(backRender.getCanvas(), newLeft > oldLeft ? (newLeft - oldLeft) : 0, newTop > oldTop ? (newTop - oldTop) : 0, clipWidth, clipHeight,
               clipTarLeft, clipTarTop, clipWidth, clipHeight);
+            /* test */
+            foreRender.strokeStyle = '#00f';
+            foreRender.strokeRect(clipTarLeft, clipTarTop, clipWidth, clipHeight);
+            /* test */
           }
           var application = this.findApplication();
           var tileData = this.mapTileData;
