@@ -200,8 +200,7 @@ export default (
         }
       }
 
-      function renderSquareMapCache (sender, render, dirtyZones) {
-        var ctx = this._mapCacheCtx.tile;
+      function renderSquareMapCache (ctx) {
         var zone = this.getLocalZone();
         var mapNodeZone = this._mapNode.getLocalZone();
 
@@ -330,8 +329,7 @@ export default (
         ctx.foreInvalid = false;
       }
 
-      function renderDiamondMapCache (sender, render, dirtyZones) {
-        var ctx = this._mapCacheCtx.tile;
+      function renderDiamondMapCache (ctx) {
         var zone = this.getLocalZone();
         var mapNodeZone = this._mapNode.getLocalZone();
 
