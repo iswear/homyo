@@ -260,8 +260,7 @@
  */
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var functions = (function () {
       function notifyPropertyGetter (name) {
         return function () {
@@ -459,8 +458,7 @@
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var functions = (function () {
       function syncClipRender () {
         if (this.clip) {
@@ -1152,8 +1150,7 @@
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var functions = (function () {
       function contextPropertyGetter (name) {
         return function () {
@@ -1535,8 +1532,7 @@
  *    target:
  * }
  */
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var Binder = (function () {
       var InnerBinder = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__notifier__["a" /* default */]);
 
@@ -1858,8 +1854,7 @@
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var Manager = (function () {
       var InnerManager = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__notifier__["a" /* default */]);
 
@@ -1960,8 +1955,7 @@
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var doc = document;
 
     var FileLoader = (function () {
@@ -2278,8 +2272,7 @@
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var QueueAnimation = (function () {
       var InnerQueueAnimation = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__base_animation__["a" /* default */]);
 
@@ -2353,8 +2346,7 @@
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var SchedulerAnimation = (function () {
       var InnerSchedulerAnimation = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__base_animation__["a" /* default */]);
 
@@ -2426,8 +2418,7 @@
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var PropertyAnimation = (function () {
       var InnerPropertyAnimation = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__base_animation__["a" /* default */]);
 
@@ -2494,8 +2485,7 @@
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var doc = document;
 
     var functions = (function () {
@@ -2918,8 +2908,7 @@
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var rootNodeProps = [
       'rotateZ', 'scaleX', 'scaleY', 'inclineX', 'inclineY', 'alpha', 'visible', 'img'
     ];
@@ -3125,8 +3114,7 @@
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var GTextureNode = (function () {
       var InnerGTextureNode = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__core_node__["a" /* default */]);
 
@@ -3166,8 +3154,7 @@
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var functions = (function () {
       function syncImageRender () {
         this.removeObserver('render', renderImage, this);
@@ -3616,8 +3603,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var win = window;
     var docEle = document.documentElement;
 
@@ -4219,8 +4205,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var functions = (function () {
       function syncViewPort () {
         this.$context.viewport(this.viewPortX, this.viewPortY, this.viewPortWidth, this.viewPortHeight)
@@ -4295,8 +4280,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var doc = document;
 
     var functions = (function () {
@@ -4544,8 +4528,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var GScene = (function () {
       var InnerGScene = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__core_node__["a" /* default */]);
 
@@ -4578,8 +4561,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var doc = document;
 
     var functions = (function () {
@@ -5338,8 +5320,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((
-  function () {
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
     var functions = (function () {
       function createNode (conf) {
         var node = new __WEBPACK_IMPORTED_MODULE_3__g_texture_node__["a" /* default */](conf.node);
