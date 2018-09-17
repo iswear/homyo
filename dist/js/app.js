@@ -3410,7 +3410,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   // });
 
   var application = new Application({
-    canvas: document.getElementById('main'),
+    canvas: document.getElementById('app'),
     root: root
   });
 

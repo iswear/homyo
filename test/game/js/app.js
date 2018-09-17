@@ -1,4 +1,4 @@
-import homyo from '../../main'
+import homyo from '../../../main'
 
 (function () {
   var Application = homyo.core.Application;
@@ -120,7 +120,7 @@ import homyo from '../../main'
   // });
 
   var application = new Application({
-    canvas: document.getElementById('main'),
+    canvas: document.getElementById('app'),
     root: root
   });
 

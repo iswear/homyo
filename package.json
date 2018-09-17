@@ -2,7 +2,7 @@
   "name": "homyo-game",
   "version": "1.0.0",
   "description": "canvas html5",
-  "main": "main.js",
+  "main": "./lib/main.js",
   "scripts": {
     "test": "webpack --env.profile=test",
     "build": "webpack --env.profile=build"
