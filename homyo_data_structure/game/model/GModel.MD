@@ -62,17 +62,18 @@ public class GActionPropertyFrameConfig {
     },
     actionGroups: {
         id: 'action_group_id_1',
-        name: '跑步',
+        name: 'action_run',
         actions: [
             {
                 id: 'action_id_1',
-                name: 'action_north',
-                property: 'x',
+                name: 'action_run_north',
+                property: 'rotateZ',
                 range: [0, 100],
-                frames: [
-                    'x': [{}, {}],
-                    'y': [{}, {}]
-                ]
+                frames: {
+                    'node_id_1': {
+                        'x': 
+                    }
+                }
             }
         ]
     }
