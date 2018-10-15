@@ -4,6 +4,7 @@
 public class GNodeConfig extends NodeConfig {
     private ImageConfig img;
     private GTextureConfig texture;
+    private List<GNodeConfig> children;
 }
 ```
 ## 二、依赖类

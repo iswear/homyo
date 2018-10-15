@@ -2,13 +2,7 @@
 ## 一、数据结构
 ```java
 public class NodeConfig {
-    /**
-     * x坐标
-     */
     private Integer x;
-    /**
-     * y坐标
-     */
     private Integer y;
     private Double rotateZ;
     private Double scaleX;
@@ -19,7 +13,7 @@ public class NodeConfig {
     private Integer height;
     private Double anchorX;
     private Double anchorY;
-    private Double alpha;NODE
+    private Double alpha;
     private Boolean visible;
     private Boolean interactive;
 }
