@@ -68,7 +68,6 @@ export default (function () {
       function loadImageFinished (url, image, success, async) {
         var ctx = this._imageCtx;
         if (ctx.invalid && success) {
-          console.log('bb');
           if (LangUtil.isString(this.image)) {
             this.width = image.width;
             this.height = image.height;
@@ -87,7 +86,6 @@ export default (function () {
           ctx.invalid = false;
         }
         if (async) {
-          console.log('aa');
           this.dirty();
         }
       }

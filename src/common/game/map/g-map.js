@@ -297,7 +297,6 @@ export default (function() {
                 var tileImageClip = this.mapTileImageClipIndex;
                 var mapID = this.getID();
                 for (var row = sRow, tileY = 0; row < rowCount && tileY < newHeight; row += 1, tileY += tileHeight) {
-                    console.log(row, rowCount);
                     if (row < 0) {
                         continue;
                     }

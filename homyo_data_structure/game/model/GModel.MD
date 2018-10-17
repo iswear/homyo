@@ -24,9 +24,14 @@ public class GActionGroupConfig {
 public class GActionConfig {
     private String id;
     private String name;
-    private String property;
-    private Object[] range;
+    private GActionConditionConfig condition;
     private Map<String, Map<String, List<GActionFrameConfig>>> frames;
+}
+
+public class GActionConditionConfig {
+    private String property;
+    private Object min;
+    private Object max;
 }
 
 public class GActionPropertyFrameConfig {
