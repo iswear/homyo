@@ -11,7 +11,23 @@ export default (function () {
     var doc = document;
 
     var functions = (function () {
-      function onPropertyChanged () {
+      function onPropertyChanged (name, newVal, oldVal) {
+
+      }
+
+      function onBackgroundColorChanged () {
+
+      }
+
+      function onBorderWidthChanged () {
+
+      }
+
+      function onBorderColorChanged () {
+
+      }
+
+      function onBorderRadiusChanged () {
 
       }
 
