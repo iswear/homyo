@@ -6,29 +6,6 @@
 import LangUtil from '../utils/lang-util';
 
 export default (function () {
-    var functions = (function () {
-      function notifyPropertyGetter (name) {
-        return function () {
-          return this.$properties[name];
-        }
-      }
-
-      function notifyPropertySetter (name, eventName) {
-        return function (val) {
-          var oldVal = this.$properties[name];
-          if (oldVal !== val) {
-            this.$properties[name] = val;
-            this.postNotification(eventName, [val, oldVal]);
-          }
-        }
-      }
-
-      return {
-        notifyPropertyGetter: notifyPropertyGetter,
-        notifyPropertySetter: notifyPropertySetter
-      }
-    })();
-
     var Notifier = (function () {
       var InnerNotifier = LangUtil.extend(null);
 
@@ -141,8 +118,16 @@ export default (function () {
         Object.defineProperty(this, name, {
           configurable: false,
           enumerable: false,
-          get: functions.notifyPropertyGetter(name),
-          set: functions.notifyPropertySetter(name, name + 'Changed')
+          get: function () {
+            return this.$properties[name];
+          },
+          set: function (val) {
+            var oldVal = this.$properties[name];
+            if (oldVal !== val) {
+              this.$properties[name] = val;
+              this.postNotification('propertyChanged', [name, val, oldVal]);
+            }
+          }
         });
         if (!LangUtil.isUndefined(value)) {
           this[name] = value;

@@ -8,12 +8,26 @@ import Notifier from '../../notifier';
 
 export default (function () {
     var functions = (function () {
-      function syncViewPort () {
+      function onPropertyChanged (name, newVal, oldVal) {
+        if (onEventsMap.hasOwnProperty(name)) {
+          onEventsMap[name].call(this, newVal, oldVal)
+        }
+      }
+      
+      function onViewPortChanged () {
         this.$context.viewport(this.viewPortX, this.viewPortY, this.viewPortWidth, this.viewPortHeight)
       }
       
+      var onEventsMap = {
+        viewPortX: onViewPortChanged,
+        viewPortY: onViewPortChanged,
+        viewPortWidth: onViewPortChanged,
+        viewPortHeight: onViewPortChanged
+      }
+
       return {
-        syncViewPort: syncViewPort
+        onPropertyChanged: onPropertyChanged,
+        onViewPortChanged: onViewPortChanged
       }
     })();
 
@@ -25,17 +39,14 @@ export default (function () {
         this.$canvas = LangUtil.checkAndGet(conf.canvas, null);
         this.$context = this.$canvas.getContext('webgl') || this.$canvas.getContext('experimental-webgl');
 
-        this.defineNotifyProperty('viewPortX', LangUtil.checkAndGet(conf.x, 0));
-        this.defineNotifyProperty('viewPortY', LangUtil.checkAndGet(conf.y, 0));
-        this.defineNotifyProperty('viewPortWidth', LangUtil.checkAndGet(conf.width, this.$canvas.width));
-        this.defineNotifyProperty('viewPortHeight', LangUtil.checkAndGet(conf.height, this.$canvas.height));
+        this.viewPortX = LangUtil.checkAndGet(conf.x, 0);
+        this.viewPortY = LangUtil.checkAndGet(conf.y, 0);
+        this.viewPortWidth = LangUtil.checkAndGet(conf.width, this.$canvas.width);
+        this.viewPortHeight = LangUtil.checkAndGet(conf.height, this.$canvas.height);
 
-        functions.syncViewPort.call(this);
+        functions.onViewPortChanged.call(this);
 
-        this.addObserver('viewPortXChanged', functions.syncViewPort, this);
-        this.addObserver('viewPortYChanged', functions.syncViewPort, this);
-        this.addObserver('viewPortWidthChanged', functions.syncViewPort, this);
-        this.addObserver('viewPortHeightChanged', functions.syncViewPort, this);
+        this.addObserver('propertyChanged', functions.onPropertyChanged, this);
       }
 
       InnerWebglRender.prototype.createAndCompileShader = function (type, source) {

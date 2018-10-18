@@ -270,11 +270,20 @@ export default (function () {
         }
       }
 
-      function syncTransform () {
-        this._transformCtx.invalid = true;
+      function onLoadImageFinished (url, image, success) {
+        if (success) {
+          var callbacks = this._loaderCtx.callbacks[url];
+          if (callbacks) {
+            for (var callbackId in callbacks) {
+              var callback = callbacks[callbackId];
+              callback.callbackFn.call(callback.callbackTarget, url, image, success, true);
+            }
+            delete this._loaderCtx.callbacks[url];
+          }
+        }
       }
 
-      function syncRenderSize () {
+      function onRenderSizeChanged () {
         var render = this._render;
         var renderZone = this._renderZone;
         var transformCtx = this._transformCtx;
@@ -320,24 +329,26 @@ export default (function () {
         }
       }
 
-      function loadImageFinished (url, image, success) {
-        if (success) {
-          var callbacks = this._loaderCtx.callbacks[url];
-          if (callbacks) {
-            for (var callbackId in callbacks) {
-              var callback = callbacks[callbackId];
-              callback.callbackFn.call(callback.callbackTarget, url, image, success, true);
-            }
-            delete this._loaderCtx.callbacks[url];
-          }
+      function onPropertyChanged(name, newVal, oldVal) {
+        if (onEventsMap.hasOwnProperty(name)) {
+          onEventsMap[name].call(this, newVal, oldVal);
         }
+      }
+
+      function onTransformInvalid() {
+        this._transformCtx.invalid = true;
+      }
+
+      var onEventsMap = {
+        scaleMode: onTransformInvalid
       }
 
       return {
         initEvent: initEvent,
-        syncTransform: syncTransform,
-        syncRenderSize: syncRenderSize,
-        loadImageFinished: loadImageFinished
+        onLoadImageFinished: onLoadImageFinished,
+        onPropertyChanged: onPropertyChanged,
+        onScaleModeChanged: onScaleModeChanged,
+        onRenderSizeChanged: onRenderSizeChanged,
       }
     })();
 
@@ -380,7 +391,7 @@ export default (function () {
       InnerApplication.prototype.defScaleMode = 0;
       InnerApplication.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('scaleMode', LangUtil.checkAndGet(conf.scaleMode, this.defScaleMode));
+        this.scaleMode = LangUtil.checkAndGet(conf.scaleMode, this.defScaleMode);
 
         this._root = LangUtil.checkAndGet(conf.root, null);
         this._root.application = this;
@@ -419,10 +430,10 @@ export default (function () {
         };
 
         functions.initEvent.call(this);
-        functions.syncTransform.call(this);
-        functions.syncRenderSize.call(this);
+        functions.onScaleModeChanged.call(this);
+        functions.onRenderSizeChanged.call(this);
 
-        this.addObserver('scaleModeChanged', functions.syncTransform, this);
+        this.addObserver('propertyChanged', functions.onPropertyChanged, this);
       }
 
       InnerApplication.prototype.runNodeAnimation = function (node, animation, fn, target, loop) {
@@ -438,7 +449,7 @@ export default (function () {
       }
 
       InnerApplication.prototype.loadImage = function (url, callbackId, callbackFn, callbackTarget) {
-        var image = this._loaderCtx.loader.loadImageAsync(url, functions.loadImageFinished, this, true); 
+        var image = this._loaderCtx.loader.loadImageAsync(url, functions.onLoadImageFinished, this, true); 
         if (image === undefined) {
           if (callbackId !== null && callbackFn !== null) {
             var imageCallBacks = this._loaderCtx.callbacks[url];
@@ -517,7 +528,7 @@ export default (function () {
         // 每半秒钟检测是否需要变换
         if (this._preCheckTime > 500) {
           this._preCheckTime = 0;
-          functions.syncRenderSize.call(this);
+          functions.onRenderSizeChanged.call(this);
         } else {
           this._preCheckTime += deltaTime;
         }

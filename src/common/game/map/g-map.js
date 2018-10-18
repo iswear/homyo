@@ -665,7 +665,7 @@ export default (function() {
         }
 
         return {
-            syncMapContext: syncMapContext
+            onPropertyChanged: onPropertyChanged
         };
     })();
 
@@ -683,16 +683,16 @@ export default (function() {
         InnerGMap.prototype.defMapTileCols = 30;
         InnerGMap.prototype.init = function(conf) {
             this.super('init', [conf]);
-            this.defineNotifyProperty('mapX', LangUtil.checkAndGet(conf.mapX, 0));
-            this.defineNotifyProperty('mapY', LangUtil.checkAndGet(conf.mapY, 0));
-            this.defineNotifyProperty('mapTileType', LangUtil.checkAndGet(conf.mapTileType, this.defMapTileType));
-            this.defineNotifyProperty('mapTileWidth', LangUtil.checkAndGet(conf.mapTileWidth, this.defMapTileWidth));
-            this.defineNotifyProperty('mapTileHeight', LangUtil.checkAndGet(conf.mapTileHeight, this.defMapTileHeight));
-            this.defineNotifyProperty('mapTileImageIndex', LangUtil.checkAndGet(conf.mapTileImageIndex, {}));
-            this.defineNotifyProperty('mapTileImageClipIndex', LangUtil.checkAndGet(conf.mapTileImageClipIndex, {}));
-            this.defineNotifyProperty('mapTileRows', LangUtil.checkAndGet(conf.mapTileRows, this.defMapTileRows));
-            this.defineNotifyProperty('mapTileCols', LangUtil.checkAndGet(conf.mapTileCols, this.defMapTileCols));
-            this.defineNotifyProperty('mapTileData', LangUtil.checkAndGet(conf.mapTileData, []));
+            this.mapTileType = LangUtil.checkAndGet(conf.mapTileType, this.defMapTileType);
+            this.mapX = LangUtil.checkAndGet(conf.mapX, 0);
+            this.mapY = LangUtil.checkAndGet(conf.mapY, 0);
+            this.mapTileWidth = LangUtil.checkAndGet(conf.mapTileWidth, this.defMapTileWidth);
+            this.mapTileHeight = LangUtil.checkAndGet(conf.mapTileHeight, this.defMapTileHeight);
+            this.mapTileImageIndex = LangUtil.checkAndGet(conf.mapTileImageIndex, {});
+            this.mapTileImageClipIndex = LangUtil.checkAndGet(conf.mapTileImageClipIndex, {});
+            this.mapTileRows = LangUtil.checkAndGet(conf.mapTileRows, this.defMapTileRows);
+            this.mapTileCols = LangUtil.checkAndGet(conf.mapTileCols, this.defMapTileCols);
+            this.mapTileData = LangUtil.checkAndGet(conf.mapTileData, []);
 
             this._mapNode = new Node({
                 rotateZ: 0
@@ -713,15 +713,15 @@ export default (function() {
                 }
             };
 
-            this._mapCacheCtx.tile.foreRender.globalAlpha = 1;
-            this._mapCacheCtx.tile.backRender.globalAlpha = 1;
+            // this._mapCacheCtx.tile.foreRender.globalAlpha = 1;
+            // this._mapCacheCtx.tile.backRender.globalAlpha = 1;
 
-            doc.body.appendChild(this._mapCacheCtx.tile.foreRender.getCanvas());
-            doc.body.appendChild(this._mapCacheCtx.tile.backRender.getCanvas());
+            // doc.body.appendChild(this._mapCacheCtx.tile.foreRender.getCanvas());
+            // doc.body.appendChild(this._mapCacheCtx.tile.backRender.getCanvas());
 
             functions.syncMapContext.call(this);
 
-            this.addObserver('mapTileTypeChanged', functions.syncMapContext, this);
+            this.addObserver('propertyChanged', functions.onPropertyChanged, this);
         }
 
         InnerGMap.prototype.addModel = function(model) {

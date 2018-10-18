@@ -1,0 +1,19 @@
+<html>
+  <head>
+
+  </head>
+  <body>
+    <script>
+      var a = '(function() { return function() { alert(this.x) } })()';
+      for (var i = 0; i < 1000; ++i) {
+        var start = (new Date()).getTime();
+        var b = eval(a);
+        console.log("time:" + ((new Date()).getTime() - start));
+      }
+      var c = {
+        x: 'feafe'
+      };
+      b.call(c);
+    </script>
+  </body>
+</html>

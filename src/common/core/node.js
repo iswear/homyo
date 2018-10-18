@@ -10,28 +10,56 @@ import GeometryUtil from '../utils/geometry-util';
 
 export default (function () {
     var functions = (function () {
-      function syncClipRender () {
-        if (this.clip) {
-          if (this.getObserverByAllParams('render', this.startClip, this, this) === null) {
-            this.addObserver('render', this.startClip, this, 0);
-          }
-        } else {
-          this.removeObserver('render', this.startClip, this);
+      function onPropertyChanged (name, newVal, oldVal) {
+        if (onEventsMap.hasOwnProperty(name)) {
+          onEventsMap[name].call(this, newVal, oldVal);
         }
       }
 
-      function syncLocalTransform () {
-        this._transformCtx.localInvalid = true;
+      function onRenderChanged (newVal, oldVal) {
+        this.removeObserver('render', this.startClip, this);
+        if (this.clip) {
+          this.addObserver('render', this.startClip, this, 0);
+        }
+        this.dirty();
       }
-      
-      function syncLocalZone () {
+
+      function onLocalTransformChanged () {
+        this._transformCtx.localInvalid = true;
+        this.dirty();
+      }
+
+      function onLocalZoneChanged () {
         this._zoneCtx.localInvalid = true;
+        this.dirty();
+      }
+
+      function onDirty (newVal, oldVal) {
+        this.dirty();
+      }
+
+      var onEventsMap = {
+        x: onLocalTransformChanged,
+        y: onLocalTransformChanged,
+        anchorX: onLocalZoneChanged,
+        anchorY: onLocalZoneChanged,
+        scaleX: onLocalTransformChanged,
+        scaleY: onLocalTransformChanged,
+        shearX: onLocalTransformChanged,
+        shearY: onLocalTransformChanged,
+        width: onLocalZoneChanged,
+        height: onLocalZoneChanged,
+        rotateZ: onLocalTransformChanged,
+        alpha: onDirty,
+        visible: onDirty,
+        clip: onRenderChanged
       }
       
       return {
-        syncClipRender: syncClipRender,
-        syncLocalTransform: syncLocalTransform,
-        syncLocalZone: syncLocalZone
+        onPropertyChanged: onPropertyChanged,
+        onRenderChanged: onRenderChanged,
+        onLocalTransformChanged: onLocalTransformChanged,
+        onLocalZoneChanged: onLocalZoneChanged
       }
     })();
 
@@ -44,8 +72,8 @@ export default (function () {
       InnerNode.prototype.defRotateZ = 0;
       InnerNode.prototype.defScaleX = 1;
       InnerNode.prototype.defScaleY = 1;
-      InnerNode.prototype.defInclineX = 0;
-      InnerNode.prototype.defInclineY = 0;
+      InnerNode.prototype.defShearX = 0;
+      InnerNode.prototype.defShearY = 0;
       InnerNode.prototype.defWidth = 0;
       InnerNode.prototype.defHeight = 0;
       InnerNode.prototype.defAnchorX = 0.5;
@@ -59,27 +87,28 @@ export default (function () {
 
       InnerNode.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('x', LangUtil.checkAndGet(conf.x, this.defX));
-        this.defineNotifyProperty('y', LangUtil.checkAndGet(conf.y, this.defY));
-        this.defineNotifyProperty('rotateZ', LangUtil.checkAndGet(conf.rotateZ, this.defRotateZ));
-        this.defineNotifyProperty('scaleX', LangUtil.checkAndGet(conf.scaleX, this.defScaleX));
-        this.defineNotifyProperty('scaleY', LangUtil.checkAndGet(conf.scaleY, this.defScaleY));
-        this.defineNotifyProperty('inclineX', LangUtil.checkAndGet(conf.inclineX, this.defInclineX));
-        this.defineNotifyProperty('inclineY', LangUtil.checkAndGet(conf.inclineY, this.defInclineY));
-        this.defineNotifyProperty('width', LangUtil.checkAndGet(conf.width, this.defWidth));
-        this.defineNotifyProperty('height', LangUtil.checkAndGet(conf.height, this.defHeight));
-        this.defineNotifyProperty('anchorX', LangUtil.checkAndGet(conf.anchorX, this.defAnchorX));
-        this.defineNotifyProperty('anchorY', LangUtil.checkAndGet(conf.anchorY, this.defAnchorY));
-        this.defineNotifyProperty('alpha', LangUtil.checkAndGet(conf.alpha, this.defAlpha));
-        this.defineNotifyProperty('visible', LangUtil.checkAndGet(conf.visible, this.defVisible));
-        this.defineNotifyProperty('cursor', LangUtil.checkAndGet(conf.cursor, this.defCursor));
-        this.defineNotifyProperty('interactive', LangUtil.checkAndGet(conf.interactive, this.defInteractive));
-        this.defineNotifyProperty('clip', LangUtil.checkAndGet(conf.clip, this.defClip));
-        this.defineNotifyProperty('parent', LangUtil.checkAndGet(conf.parent, null));
-        this.defineNotifyProperty('application', LangUtil.checkAndGet(conf.application, null));
+        this.x = LangUtil.checkAndGet(conf.x, this.defX);
+        this.y = LangUtil.checkAndGet(conf.y, this.defY);
+        this.rotateZ = LangUtil.checkAndGet(conf.rotateZ, this.defRotateZ);
+        this.scaleX = LangUtil.checkAndGet(conf.scaleX, this.defScaleX);
+        this.scaleY = LangUtil.checkAndGet(conf.scaleY, this.defScaleY);
+        this.shearX = LangUtil.checkAndGet(conf.shearX, this.defShearX);
+        this.shearY = LangUtil.checkAndGet(conf.shearY, this.defShearY);
+        this.width = LangUtil.checkAndGet(conf.width, this.defWidth);
+        this.height = LangUtil.checkAndGet(conf.height, this.defHeight);
+        this.anchorX = LangUtil.checkAndGet(conf.anchorX, this.defAnchorX);
+        this.anchorY = LangUtil.checkAndGet(conf.anchorY, this.defAnchorY);
+        this.alpha = LangUtil.checkAndGet(conf.alpha, this.defAlpha);
+        this.visible = LangUtil.checkAndGet(conf.visible, this.defVisible);
+        this.cursor = LangUtil.checkAndGet(conf.cursor, this.defCursor);
+        this.interactive = LangUtil.checkAndGet(conf.interactive, this.defInteractive);
+        this.clip = LangUtil.checkAndGet(conf.clip, this.defClip);
+        this.parent = LangUtil.checkAndGet(conf.parent, null);
+        this.application = LangUtil.checkAndGet(conf.application, null);
+
 
         this._id = ++id;
-        
+
         this._childNodes =  {
           count: 0, 
           defLayer: LangUtil.checkAndGet(conf.defLayer, this.defLayer), 
@@ -117,40 +146,11 @@ export default (function () {
           curReported: false,
         };
 
-        functions.syncClipRender.call(this);
-        functions.syncLocalTransform.call(this);
-        functions.syncLocalZone.call(this);
+        functions.onLocalTransformChanged.call(this);
+        functions.onLocalZoneChanged.call(this);
+        functions.onRenderChanged.call(this);
 
-        this.addObserver('xChanged', this.dirty, this);
-        this.addObserver('yChanged', this.dirty, this);
-        this.addObserver('rotateZChanged', this.dirty, this);
-        this.addObserver('scaleXChanged', this.dirty, this);
-        this.addObserver('scaleYChanged', this.dirty, this);
-        this.addObserver('inclineXChanged', this.dirty, this);
-        this.addObserver('inclineYChanged', this.dirty, this);
-        this.addObserver('widthChanged', this.dirty, this);
-        this.addObserver('heightChanged', this.dirty, this);
-        this.addObserver('anchorXChanged', this.dirty, this);
-        this.addObserver('anchorYChanged', this.dirty, this);
-        this.addObserver('alphaChanged', this.dirty, this);
-        this.addObserver('visibleChanged', this.dirty, this);
-
-        this.addObserver('clipChanged', functions.syncClipRender, this);
-
-        this.addObserver('xChanged', functions.syncLocalTransform, this);
-        this.addObserver('yChanged', functions.syncLocalTransform, this);
-        this.addObserver('rotateZChanged', functions.syncLocalTransform, this);
-        this.addObserver('scaleXChanged', functions.syncLocalTransform, this);
-        this.addObserver('scaleYChanged', functions.syncLocalTransform, this);
-        this.addObserver('inclineXChanged', functions.syncLocalTransform, this);
-        this.addObserver('inclineYChanged', functions.syncLocalTransform, this);
-        this.addObserver('parentChanged', functions.syncLocalTransform, this);
-
-
-        this.addObserver('widthChanged', functions.syncLocalZone, this);
-        this.addObserver('heightChanged', functions.syncLocalZone, this);
-        this.addObserver('anchorXChanged', functions.syncLocalZone, this);
-        this.addObserver('anchorYChanged', functions.syncLocalZone, this);
+        this.addObserver('propertyChanged', functions.onPropertyChanged, this);
       }
 
       InnerNode.prototype.getID = function () {

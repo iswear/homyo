@@ -8,31 +8,6 @@ import Node from '../core/node';
 
 export default (function () {
     var functions = (function () {
-      function syncImageRender () {
-        this.removeObserver('render', renderImage, this);
-        this.removeObserver('render', renderImageClip, this);
-        if (this.image !== null && this.image !== '') {
-          if (LangUtil.isString(this.image)) {
-            this.addObserver('render', renderImage, this);
-          } else {
-            this.addObserver('render', renderImageClip, this);
-          }
-        }
-      }
-
-      function syncImageContext () {
-        if (this.image !== null && this.image !== '') {
-          var ctx = this._imageCtx;
-          var image = this.image;
-          ctx.invalid = true;
-          if (LangUtil.isString(image)) {
-            ctx.url = image;
-          } else {
-            ctx.url = image.url;
-          }
-        }
-      }
-
       function renderImage (sender, render, dirtyZones) {
         var ctx = this._imageCtx;
         var image = this.findApplication().loadImage(ctx.url, this.getID(), loadImageFinished, this);
@@ -48,7 +23,7 @@ export default (function () {
           }
         }
       }
-      
+
       function renderImageClip (sender, render, dirtyZones) {
         var ctx = this._imageCtx;
         var image = this.findApplication().loadImage(ctx.url, this.getID(), loadImageFinished, this);
@@ -90,9 +65,35 @@ export default (function () {
         }
       }
 
+      function onPropertyChanged(name, newVal, oldVal) {
+        if (onEventsMap.hasOwnProperty(name)) {
+          onEventsMap[name].call(this, newVal, oldVal);
+        }
+      }
+
+      function onRenderImageChanged (newVal, oldVal) {
+        this.removeObserver('render', renderImage, this);
+        this.removeObserver('render', renderImageClip, this);
+        if (newVal && newVal !== '') {
+          var ctx = this._imageCtx;
+          if (LangUtil.isString(newVal)) {
+            ctx.url = newVal;
+            this.addObserver('render', renderImage, this);
+          } else {
+            ctx.url = newVal.url;
+            this.addObserver('render', renderImageClip, this);
+          }
+          ctx.invalid = true;
+        }
+      }
+
+      var onEventsMap = {
+        image: onRenderImageChanged
+      };
+      
       return {
-        syncImageRender: syncImageRender,
-        syncImageContext: syncImageContext
+        onPropertyChanged: onPropertyChanged,
+        onRenderImageChanged: onRenderImageChanged
       }
     })();
 
@@ -104,7 +105,7 @@ export default (function () {
       InnerGTexture.prototype.defAnchorY = 0.5;
       InnerGTexture.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('image', LangUtil.checkAndGet(conf.image, this.defImage));
+        this.image = LangUtil.checkAndGet(conf.image, this.defImage);
 
         this._imageCtx = {
           invalid: true,
@@ -115,13 +116,9 @@ export default (function () {
           height: 0
         };
 
-        functions.syncImageRender.call(this);
-        functions.syncImageContext.call(this);
+        functions.onRenderImageChanged.call(this, this.image, undefined);
 
-        this.addObserver('imageChanged', this.dirty, this);
-
-        this.addObserver('imageChanged', functions.syncImageRender, this);
-        this.addObserver('imageChanged', functions.syncImageContext, this);
+        this.addObserver('propertyChanged', this, functions.onPropertyChanged);
       }
 
       return InnerGTexture;

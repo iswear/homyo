@@ -69,6 +69,19 @@ export default (
         if (obj.prototype.super === undefined) {
           obj.prototype.super = superCallFn;
         }
+        if (this.defineNotifyProperty) {
+          for (item in this) {
+            var prefix = this[item].charAt(0)
+            if (prefix === "_" || prefix === "$") {
+              continue;
+            }
+            this.defineNotifyProperty(item, this[item])
+            delete this[item]
+          }
+        }
+        for (item in this) {
+
+        }
         return obj;
       }
 
