@@ -11,6 +11,17 @@ export default (function () {
     var doc = document;
 
     var functions = (function () {
+      function onPropertyChanged () {
+
+      }
+
+      var onEventsMap = {
+        backgroundColor: ,
+        borderWidth: ,
+        borderColor: ,
+        borderRadius: ,
+      }
+
       function syncBackgroundBorderRender() {
         var ctx = this._backgroundBorderCacheCtx;
         if (this.backgroundColor === null && (this.borderColor === null || this.borderWidth <= 0)) {
@@ -132,10 +143,10 @@ export default (function () {
       InnerUIView.prototype.defBorderRadius = 0;
       InnerUIView.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('backgroundColor', LangUtil.checkAndGet(conf.backgroundColor, this.defBackgroundColor));
-        this.defineNotifyProperty('borderWidth', LangUtil.checkAndGet(conf.borderWidth, this.defBorderWidth));
-        this.defineNotifyProperty('borderColor', LangUtil.checkAndGet(conf.borderColor, this.defBorderColor));
-        this.defineNotifyProperty('borderRadius', LangUtil.checkAndGet(conf.borderRadius, this.defBorderRadius));
+        this.backgroundColor = LangUtil.checkAndGet(conf.backgroundColor, this.defBackgroundColor);
+        this.borderWidth = LangUtil.checkAndGet(conf.borderWidth, this.defBorderWidth);
+        this.borderColor = LangUtil.checkAndGet(conf.borderColor, this.defBorderColor);
+        this.borderRadius = LangUtil.checkAndGet(conf.borderRadius, this.defBorderRadius);
 
         this._backgroundBorderCacheCtx = {
           borderOffset: 0,

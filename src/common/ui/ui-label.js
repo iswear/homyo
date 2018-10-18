@@ -13,53 +13,12 @@ export default (function () {
     var doc = document;
 
     var functions = (function () {
-      function syncTextRender () {
-        var ctx = this._textCacheCtx;
-        if (this.text === null || this.text.trim().length === 0) {
-          this.removeObserver('render', renderLabelText, this);
-          ctx.render = null;
-        } else {
-          if (this.getObserverByAllParams('render', renderLabelText, this) === null) {
-            this.addObserver('render', renderLabelText, this);
-          }
-          if (ctx.render === null) {
-            ctx.renderInvalid = true;
-            ctx.render = new CanvasRender({
-              canvas: doc.createElement('canvas'),
-              width: this.width,
-              height: this.height
-            });
-          }
-        }
-      }
-
-      function syncTextFontInvalid () {
-        this._textCacheCtx.fontInvalid = true;
-      }
-
-      function syncTextLayoutInvalid () {
-        this._textCacheCtx.layoutInvalid = true;
-      }
-
-      function syncTextRenderInvalid () {
-        this._textCacheCtx.renderInvalid = true;
-      }
-
       function renderLabelText (sender, render, dirtyZones) {
         var renderCache = this._textCacheCtx;
-        if (renderCache.fontInvalid) {
-          renderLabelTextFont.call(this);
-          renderCache.fontInvalid = false;
-        }
-        if (renderCache.layoutInvalid) {
-          renderLabelTextLayout.call(this);
-          renderCache.layoutInvalid = false;
-        }
-        if (renderCache.renderInvalid) {
-          renderLabelTextCache.call(this);
-          renderCache.renderInvalid = false;
-        }
-
+        renderLabelTextFont.call(this);
+        renderLabelTextLayout.call(this);
+        renderLabelTextCache.call(this);
+        
         var zone = this.getLocalZone();
         var width = zone.width;
         var height = zone.height;
@@ -113,63 +72,151 @@ export default (function () {
           }
         }
       }
-      
+
       function renderLabelTextFont () {
-        this._textCacheCtx._font = this.fontSize + 'px ' + this.fontFamily;
+        var renderCache = this._textCacheCtx;
+        if (renderCache.fontInvalid) {
+          renderCache._font = this.fontSize + 'px ' + this.fontFamily;
+          renderCache.fontInvalid = false;
+        }
       }
 
       function renderLabelTextLayout () {
         var renderCache = this._textCacheCtx;
-        if (this.textLineNum !== 1) {
-          var zone = this.getLocalZone();
-          var borderWidth = (this.borderWidth > 0 && this.borderColor !== null) ? this.borderWidth : 0;
-          renderCache.layout = TextUtil.getTextLayoutInfo(this.text, renderCache._font, zone.width - 2 * borderWidth);
-        } else {
-          renderCache.layout = TextUtil.getTextLayoutInfo(this.text, renderCache._font, -1);
+        if (renderCache.layoutInvalid) {
+          if (this.textLineNum !== 1) {
+            var zone = this.getLocalZone();
+            var borderWidth = (this.borderWidth > 0 && this.borderColor !== null) ? this.borderWidth : 0;
+            renderCache.layout = TextUtil.getTextLayoutInfo(this.text, renderCache._font, zone.width - 2 * borderWidth);
+          } else {
+            renderCache.layout = TextUtil.getTextLayoutInfo(this.text, renderCache._font, -1);
+          }
+          renderCache.layoutInvalid = false;
         }
       }
 
       function renderLabelTextCache () {
-        var zone = this.getLocalZone();
         var renderCache = this._textCacheCtx;
-        var layoutInfo = renderCache.layout;
-        var lines = layoutInfo.lines;
-        var lineHeight = LangUtil.checkAndGet(this.textLineHeight, 1.5 * this.fontSize);
-        var lineNum = (this.textLineNum < 1 || this.textLineNum > lines.length) ? lines.length : this.textLineNum;
-        var render = renderCache.render;
-        var renderWidth = (lineNum === 1) ? layoutInfo.width : (zone.width - 2 * this.borderWidth);
-        var renderHeight = lineHeight * lineNum + 1;
-        if (render.width !== render.width || render.height !== renderHeight) {
-          render.width = renderWidth;
-          render.height = renderHeight;
-        } else {
-          render.clear();
-        }
-        render.textBaseline = 'middle';
-        var tx = 0, ty = lineHeight / 2;
-        if (this.textHorAlign < 0) {
-          tx = 0;
-          render.textAlign = 'left';
-        } else if (this.textHorAlign > 0) {
-          tx = render.width;
-          render.textAlign = 'right';
-        } else {
-          tx = render.width / 2;
-          render.textAlign = 'center';
-        }
-        render.font = this._textCacheCtx._font;
-        render.fillStyle = this.textColor;
-        for (var i = 0; i < lineNum; ++i) {
-          render.fillText(lines[i], tx, ty);
-          ty += lineHeight;
+        if (renderCache.renderInvalid) {
+          var zone = this.getLocalZone();
+          var layoutInfo = renderCache.layout;
+          var lines = layoutInfo.lines;
+          var lineHeight = LangUtil.checkAndGet(this.textLineHeight, 1.5 * this.fontSize);
+          var lineNum = (this.textLineNum < 1 || this.textLineNum > lines.length) ? lines.length : this.textLineNum;
+          var render = renderCache.render;
+          var renderWidth = (lineNum === 1) ? layoutInfo.width : (zone.width - 2 * this.borderWidth);
+          var renderHeight = lineHeight * lineNum + 1;
+          if (render.width !== render.width || render.height !== renderHeight) {
+            render.width = renderWidth;
+            render.height = renderHeight;
+          } else {
+            render.clear();
+          }
+          render.textBaseline = 'middle';
+          var tx = 0, ty = lineHeight / 2;
+          if (this.textHorAlign < 0) {
+            tx = 0;
+            render.textAlign = 'left';
+          } else if (this.textHorAlign > 0) {
+            tx = render.width;
+            render.textAlign = 'right';
+          } else {
+            tx = render.width / 2;
+            render.textAlign = 'center';
+          }
+          render.font = this._textCacheCtx._font;
+          render.fillStyle = this.textColor;
+          for (var i = 0; i < lineNum; ++i) {
+            render.fillText(lines[i], tx, ty);
+            ty += lineHeight;
+          }
+          renderCache.renderInvalid = false;
         }
       }
 
+      function onPropertyChanged (name, newVal, oldVal) {
+        if (onEventsMap.hasOwnProperty(name)) {
+          onEventsMap[name].call(this, newVal, oldVal);
+        }
+      }
+
+      function onTextChanged () {
+        this.removeObserver('render', renderLabelText, this);
+        if (this.text || this.text !== '') {
+          this.addObserver('render', renderLabelText, this);
+          var ctx = this._textCacheCtx;
+          ctx.fontInvalid = true;
+          ctx.layoutInvalid = true;
+          ctx.renderInvalid = true;
+          if (ctx.render === null) {
+            ctx.render = new CanvasRender({
+              canvas: doc.createElement('canvas'),
+              width: this.width,
+              height: this.height
+            });
+          }
+        }
+        this.dirty();
+      }
+
+      function onWidthChanged () {
+        this._textCacheCtx.layoutInvalid = true;
+        this._textCacheCtx.renderInvalid = true;
+      }
+
+      function onFontSizeChanged () {
+        this._textCacheCtx.fontInvalid = true;
+        this._textCacheCtx.layoutInvalid = true;
+        this._textCacheCtx.renderInvalid = true;
+        this.dirty();
+      }
+      
+      function onFontFamilyChanged () {
+        this._textCacheCtx.fontInvalid = true;
+        this._textCacheCtx.layoutInvalid = true;
+        this._textCacheCtx.renderInvalid = true;
+        this.dirty();
+      }
+
+      function onTextColorChanged () {
+        this._textCacheCtx.renderInvalid = true;
+        this.dirty();
+      }
+
+      function onTextHorAlignChanged () {
+        this._textCacheCtx.renderInvalid = true;
+        this.dirty();
+      }
+
+      function onTextVerAlignChanged () {
+        this._textCacheCtx.renderInvalid = true;
+        this.dirty();
+      }
+
+      function onTextLineHeightChanged () {
+        this._textCacheCtx.renderInvalid = true;
+        this.dirty();
+      }
+
+      function onTextLineNumChanged () {
+        this._textCacheCtx.renderInvalid = true;
+        this.dirty();
+      }
+
+      var onEventsMap = {
+        width: onWidthChanged,
+        text: onTextChanged,
+        fontSize: onFontSizeChanged,
+        fontFamily: onFontFamilyChanged,
+        textColor: onTextColorChanged,
+        textHorAlign: onTextHorAlignChanged,
+        textVerAlign: onTextVerAlignChanged,
+        textLineHeight: onTextLineHeightChanged,
+        textLineNum: onTextLineNumChanged
+      }
+
       return {
-        syncTextRender: syncTextRender,
-        syncTextFontInvalid: syncTextFontInvalid,
-        syncTextLayoutInvalid: syncTextLayoutInvalid,
-        syncTextRenderInvalid: syncTextRenderInvalid
+        onPropertyChanged: onPropertyChanged
       }
     })();
 
@@ -183,14 +230,14 @@ export default (function () {
       InnerUILabel.prototype.defTextVerAlign = 0;
       InnerUILabel.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.defineNotifyProperty('text', LangUtil.checkAndGet(conf.text, ''));
-        this.defineNotifyProperty('fontSize', LangUtil.checkAndGet(conf.fontSize, this.defFontSize));
-        this.defineNotifyProperty('fontFamily', LangUtil.checkAndGet(conf.fontFamily, this.defFontFamily));
-        this.defineNotifyProperty('textColor', LangUtil.checkAndGet(conf.textColor, this.defTextColor));
-        this.defineNotifyProperty('textHorAlign', LangUtil.checkAndGet(conf.textHorAlign, this.defTextHorAlign));
-        this.defineNotifyProperty('textVerAlign', LangUtil.checkAndGet(conf.textVerAlign, this.defTextVerAlign));
-        this.defineNotifyProperty('textLineHeight', LangUtil.checkAndGet(conf.textLineHeight, undefined));
-        this.defineNotifyProperty('textLineNum', LangUtil.checkAndGet(conf.textLineNum, 1));
+        this.text = LangUtil.checkAndGet(conf.text, '');
+        this.fontSize = LangUtil.checkAndGet(conf.fontSize, this.defFontSize);
+        this.fontFamily = LangUtil.checkAndGet(conf.fontFamily, this.defFontFamily);
+        this.textColor = LangUtil.checkAndGet(conf.textColor, this.defTextColor);
+        this.textHorAlign = LangUtil.checkAndGet(conf.textHorAlign, this.defTextHorAlign);
+        this.textVerAlign = LangUtil.checkAndGet(conf.textVerAlign, this.defTextVerAlign);
+        this.textLineHeight = LangUtil.checkAndGet(conf.textLineHeight, undefined);
+        this.textLineNum = LangUtil.checkAndGet(conf.textLineNum, 1);
 
         this._textCacheCtx = {
           fontInvalid: true,
@@ -201,38 +248,7 @@ export default (function () {
           render: null
         };
 
-        functions.syncTextRender.call(this);
-        functions.syncTextFontInvalid.call(this);
-        functions.syncTextLayoutInvalid.call(this);
-        functions.syncTextRenderInvalid.call(this);
-
-        this.addObserver('textChanged', this.dirty, this);
-        this.addObserver('fontSizeChanged', this.dirty, this);
-        this.addObserver('fontFamilyChanged', this.dirty, this);
-        this.addObserver('textColor', this.dirty, this);
-        this.addObserver('textHorAlignChanged', this.dirty, this);
-        this.addObserver('textVerAlignChanged', this.dirty, this);
-        this.addObserver('textLineHeightChanged', this.dirty, this);
-        this.addObserver('textLineNumChanged', this.dirty, this);
-
-        this.addObserver('textChanged', functions.syncTextRender, this);
-
-        this.addObserver('fontSizeChanged', functions.syncTextFontInvalid, this);
-        this.addObserver('fontFamilyChanged', functions.syncTextFontInvalid, this);
-
-        this.addObserver('widthChanged', functions.syncTextLayoutInvalid, this);
-        this.addObserver('textChanged', functions.syncTextLayoutInvalid, this);
-        this.addObserver('fontSizeChanged', functions.syncTextLayoutInvalid, this);
-        this.addObserver('fontFamilyChanged', functions.syncTextFontInvalid, this);
-
-        this.addObserver('widthChanged', functions.syncTextRenderInvalid, this);
-        this.addObserver('textChanged', functions.syncTextRenderInvalid, this);
-        this.addObserver('fontSizeChanged', functions.syncTextRenderInvalid, this);
-        this.addObserver('fontFamilyChanged', functions.syncTextRenderInvalid, this);
-        this.addObserver('textColorChanged', functions.syncTextRenderInvalid, this);
-        this.addObserver('textHorAlignChanged', functions.syncTextRenderInvalid, this);
-        this.addObserver('textLineHeightChanged', functions.syncTextRenderInvalid, this);
-        this.addObserver('textLineNumChanged', functions.syncTextRenderInvalid, this);
+        this.addObserver('propertyChanged', functions.onPropertyChanged, this);
       }
 
       return InnerUILabel;

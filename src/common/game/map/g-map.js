@@ -12,139 +12,6 @@ export default (function() {
     var doc = document;
 
     var functions = (function() {
-        function syncMapContext() {
-            this.removeObserver('mapXChanged', syncMapX, this);
-            this.removeObserver('mapYChanged', syncMapY, this);
-            this.removeObserver('anchorXChanged', syncMapAnchorX, this);
-            this.removeObserver('anchorYChanged', syncMapAnchorY, this);
-
-            this.removeObserver('mapTileWidthChanged', syncMapSquareWidth, this);
-            this.removeObserver('mapTileColsChanged', syncMapSquareWidth, this);
-            this.removeObserver('mapTileHeightChanged', syncMapSquareHeight, this);
-            this.removeObserver('mapTileRowsChanged', syncMapSquareHeight, this);
-
-            this.removeObserver('mapTileWidthChanged', syncMapDiamondWidth, this);
-            this.removeObserver('mapTileRowsChanged', syncMapDiamondWidth, this);
-            this.removeObserver('mapTileColsChanged', syncMapDiamondWidth, this);
-            this.removeObserver('mapTileHeightChanged', syncMapDiamondHeight, this);
-            this.removeObserver('mapTileRowsChanged', syncMapDiamondHeight, this);
-            this.removeObserver('mapTileColsChanged', syncMapDiamondHeight, this);
-
-            this.removeObserver('widthChanged', syncMapForeCacheInvalid, this);
-            this.removeObserver('heightChanged', syncMapForeCacheInvalid, this);
-            this.removeObserver('anchorXChanged', syncMapForeCacheInvalid, this);
-            this.removeObserver('anchorYChanged', syncMapForeCacheInvalid, this);
-            this.removeObserver('mapXChanged', syncMapForeCacheInvalid, this);
-            this.removeObserver('mapYChanged', syncMapForeCacheInvalid, this);
-
-            this.removeObserver('mapTileWidthChanged', syncMapCacheInvalid, this);
-            this.removeObserver('mapTileHeightChanged', syncMapCacheInvalid, this);
-            this.removeObserver('mapTileDataChanged', syncMapCacheInvalid, this);
-
-            this.removeObserver('render', renderSquareMap, this);
-            this.removeObserver('render', renderDiamondMap, this);
-            if (this.mapTileType === 'square') {
-                this.addObserver('mapXChanged', syncMapX, this);
-                this.addObserver('mapYChanged', syncMapY, this);
-                this.addObserver('anchorXChanged', syncMapAnchorX, this);
-                this.addObserver('anchorYChanged', syncMapAnchorY, this);
-                this.addObserver('mapTileWidthChanged', syncMapSquareWidth, this);
-                this.addObserver('mapTileColsChanged', syncMapSquareWidth, this);
-                this.addObserver('mapTileHeightChanged', syncMapSquareHeight, this);
-                this.addObserver('mapTileRowsChanged', syncMapSquareHeight, this);
-                this.addObserver('widthChanged', syncMapForeCacheInvalid, this);
-                this.addObserver('heightChanged', syncMapForeCacheInvalid, this);
-                this.addObserver('anchorXChanged', syncMapForeCacheInvalid, this);
-                this.addObserver('anchorYChanged', syncMapForeCacheInvalid, this);
-                this.addObserver('mapXChanged', syncMapForeCacheInvalid, this);
-                this.addObserver('mapYChanged', syncMapForeCacheInvalid, this);
-                this.addObserver('mapTileWidthChanged', syncMapCacheInvalid, this);
-                this.addObserver('mapTileHeightChanged', syncMapCacheInvalid, this);
-                this.addObserver('mapTileDataChanged', syncMapCacheInvalid, this);
-                this.addObserver('render', renderSquareMap, this);
-                syncMapX.call(this);
-                syncMapY.call(this);
-                syncMapAnchorX.call(this);
-                syncMapAnchorY.call(this);
-                syncMapSquareWidth.call(this);
-                syncMapSquareHeight.call(this);
-                syncMapCacheInvalid.call(this);
-            } else if (this.mapTileType === 'diamond') {
-                this.addObserver('mapXChanged', syncMapX, this);
-                this.addObserver('mapYChanged', syncMapY, this);
-                this.addObserver('anchorXChanged', syncMapAnchorX, this);
-                this.addObserver('anchorYChanged', syncMapAnchorY, this);
-                this.addObserver('mapTileWidthChanged', syncMapDiamondWidth, this);
-                this.addObserver('mapTileRowsChanged', syncMapDiamondWidth, this);
-                this.addObserver('mapTileColsChanged', syncMapDiamondWidth, this);
-                this.addObserver('mapTileHeightChanged', syncMapDiamondHeight, this);
-                this.addObserver('mapTileRowsChanged', syncMapDiamondHeight, this);
-                this.addObserver('mapTileColsChanged', syncMapDiamondHeight, this);
-                this.addObserver('widthChanged', syncMapForeCacheInvalid, this);
-                this.addObserver('heightChanged', syncMapForeCacheInvalid, this);
-                this.addObserver('anchorXChanged', syncMapForeCacheInvalid, this);
-                this.addObserver('anchorYChanged', syncMapForeCacheInvalid, this);
-                this.addObserver('mapXChanged', syncMapForeCacheInvalid, this);
-                this.addObserver('mapYChanged', syncMapForeCacheInvalid, this);
-                this.addObserver('mapTileWidthChanged', syncMapCacheInvalid, this);
-                this.addObserver('mapTileHeightChanged', syncMapCacheInvalid, this);
-                this.addObserver('mapTileDataChanged', syncMapCacheInvalid, this);
-                this.addObserver('render', renderDiamondMap, this);
-                syncMapX.call(this);
-                syncMapY.call(this);
-                syncMapAnchorX.call(this);
-                syncMapAnchorY.call(this);
-                syncMapDiamondWidth.call(this);
-                syncMapDiamondHeight.call(this);
-                syncMapCacheInvalid.call(this);
-            }
-        }
-
-        function syncMapCacheInvalid() {
-            var tileCtx = this._mapCacheCtx.tile;
-            tileCtx.needRender = (this.mapTileData && LangUtil.isArray(this.mapTileData)) ? true : false;
-            tileCtx.offsetInvalid = true;
-            tileCtx.sizeInvalid = true;
-            tileCtx.foreInvalid = true;
-            tileCtx.backInvalid = true;
-        }
-
-        function syncMapForeCacheInvalid() {
-            this._mapCacheCtx.tile.foreInvalid = true;
-        }
-
-        function syncMapX() {
-            this._mapNode.x = -this.mapX;
-        }
-
-        function syncMapY() {
-            this._mapNode.y = -this.mapY;
-        }
-
-        function syncMapAnchorX() {
-            this._mapNode.anchorX = this.anchorX;
-        }
-
-        function syncMapAnchorY() {
-            this._mapNode.anchorY = this.anchorY;
-        }
-
-        function syncMapSquareWidth() {
-            this._mapNode.width = this.mapTileWidth * this.mapTileCols;
-        }
-
-        function syncMapSquareHeight() {
-            this._mapNode.height = this.mapTileHeight * this.mapTileRows;
-        }
-
-        function syncMapDiamondWidth() {
-            this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
-        }
-
-        function syncMapDiamondHeight() {
-            this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
-        }
-
         function renderSquareMap(sender, render, dirtyZones) {
             var ctx = this._mapCacheCtx;
             var tileCtx = ctx.tile;
@@ -335,326 +202,6 @@ export default (function() {
             ctx.foreInvalid = false;
         }
 
-        function renderDiamondMapCache(ctx) {
-            var zone = this.getLocalZone();
-            var mapNodeZone = this._mapNode.getLocalZone();
-
-            var tileWidth = this.mapTileWidth;
-            var tileHeight = this.mapTileHeight;
-            var halfTileWidth = tileWidth / 2;
-            var halfTileHeight = tileHeight / 2;
-
-            var containerLeft = zone.left + this.mapX - mapNodeZone.left - this.mapTileRows * halfTileWidth;
-            var containerTop = zone.top + this.mapY - mapNodeZone.top;
-            var containerRight = containerLeft + this.width;
-            var containerBottom = containerTop + this.height;
-
-            var sRow = Math.floor(containerTop / tileHeight - containerLeft / tileWidth);
-            var sCol = Math.floor(containerTop / tileHeight + containerLeft / tileWidth);
-            var eRow = Math.floor(containerBottom / tileHeight - containerRight / tileWidth);
-            var eCol = Math.floor(containerBottom / tileHeight + containerRight / tileWidth);
-
-            var oldLeft = ctx.left;
-            var oldTop = ctx.top;
-            var newLeft = ((sCol - sRow - 1) * halfTileWidth) + this.mapTileRows * halfTileWidth;
-            var newTop = (sCol + sRow) * halfTileHeight;
-
-            var oldWidth = ctx.width;
-            var oldHeight = ctx.height;
-            var newWidth = (eCol - eRow - sCol + sRow + 2) * halfTileWidth;
-            var newHeight = (eCol + eRow - sCol - sRow + 2) * halfTileHeight;
-
-            var rowCount = this.mapTileRows;
-            var colCount = this.mapTileCols;
-            if (ctx.backInvalid) {
-                var foreRender = ctx.backRender;
-                var backRender = ctx.foreRender;
-                if (foreRender.width !== newWidth || foreRender.height !== newHeight) {
-                    foreRender.width = newWidth;
-                    foreRender.height = newHeight;
-                } else {
-                    foreRender.clear();
-                }
-
-                var application = this.findApplication();
-                var tileData = this.mapTileData;
-                var tileImage = this.mapTileImageIndex;
-                var tileImageClip = this.mapTileImageClipIndex;
-                var mapID = this.getID();
-                for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight; startTileY < newHeight; startTileY += halfTileHeight) {
-                    if (startCol >= colCount) {
-                        break;
-                    }
-                    if (startRow >= 0) {
-                        for (var row = startRow, col = startCol, tileX = startTileX, tileY = startTileY; tileX < newWidth; row -= 1, col += 1, tileX += tileWidth) {
-                            if (row < 0 || col >= colCount) {
-                                break;
-                            }
-                            if (row >= rowCount || col < 0) {
-                                continue;
-                            }
-                            var tileCell = tileData[row][col];
-                            if (!tileCell) {
-                                continue;
-                            }
-                            var imageClip = tileImageClip[tileCell];
-                            if (imageClip) {
-                                var image = tileImage[imageClip.imageId];
-                                if (image) {
-                                    var img = application.loadImage(image, mapID, loadImageFinished, this);
-                                    if (img) {
-                                        var halfImageWidth = imageClip.width / 2;
-                                        var halfImageHeight = imageClip.height / 2;
-                                        var srcX = imageClip.x;
-                                        var srcY = imageClip.y;
-                                        var srcWidth = imageClip.width;
-                                        var srcHeight = imageClip.height;
-                                        var desX = tileX;
-                                        var desY = tileY;
-                                        var desWidth = tileWidth;
-                                        var desHeight = tileHeight;
-                                        if (desX < 0) {
-                                            srcX += halfImageWidth;
-                                            srcWidth -= halfImageWidth;
-                                            desX += halfTileWidth;
-                                            desWidth -= halfTileWidth;
-                                        } else if (desX + tileWidth > newWidth) {
-                                            srcWidth -= halfImageWidth;
-                                            desWidth -= halfTileWidth;
-                                        }
-                                        if (desY < 0) {
-                                            srcY += halfImageHeight;
-                                            srcHeight -= halfImageHeight;
-                                            desY += halfTileHeight;
-                                            desHeight -= halfTileHeight;
-                                        } else if (desY + tileHeight > newHeight) {
-                                            srcHeight -= halfImageHeight;
-                                            desHeight -= halfTileHeight;
-                                        }
-                                        foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
-                                            desX, desY, desWidth, desHeight);
-                                    }
-                                }
-                            }
-                        }
-                        if (startTileX === 0) {
-                            startTileX = -halfTileWidth;
-                            startRow += 1;
-                        } else {
-                            startTileX = 0;
-                            startCol += 1;
-                        }
-                    }
-                }
-                ctx.foreRender = foreRender;
-                ctx.backRender = backRender;
-            } else if (newWidth !== oldWidth || newHeight !== oldHeight || newLeft !== oldLeft || newTop !== oldTop) {
-                var foreRender = ctx.backRender;
-                var backRender = ctx.foreRender;
-                if (foreRender.width !== newWidth || foreRender.height !== newHeight) {
-                    foreRender.width = newWidth;
-                    foreRender.height = newHeight;
-                } else {
-                    foreRender.clear();
-                }
-                var clipWidth = Math.min(newWidth + newLeft, oldWidth + oldLeft) - Math.max(newLeft, oldLeft);
-                var clipHeight = Math.min(newHeight + newTop, oldHeight + oldTop) - Math.max(newTop, oldTop);
-                var clip = clipWidth > 0 && clipHeight > 0;
-                var clipTarLeft = 0;
-                var clipTarTop = 0;
-                var clipTarRight = 0;
-                var clipTarBottom = 0;
-                if (clip) {
-                    clipTarLeft = newLeft < oldLeft ? (oldLeft - newLeft) : 0;
-                    clipTarRight = clipWidth + clipTarLeft;
-                    clipTarTop = newTop < oldTop ? (oldTop - newTop) : 0;
-                    clipTarBottom = clipHeight + clipTarTop;
-                    foreRender.drawImageExt(backRender.getCanvas(), newLeft > oldLeft ? (newLeft - oldLeft) : 0, newTop > oldTop ? (newTop - oldTop) : 0, clipWidth, clipHeight,
-                        clipTarLeft, clipTarTop, clipWidth, clipHeight);
-                    /* test */
-                    foreRender.strokeStyle = '#00f';
-                    foreRender.strokeRect(clipTarLeft, clipTarTop, clipWidth, clipHeight);
-                    /* test */
-                }
-                var application = this.findApplication();
-                var tileData = this.mapTileData;
-                var tileImage = this.mapTileImageIndex;
-                var tileImageClip = this.mapTileImageClipIndex;
-                var mapID = this.getID();
-                for (var startRow = sRow, startCol = sCol - 1, startTileX = -halfTileWidth, startTileY = -halfTileHeight; startTileY < newHeight; startTileY += halfTileHeight) {
-                    if (startCol >= colCount) {
-                        break;
-                    }
-                    if (startRow >= 0) {
-                        for (row = startRow, col = startCol, tileX = startTileX, tileY = startTileY; tileX < newWidth; row -= 1, col += 1, tileX += tileWidth) {
-                            if (row < 0 || col >= colCount) {
-                                break;
-                            }
-                            if (row >= rowCount || col < 0) {
-                                continue;
-                            }
-                            var tileCell = tileData[row][col];
-                            if (!tileCell) {
-                                continue;
-                            }
-                            var imageClip = tileImageClip[tileCell];
-                            if (imageClip) {
-                                var image = tileImage[imageClip.imageId];
-                                if (image) {
-                                    var img = application.loadImage(image, mapID, loadImageFinished, this);
-                                    if (img) {
-                                        var halfImageWidth = imageClip.width / 2;
-                                        var halfImageHeight = imageClip.height / 2;
-                                        var srcX = imageClip.x;
-                                        var srcY = imageClip.y;
-                                        var srcWidth = imageClip.width;
-                                        var srcHeight = imageClip.height;
-                                        var desX = tileX;
-                                        var desY = tileY;
-                                        var desWidth = tileWidth;
-                                        var desHeight = tileHeight;
-                                        if (desX < 0) {
-                                            srcX += halfImageWidth;
-                                            desX += halfTileWidth;
-                                            srcWidth -= halfImageWidth;
-                                            desWidth -= halfTileWidth;
-                                        } else if (desX + tileWidth > newWidth) {
-                                            srcWidth -= halfImageWidth;
-                                            desWidth -= halfTileWidth;
-                                        }
-                                        if (desY < 0) {
-                                            srcY += halfImageHeight;
-                                            desY += halfTileHeight;
-                                            srcHeight -= halfImageHeight;
-                                            desHeight -= halfTileHeight;
-                                        } else if (desY + tileHeight > newHeight) {
-                                            srcHeight -= halfImageHeight;
-                                            desHeight -= halfTileHeight;
-                                        }
-                                        if (clip) {
-                                            if (desY + desHeight <= clipTarTop) {
-                                                foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
-                                                    desX, desY, desWidth, desHeight);
-                                            } else if (desY >= clipTarBottom) {
-                                                foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
-                                                    desX, desY, desWidth, desHeight);
-                                            } else {
-                                                if (desX + desWidth <= clipTarLeft) {
-                                                    foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
-                                                        desX, desY, desWidth, desHeight);
-                                                } else if (desX >= clipTarRight) {
-                                                    foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
-                                                        desX, desY, desWidth, desHeight);
-                                                } else {
-                                                    if (tileY + halfTileHeight === clipTarTop) {
-                                                        if (tileX + halfTileWidth === clipTarLeft) {
-                                                            if (clipTarLeft > 0) {
-                                                                if (clipTarTop > 0) {
-                                                                    foreRender.drawImageExt(img, imageClip.x, imageClip.y, imageClip.width, halfImageHeight,
-                                                                        tileX, tileY, tileWidth, halfTileHeight);
-                                                                }
-                                                                foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, halfImageWidth, halfImageHeight,
-                                                                    tileX, tileY + halfTileHeight, halfTileWidth, halfTileHeight);
-                                                            } else {
-                                                                if (clipTarTop > 0) {
-                                                                    foreRender.drawImageExt(img, imageClip.x + halfImageWidth, imageClip.y, halfImageWidth, halfImageHeight,
-                                                                        tileX + halfTileWidth, tileY, halfTileWidth, halfTileHeight);
-                                                                }
-                                                            }
-                                                        } else if (tileX + halfTileWidth === clipTarRight) {
-                                                            if (clipTarRight < newWidth) {
-                                                                if (clipTarTop > 0) {
-                                                                    foreRender.drawImageExt(img, imageClip.x, imageClip.y, imageClip.width, halfImageHeight,
-                                                                        tileX, tileY, tileWidth, halfTileHeight);
-                                                                }
-                                                                foreRender.drawImageExt(img, imageClip.x + halfImageWidth, imageClip.y + halfImageHeight, halfImageWidth, halfImageHeight,
-                                                                    tileX + halfTileWidth, tileY + halfTileHeight, halfTileWidth, halfTileHeight);
-                                                            } else {
-                                                                if (clipTarTop > 0) {
-                                                                    foreRender.drawImageExt(img, imageClip.x, imageClip.y, halfImageWidth, halfImageHeight,
-                                                                        tileX, tileY, halfTileWidth, halfTileHeight);
-                                                                }
-                                                            }
-                                                        } else {
-                                                            if (clipTarTop > 0) {
-                                                                foreRender.drawImageExt(img, imageClip.x, imageClip.y, imageClip.width, halfImageHeight,
-                                                                    tileX, tileY, tileWidth, halfTileHeight);
-                                                            }
-                                                        }
-                                                    } else if (tileY + halfTileHeight === clipTarBottom) {
-                                                        if (tileX + halfTileWidth === clipTarLeft) {
-                                                            if (clipTarLeft > 0) {
-                                                                if (clipTarBottom < newHeight) {
-                                                                    foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, imageClip.width, halfImageHeight,
-                                                                        tileX, tileY + halfTileHeight, tileWidth, halfTileHeight);
-                                                                }
-                                                                foreRender.drawImageExt(img, imageClip.x, imageClip.y, halfImageWidth, halfImageHeight,
-                                                                    tileX, tileY, halfTileWidth, halfTileHeight);
-                                                            } else {
-                                                                if (clipTarBottom < newHeight) {
-                                                                    foreRender.drawImageExt(img, imageClip.x + halfImageWidth, imageClip.y + halfImageHeight, halfImageWidth, halfImageHeight,
-                                                                        tileX + halfTileWidth, tileY + halfTileHeight, halfTileWidth, halfTileHeight);
-                                                                }
-                                                            }
-                                                        } else if (tileX + halfTileWidth === clipTarRight) {
-                                                            if (clipTarRight < newWidth) {
-                                                                if (clipTarBottom < newHeight) {
-                                                                    foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, imageClip.width, halfImageHeight,
-                                                                        tileX, tileY + halfTileHeight, tileWidth, halfTileHeight);
-                                                                }
-                                                                foreRender.drawImageExt(img, imageClip.x + halfImageWidth, imageClip.y, halfImageWidth, halfImageHeight,
-                                                                    tileX + halfTileWidth, tileY, halfTileWidth, halfTileHeight);
-                                                            } else {
-                                                                if (clipTarBottom < newHeight) {
-                                                                    foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, halfImageWidth, halfImageHeight,
-                                                                        tileX, tileY + halfTileHeight, halfTileWidth, halfTileHeight);
-                                                                }
-                                                            }
-                                                        } else {
-                                                            if (clipTarBottom < newHeight) {
-                                                                foreRender.drawImageExt(img, imageClip.x, imageClip.y + halfImageHeight, imageClip.width, halfImageHeight,
-                                                                    tileX, tileY + halfTileHeight, tileWidth, halfTileHeight);
-                                                            }
-                                                        }
-                                                    } else {
-                                                        if (tileX + halfTileWidth === clipTarLeft) {
-                                                            foreRender.drawImageExt(img, imageClip.x, imageClip.y, halfImageWidth, imageClip.height,
-                                                                tileX, tileY, halfTileWidth, tileHeight);
-                                                        } else if (tileX + halfTileWidth === clipTarRight) {
-                                                            foreRender.drawImageExt(img, imageClip.x + halfImageWidth, imageClip.y, halfImageWidth, imageClip.height,
-                                                                tileX + halfTileWidth, tileY, halfTileWidth, tileHeight);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        } else {
-                                            foreRender.drawImageExt(img, srcX, srcY, srcWidth, srcHeight,
-                                                desX, desY, desWidth, desHeight);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (startTileX === 0) {
-                        startTileX = -halfTileWidth;
-                        startRow += 1;
-                    } else {
-                        startTileX = 0;
-                        startCol += 1;
-                    }
-                }
-                ctx.foreRender = foreRender;
-                ctx.backRender = backRender;
-            }
-            ctx.left = newLeft;
-            ctx.top = newTop;
-            ctx.width = newWidth;
-            ctx.height = newHeight;
-            ctx.backInvalid = false;
-            ctx.foreInvalid = false;
-        }
-
         function loadImageFinished(url, image, success, async) {
             if (async && success) {
                 var tileCtx = this._mapCacheCtx.tile;
@@ -662,6 +209,144 @@ export default (function() {
                 tileCtx.backInvalid = true;
                 this.dirty();
             }
+        }
+
+        function onPropertyChanged (name, newVal, oldVal) {
+            if (onEventsMap.hasOwnProperty(name)) {
+                onEventsMap[name].call(this, newVal, oldVal);
+            }
+        }
+
+        function onMapTileTypeChanged () {
+            onEventsMap = { mapTileType: onMapTileTypeChanged };
+            this.removeObserver('render', renderSquareMap, this);
+            this.removeObserver('render', renderDiamondMap, this);
+            if (this.mapTileType === 'square') {
+                this.addObserver('render', renderSquareMap, this);
+                onEventsMap.width = onMapForeCacheInvalid;
+                onEventsMap.height = onMapForeCacheInvalid;
+                onEventsMap.anchorX = onAnchorXChanged;
+                onEventsMap.anchorY = onAnchorYChanged;
+                onEventsMap.mapX = onMapXChanged;
+                onEventsMap.mapY = onMapYChanged;
+                onEventsMap.mapTileWidth = onSquareMapTileWidthChanged;
+                onEventsMap.mapTileHeight = onSquareMapTileHeightChanged;
+                onEventsMap.mapTileRows = onSquareMapTileRowsChanged;
+                onEventsMap.mapTileCols = onSquareMapTileColsChanged;
+                onEventsMap.mapTileData = onMapAllCacheInvalid;
+                onMapForeCacheInvalid.call(this);
+                onAnchorXChanged.call(this);
+                onAnchorYChanged.call(this);
+                onMapXChanged.call(this);
+                onMapYChanged.call(this);
+                onSquareMapTileWidthChanged.call(this);
+                onSquareMapTileHeightChanged.call(this);
+                onSquareMapTileRowsChanged.call(this);
+                onSquareMapTileColsChanged.call(this);
+                onMapAllCacheInvalid.call(this);
+            } else if (this.mapTileType === 'diamond') {
+                this.addObserver('render', renderDiamondMap, this);
+                onEventsMap.width = onMapForeCacheInvalid;
+                onEventsMap.height = onMapForeCacheInvalid;
+                onEventsMap.anchorX = onAnchorXChanged;
+                onEventsMap.anchorY = onAnchorYChanged;
+                onEventsMap.mapX = onMapXChanged;
+                onEventsMap.mapY = onMapYChanged;
+                onEventsMap.mapTileWidth = onDiamondMapTileWidthChanged; 
+                onEventsMap.mapTileHeight = onDiamondMapTileHeightChanged;
+                onEventsMap.mapTileRows = onDiamondMapTileRowsChanged;
+                onEventsMap.mapTileCols = onDiamondMapTileColsChanged;
+                onEventsMap.mapTileData = onMapAllCacheInvalid;
+                onMapForeCacheInvalid.call(this);
+                onAnchorXChanged.call(this);
+                onAnchorYChanged.call(this);
+                onMapXChanged.call(this);
+                onMapYChanged.call(this);
+                onDiamondMapTileWidthChanged.call(this);
+                onDiamondMapTileHeightChanged.call(this);
+                onDiamondMapTileRowsChanged.call(this);
+                onDiamondMapTileColsChanged.call(this);
+                onMapAllCacheInvalid.call(this);
+            }
+        }
+
+        function onMapAllCacheInvalid () {
+            var ctx = this._mapCacheCtx.tile;
+            ctx.needRender = (this.mapTileData && LangUtil.isArray(this.mapTileData)) ? true : false;
+            ctx.offsetInvalid = true;
+            ctx.sizeInvalid = true;
+            ctx.foreInvalid = true;
+            ctx.backInvalid = true;
+        }
+
+        function onMapForeCacheInvalid () {
+            this._mapCacheCtx.tile.foreInvalid = true;
+        }
+
+        function onMapXChanged () {
+            this._mapCacheCtx.tile.foreInvalid = true;
+            this._mapNode.x = -this.mapX;
+        }
+
+        function onMapYChanged () {
+            this._mapCacheCtx.tile.foreInvalid = true;
+            this._mapNode.y = -this.mapY;
+        }
+
+        function onAnchorXChanged () {
+            this._mapCacheCtx.tile.foreInvalid = true;
+            this._mapNode.anchorX = this.anchorX;
+        }
+
+        function onAnchorYChanged () {
+            this._mapCacheCtx.tile.foreInvalid = true;
+            this._mapNode.anchorY = this.anchorY;
+        }
+
+        function onSquareMapTileWidthChanged () {
+            this._mapNode.width = this.mapTileWidth * this.mapTileCols;
+            onMapAllCacheInvalid.call(this);
+        }
+
+        function onDiamondMapTileWidthChanged () {
+            this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
+            onMapAllCacheInvalid.call(this);
+        }
+
+        function onSquareMapTileHeightChanged () {
+            this._mapNode.height = this.mapTileHeight * this .mapTileRows;
+            onMapAllCacheInvalid.call(this);
+        }
+
+        function onDiamondMapTileHeightChanged () {
+            this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
+            onMapAllCacheInvalid.call(this);
+        }
+
+        function onSquareMapTileRowsChanged () {
+            this._mapNode.height = this.mapTileHeight * this .mapTileRows;
+            onMapAllCacheInvalid.call(this);
+        }
+
+        function onDiamondMapTileRowsChanged () {
+            this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
+            this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
+            onMapAllCacheInvalid.call(this);
+        }
+
+        function onSquareMapTileColsChanged () {
+            this._mapNode.width = this.mapTileWidth * this.mapTileCols;
+            onMapAllCacheInvalid.call(this);
+        }
+
+        function onDiamondMapTileColsChanged () {
+            this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
+            this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
+            onMapAllCacheInvalid.call(this);
+        }
+
+        var onEventsMap = {
+            mapTileType: onMapTileTypeChanged
         }
 
         return {
@@ -712,14 +397,6 @@ export default (function() {
                     backRender: new CanvasRender({ canvas: doc.createElement('canvas') })
                 }
             };
-
-            // this._mapCacheCtx.tile.foreRender.globalAlpha = 1;
-            // this._mapCacheCtx.tile.backRender.globalAlpha = 1;
-
-            // doc.body.appendChild(this._mapCacheCtx.tile.foreRender.getCanvas());
-            // doc.body.appendChild(this._mapCacheCtx.tile.backRender.getCanvas());
-
-            functions.syncMapContext.call(this);
 
             this.addObserver('propertyChanged', functions.onPropertyChanged, this);
         }
