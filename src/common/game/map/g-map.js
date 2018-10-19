@@ -212,8 +212,9 @@ export default (function() {
         }
 
         function onPropertyChanged (name, newVal, oldVal) {
-            if (onEventsMap.hasOwnProperty(name)) {
-                onEventsMap[name].call(this, newVal, oldVal);
+            var events = onEventsMap[this.mapTileType]
+            if (events.hasOwnProperty(name)) {
+                events[name].call(this, newVal, oldVal);
             }
         }
 
@@ -223,17 +224,6 @@ export default (function() {
             this.removeObserver('render', renderDiamondMap, this);
             if (this.mapTileType === 'square') {
                 this.addObserver('render', renderSquareMap, this);
-                onEventsMap.width = onMapForeCacheInvalid;
-                onEventsMap.height = onMapForeCacheInvalid;
-                onEventsMap.anchorX = onAnchorXChanged;
-                onEventsMap.anchorY = onAnchorYChanged;
-                onEventsMap.mapX = onMapXChanged;
-                onEventsMap.mapY = onMapYChanged;
-                onEventsMap.mapTileWidth = onSquareMapTileWidthChanged;
-                onEventsMap.mapTileHeight = onSquareMapTileHeightChanged;
-                onEventsMap.mapTileRows = onSquareMapTileRowsChanged;
-                onEventsMap.mapTileCols = onSquareMapTileColsChanged;
-                onEventsMap.mapTileData = onMapAllCacheInvalid;
                 onMapForeCacheInvalid.call(this);
                 onAnchorXChanged.call(this);
                 onAnchorYChanged.call(this);
@@ -246,17 +236,6 @@ export default (function() {
                 onMapAllCacheInvalid.call(this);
             } else if (this.mapTileType === 'diamond') {
                 this.addObserver('render', renderDiamondMap, this);
-                onEventsMap.width = onMapForeCacheInvalid;
-                onEventsMap.height = onMapForeCacheInvalid;
-                onEventsMap.anchorX = onAnchorXChanged;
-                onEventsMap.anchorY = onAnchorYChanged;
-                onEventsMap.mapX = onMapXChanged;
-                onEventsMap.mapY = onMapYChanged;
-                onEventsMap.mapTileWidth = onDiamondMapTileWidthChanged; 
-                onEventsMap.mapTileHeight = onDiamondMapTileHeightChanged;
-                onEventsMap.mapTileRows = onDiamondMapTileRowsChanged;
-                onEventsMap.mapTileCols = onDiamondMapTileColsChanged;
-                onEventsMap.mapTileData = onMapAllCacheInvalid;
                 onMapForeCacheInvalid.call(this);
                 onAnchorXChanged.call(this);
                 onAnchorYChanged.call(this);
@@ -346,7 +325,34 @@ export default (function() {
         }
 
         var onEventsMap = {
-            mapTileType: onMapTileTypeChanged
+            square: {
+                mapTileType: onMapTileTypeChanged,
+                width: onMapForeCacheInvalid,
+                height: onMapForeCacheInvalid,
+                anchorX: onAnchorXChanged,
+                anchorY: onAnchorYChanged,
+                mapX: onMapXChanged,
+                mapY: onMapYChanged,
+                mapTileWidth: onSquareMapTileWidthChanged,
+                mapTileHeight: onSquareMapTileHeightChanged,
+                mapTileRows: onSquareMapTileRowsChanged,
+                mapTileCols: onSquareMapTileColsChanged,
+                mapTileData: onMapAllCacheInvalid
+            },
+            diamond: {
+                mapTileType: onMapTileTypeChanged,
+                width: onMapForeCacheInvalid,
+                height: onMapForeCacheInvalid,
+                anchorX: onAnchorXChanged,
+                anchorY: onAnchorYChanged,
+                mapX: onMapXChanged,
+                mapY: onMapYChanged,
+                mapTileWidth: onDiamondMapTileWidthChanged,
+                mapTileHeight: onDiamondMapTileHeightChanged,
+                mapTileRows: onDiamondMapTileRowsChanged,
+                mapTileCols: onDiamondMapTileColsChanged,
+                mapTileData: onMapAllCacheInvalid
+            }
         }
 
         return {

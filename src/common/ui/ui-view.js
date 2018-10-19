@@ -11,57 +11,6 @@ export default (function () {
     var doc = document;
 
     var functions = (function () {
-      function onPropertyChanged (name, newVal, oldVal) {
-
-      }
-
-      function onBackgroundColorChanged () {
-
-      }
-
-      function onBorderWidthChanged () {
-
-      }
-
-      function onBorderColorChanged () {
-
-      }
-
-      function onBorderRadiusChanged () {
-
-      }
-
-      var onEventsMap = {
-        backgroundColor: ,
-        borderWidth: ,
-        borderColor: ,
-        borderRadius: ,
-      }
-
-      function syncBackgroundBorderRender() {
-        var ctx = this._backgroundBorderCacheCtx;
-        if (this.backgroundColor === null && (this.borderColor === null || this.borderWidth <= 0)) {
-          this.removeObserver('render', renderBackgroundAndBorder, this);
-          ctx.render = null;
-        } else {
-          if (this.getObserverByAllParams('render', renderBackgroundAndBorder, this, this) === null) {
-            this.addObserver('render', renderBackgroundAndBorder, this, -Infinity);
-          }
-          if (ctx.render === null) {
-            ctx.renderInvalid = true;
-            ctx.render = new CanvasRender({
-              canvas: doc.createElement('canvas'),
-              width: this.width,
-              height: this.height
-            });
-          }
-        }
-      }
-
-      function syncBackgroundBorderRenderInvalid () {
-        this._backgroundBorderCacheCtx.renderInvalid = true;
-      }
-      
       function renderBackgroundAndBorder (sender, render, dirtyZones) {
         var ctx = this._backgroundBorderCacheCtx;
         if (ctx.renderInvalid) {
@@ -139,6 +88,70 @@ export default (function () {
         render.lineTo(left + radius, bottom);
         render.arcTo(left, bottom, left, bottom - radius, radius);
         render.closePath();
+      }
+
+      function onPropertyChanged (name, newVal, oldVal) {
+        if (onEventsMap.hasOwnProperty(name)) {
+          onEventsMap[name].call(this, newVal, oldVal);
+        }
+      }
+
+      function onRenderChanged () {
+        var ctx = this._backgroundBorderCacheCtx;
+        this.removeObserver('render', renderBackgroundAndBorder, this);
+        if (!(this.backgroundColor === null && (this.borderColor === null || this.borderWidth <= 0))) {
+          this.addObserver('render', renderBackgroundAndBorder, this, -Infinity);
+          if (ctx.render === null) {
+            ctx.renderInvalid = true;
+            ctx.render = new CanvasRender({
+              canvas: doc.createElement('canvas'),
+              width: this.width,
+              height: this.height
+            })
+          }
+        } else {
+          ctx.render = null;
+        }
+      }
+
+      function onWidthChanged () {
+        this._backgroundBorderCacheCtx.renderInvalid = true;
+      }
+
+      function onHeightChanged () {
+        this._backgroundBorderCacheCtx.renderInvalid = true;
+      }
+
+      function onBackgroundColorChanged () {
+        onRenderChanged.call(this);
+        this._backgroundBorderCacheCtx.renderInvalid = true;
+        this.dirty();
+      }
+
+      function onBorderWidthChanged () {
+        onRenderChanged.call(this);
+        this._backgroundBorderCacheCtx.renderInvalid = true;
+        this.dirty();
+      }
+
+      function onBorderColorChanged () {
+        onRenderChanged.call(this);
+        this._backgroundBorderCacheCtx.renderInvalid = true;
+        this.dirty();
+      }
+
+      function onBorderRadiusChanged () {
+        this._backgroundBorderCacheCtx.renderInvalid = true;
+        this.dirty();
+      }
+
+      var onEventsMap = {
+        width: onWidthChanged,
+        height: onHeightChanged,
+        backgroundColor: onBackgroundColorChanged,
+        borderWidth: onBorderWidthChanged,
+        borderColor: onBorderColorChanged,
+        borderRadius: onBorderRadiusChanged
       }
 
       return {
