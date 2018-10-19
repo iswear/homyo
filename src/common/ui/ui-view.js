@@ -99,6 +99,8 @@ export default (function () {
       function onRenderChanged () {
         var ctx = this._backgroundBorderCacheCtx;
         this.removeObserver('render', renderBackgroundAndBorder, this);
+        this._backgroundBorderCacheCtx.renderInvalid = true;
+        this.dirty();
         if (!(this.backgroundColor === null && (this.borderColor === null || this.borderWidth <= 0))) {
           this.addObserver('render', renderBackgroundAndBorder, this, -Infinity);
           if (ctx.render === null) {
@@ -122,24 +124,6 @@ export default (function () {
         this._backgroundBorderCacheCtx.renderInvalid = true;
       }
 
-      function onBackgroundColorChanged () {
-        onRenderChanged.call(this);
-        this._backgroundBorderCacheCtx.renderInvalid = true;
-        this.dirty();
-      }
-
-      function onBorderWidthChanged () {
-        onRenderChanged.call(this);
-        this._backgroundBorderCacheCtx.renderInvalid = true;
-        this.dirty();
-      }
-
-      function onBorderColorChanged () {
-        onRenderChanged.call(this);
-        this._backgroundBorderCacheCtx.renderInvalid = true;
-        this.dirty();
-      }
-
       function onBorderRadiusChanged () {
         this._backgroundBorderCacheCtx.renderInvalid = true;
         this.dirty();
@@ -148,17 +132,14 @@ export default (function () {
       var onEventsMap = {
         width: onWidthChanged,
         height: onHeightChanged,
-        backgroundColor: onBackgroundColorChanged,
-        borderWidth: onBorderWidthChanged,
-        borderColor: onBorderColorChanged,
+        backgroundColor: onRenderChanged,
+        borderWidth: onRenderChanged,
+        borderColor: onRenderChanged,
         borderRadius: onBorderRadiusChanged
       }
 
       return {
-        syncBackgroundBorderRender: syncBackgroundBorderRender,
-        syncBackgroundBorderRenderInvalid: syncBackgroundBorderRenderInvalid,
-        renderRectPath: renderRectPath,
-        renderRadiusPath: renderRadiusPath
+        onPropertyChanged: onPropertyChanged
       }
     })();
 
@@ -188,24 +169,7 @@ export default (function () {
           render: null
         };
 
-        functions.syncBackgroundBorderRender.call(this);
-        functions.syncBackgroundBorderRenderInvalid.call(this);
-
-        this.addObserver('backgroundColorChanged', this.dirty, this);
-        this.addObserver('borderWidthChanged', this.dirty, this);
-        this.addObserver('borderColorChanged', this.dirty, this);
-        this.addObserver('borderRadiusChanged', this.dirty, this);
-
-        this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRender, this);
-        this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRender, this);
-        this.addObserver('borderColorChanged', functions.syncBackgroundBorderRender, this);
-
-        this.addObserver('widthChanged', functions.syncBackgroundBorderRenderInvalid, this);
-        this.addObserver('heightChanged', functions.syncBackgroundBorderRenderInvalid, this);
-        this.addObserver('backgroundColorChanged', functions.syncBackgroundBorderRenderInvalid, this);
-        this.addObserver('borderWidthChanged', functions.syncBackgroundBorderRenderInvalid, this);
-        this.addObserver('borderColorChanged', functions.syncBackgroundBorderRenderInvalid, this);
-        this.addObserver('borderRadiusChanged', functions.syncBackgroundBorderRenderInvalid, this);
+        this.addObserver('propertyChanged', this.onPropertyChanged, this);
       }
 
       InnerUIView.prototype.startClip = function (render) {

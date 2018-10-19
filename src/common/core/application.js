@@ -347,7 +347,6 @@ export default (function () {
         initEvent: initEvent,
         onLoadImageFinished: onLoadImageFinished,
         onPropertyChanged: onPropertyChanged,
-        onScaleModeChanged: onScaleModeChanged,
         onRenderSizeChanged: onRenderSizeChanged,
       }
     })();
@@ -430,7 +429,6 @@ export default (function () {
         };
 
         functions.initEvent.call(this);
-        functions.onScaleModeChanged.call(this);
         functions.onRenderSizeChanged.call(this);
 
         this.addObserver('propertyChanged', functions.onPropertyChanged, this);

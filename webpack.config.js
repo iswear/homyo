@@ -21,7 +21,7 @@ module.exports = env => {
         path: path.resolve(__dirname, './dist/js')
       },
       plugins: [
-        new uglify()
+        // new uglify()
       ]
     }
   } else {
@@ -34,7 +34,7 @@ module.exports = env => {
         libraryTarget: 'commonjs2'
       },
       plugins: [
-        new uglify()
+        // new uglify()
       ]
     };
   }

@@ -70,6 +70,7 @@ export default (
           obj.prototype.super = superCallFn;
         }
         if (this.defineNotifyProperty) {
+          console.log('fafe' + item)
           for (item in this) {
             var prefix = this[item].charAt(0)
             if (prefix === "_" || prefix === "$") {
@@ -78,9 +79,6 @@ export default (
             this.defineNotifyProperty(item, this[item])
             delete this[item]
           }
-        }
-        for (item in this) {
-
         }
         return obj;
       }
