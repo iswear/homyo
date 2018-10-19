@@ -122,7 +122,20 @@
 
       function extend (base) {
         var obj = function (conf) {
-          this.init(conf)
+          this.init(conf);
+          if (this.defineNotifyProperty) {
+            for (var item in this) {
+              if (this.hasOwnProperty(item)) {
+                var prefix = item.charAt(0)
+                if (prefix === "_" || prefix === "$") {
+                  continue;
+                }
+                var value = this[item];
+                delete this[item];
+                this.defineNotifyProperty(item, value);
+              }
+            }
+          }
         }
         if (base) {
           obj.prototype = Object.create(base.prototype);
@@ -138,17 +151,6 @@
         }
         if (obj.prototype.super === undefined) {
           obj.prototype.super = superCallFn;
-        }
-        if (this.defineNotifyProperty) {
-          console.log('fafe' + item)
-          for (item in this) {
-            var prefix = this[item].charAt(0)
-            if (prefix === "_" || prefix === "$") {
-              continue;
-            }
-            this.defineNotifyProperty(item, this[item])
-            delete this[item]
-          }
         }
         return obj;
       }
@@ -456,7 +458,7 @@
 
 /* harmony default export */ __webpack_exports__["a"] = ((function () {
     var functions = (function () {
-      function onPropertyChanged (name, newVal, oldVal) {
+      function onPropertyChanged (sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
           onEventsMap[name].call(this, newVal, oldVal);
         }
@@ -883,7 +885,7 @@
         }
         
         if (transformCtx.localInvalid) {
-          transformCtx.localTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].incline2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].scale2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].rotate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].translate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
+          transformCtx.localTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].shear2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].scale2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].rotate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].translate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.shearX, this.shearY);
           transformCtx.localReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].reverse2d(transformCtx.localTransform);
           transformCtx.worldTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(parentWTransform, transformCtx.localTransform);
           transformCtx.worldReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(transformCtx.localReverseTransform, parentWReverseTransform);
@@ -905,19 +907,19 @@
           worldZone.height = worldZone.bottom - worldZone.top;
         }
 
-        transformCtx.localInvalid = false;
-        zoneCtx.localInvalid = false;
-        dirtyCtx.render = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].isZoneCross(renderZone, this.getDirtyZone());
-
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
           var layer = layers[i];
           if (layer) {
             for (var j = 0, len2 = layer.length; j < len2; ++j) {
-              layer[j]._syncTransform(transformCtx.worldTransform, transformCtx.worldReverseTransform, parentUpdateTransform || transformCtx.localInvalid);
+              layer[j]._syncTransform(transformCtx.worldTransform, transformCtx.worldReverseTransform, renderZone, parentUpdateTransform || transformCtx.localInvalid);
             }
           }
         }
+
+        dirtyCtx.render = __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__["a" /* default */].isZoneCross(renderZone, this.getDirtyZone());
+        transformCtx.localInvalid = false;
+        zoneCtx.localInvalid = false;
       }
 
       InnerNode.prototype.dirty = function () {
@@ -2224,7 +2226,7 @@
           mat[3] * x, mat[4] * y, mat[5]
         ];
       },
-      incline2d: function (mat, x, y) {
+      shear2d: function (mat, x, y) {
         // [
         //   1, y, 0,
         //   x, 1, 0,
@@ -2564,7 +2566,7 @@
         render.closePath();
       }
 
-      function onPropertyChanged (name, newVal, oldVal) {
+      function onPropertyChanged (sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
           onEventsMap[name].call(this, newVal, oldVal);
         }
@@ -2643,7 +2645,7 @@
           render: null
         };
 
-        this.addObserver('propertyChanged', this.onPropertyChanged, this);
+        this.addObserver('propertyChanged', functions.onPropertyChanged, this);
       }
 
       InnerUIView.prototype.startClip = function (render) {
@@ -2910,11 +2912,11 @@
 
 /* harmony default export */ __webpack_exports__["a"] = ((function() {
     var rootNodeProps = [
-        'rotateZ', 'scaleX', 'scaleY', 'inclineX', 'inclineY', 'alpha', 'visible', 'img'
+        'rotateZ', 'scaleX', 'scaleY', 'shearX', 'shearY', 'alpha', 'visible', 'img'
     ];
 
     var normalNodeProps = [
-        'x', 'y', 'rotateZ', 'scaleX', 'scaleY', 'inclineX', 'inclineY', 'alpha', 'visible', 'img'
+        'x', 'y', 'rotateZ', 'scaleX', 'scaleY', 'shearX', 'shearY', 'alpha', 'visible', 'img'
     ];
 
     var tweenNodeProps = {
@@ -2923,8 +2925,8 @@
         rotateZ: true,
         scaleX: true,
         scaleY: true,
-        inclineX: true,
-        inclineY: true,
+        shearX: true,
+        shearY: true,
         alpha: true,
         visible: false,
         img: false
@@ -3212,7 +3214,7 @@
         }
       }
 
-      function onPropertyChanged(name, newVal, oldVal) {
+      function onPropertyChanged(sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
           onEventsMap[name].call(this, newVal, oldVal);
         }
@@ -3265,7 +3267,7 @@
 
         functions.onRenderImageChanged.call(this, this.image, undefined);
 
-        this.addObserver('propertyChanged', this, functions.onPropertyChanged);
+        this.addObserver('propertyChanged', functions.onPropertyChanged, this);
       }
 
       return InnerGTexture;
@@ -3291,18 +3293,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   var GTexture = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Texture;
   var GMap = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Map;
 
-  var root = new UILabel({
-    x: 400,
-    y: 300,
-    width: 100,
-    height: 100,
-    visible: true,
-    text: '测试测试',
-    backgroundColor: '#f00',
-    borderWidth: 1,
-    borderColor: '#0f0',
-    borderRadius: 10
-  });
+  // var root = new UILabel({
+  //   x: 400,
+  //   y: 300,
+  //   width: 100,
+  //   height: 100,
+  //   visible: true,
+  //   text: '测试测试',
+  //   backgroundColor: '#f00',
+  //   borderWidth: 1,
+  //   borderColor: '#0f0',
+  //   borderRadius: 10
+  // });
 
   // var root = new GTexture({
   //   x: 400,
@@ -3311,51 +3313,51 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   //   image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
   // });
 
-  // var root = new GMap({
-  //   x: 250,
-  //   y: 250,
-  //   // mapX: 45,
-  //   // mapY: 45,
-  //   width: 200,
-  //   height: 200,
-  //   anchorX: 0.5,
-  //   anchorY: 0.5,
-  //   visible: true,
-  //   mapTileType: 'square',
-  //   mapTileWidth: 30,
-  //   mapTileHeight: 30,
-  //   mapTileImageIndex: {
-  //     1: 'images/email.jpg'
-  //   },
-  //   mapTileImageClipIndex: {
-  //     1: {
-  //       imageId: 1,
-  //       x: 0,
-  //       y: 0,
-  //       width: 30,
-  //       height: 30
-  //     }
-  //   },
-  //   mapTileRows: 15,
-  //   mapTileCols: 15,
-  //   mapTileData: [
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //   ]
-  // });
+  var root = new GMap({
+    x: 250,
+    y: 250,
+    // mapX: 45,
+    // mapY: 45,
+    width: 200,
+    height: 200,
+    anchorX: 0.5,
+    anchorY: 0.5,
+    visible: true,
+    mapTileType: 'square',
+    mapTileWidth: 30,
+    mapTileHeight: 30,
+    mapTileImageIndex: {
+      1: 'images/email.jpg'
+    },
+    mapTileImageClipIndex: {
+      1: {
+        imageId: 1,
+        x: 0,
+        y: 0,
+        width: 30,
+        height: 30
+      }
+    },
+    mapTileRows: 15,
+    mapTileCols: 15,
+    mapTileData: [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ]
+  });
 
   // var root = new GMap({
   //   x: 250,
@@ -3410,22 +3412,22 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
   application.run();
 
-  root.runAnimation(new PropertyAnimation({
-      property: 'rotateZ',
-      offset: Infinity,
-      offsetFn: function (animation, deltaTime, sumTime) {
-          return sumTime / 1000;
-      }
-  }), null, null, false);
+  // root.runAnimation(new PropertyAnimation({
+  //     property: 'rotateZ',
+  //     offset: Infinity,
+  //     offsetFn: function (animation, deltaTime, sumTime) {
+  //         return sumTime / 1000;
+  //     }
+  // }), null, null, false);
 
-  for (var i = 0; i < 10; ++i) {
-    root.addChildNode(new GTexture({
-      x: 20 * i,
-      y: 20 * i,
-      visible: true,
-      image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
-    }));
-  }
+  // for (var i = 0; i < 10; ++i) {
+  //   root.addChildNode(new GTexture({
+  //     x: 20 * i,
+  //     y: 20 * i,
+  //     visible: true,
+  //     image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
+  //   }));
+  // }
 
   document.onkeydown = function (e) {
     var e = e ? event : e;
@@ -3912,7 +3914,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
       }
 
-      function onPropertyChanged(name, newVal, oldVal) {
+      function onPropertyChanged(sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
           onEventsMap[name].call(this, newVal, oldVal);
         }
@@ -4210,7 +4212,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 /* harmony default export */ __webpack_exports__["a"] = ((function () {
     var functions = (function () {
-      function onPropertyChanged (name, newVal, oldVal) {
+      function onPropertyChanged (sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
           onEventsMap[name].call(this, newVal, oldVal)
         }
@@ -4419,7 +4421,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
       }
 
-      function onPropertyChanged (name, newVal, oldVal) {
+      function onPropertyChanged (sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
           onEventsMap[name].call(this, newVal, oldVal);
         }
@@ -4794,7 +4796,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }
         }
 
-        function onPropertyChanged (name, newVal, oldVal) {
+        function onPropertyChanged (sender, name, newVal, oldVal) {
             var events = onEventsMap[this.mapTileType]
             if (events.hasOwnProperty(name)) {
                 events[name].call(this, newVal, oldVal);
@@ -4802,7 +4804,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
 
         function onMapTileTypeChanged () {
-            onEventsMap = { mapTileType: onMapTileTypeChanged };
             this.removeObserver('render', renderSquareMap, this);
             this.removeObserver('render', renderDiamondMap, this);
             if (this.mapTileType === 'square') {

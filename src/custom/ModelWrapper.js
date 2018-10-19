@@ -33,16 +33,16 @@ export default (function() {
                 app.removeObserver('mouseup', functions.scaleXMouseUp, sender, app)
                 app.removeObserver('mousemove', functions.scaleYMouseMove, sender, app)
                 app.removeObserver('mouseup', functions.scaleYMouseUp, sender, app)
-                app.removeObserver('mousemove', functions.inclineXMouseMove, sender, app)
-                app.removeObserver('mouseup', functions.inclineXMouseUp, sender, app)
-                app.removeObserver('mousemove', functions.inclineYMouseMove, sender, app)
-                app.removeObserver('mouseup', functions.inclineYMouseUp, sender, app)
+                app.removeObserver('mousemove', functions.shearXMouseMove, sender, app)
+                app.removeObserver('mouseup', functions.shearXMouseUp, sender, app)
+                app.removeObserver('mousemove', functions.shearYMouseMove, sender, app)
+                app.removeObserver('mouseup', functions.shearYMouseUp, sender, app)
                 ctrlNodeX.removeObserver('mousedown', functions.moveXMouseDown, sender, ctrlNodeX)
                 ctrlNodeX.removeObserver('mousedown', functions.scaleXMouseDown, sender, ctrlNodeX)
-                ctrlNodeX.removeObserver('mousedown', functions.inclineXMouseDown, sender, ctrlNodeX)
+                ctrlNodeX.removeObserver('mousedown', functions.shearXMouseDown, sender, ctrlNodeX)
                 ctrlNodeY.removeObserver('mousedown', functions.moveYMouseDown, sender, ctrlNodeY)
                 ctrlNodeY.removeObserver('mousedown', functions.scaleYMouseDown, sender, ctrlNodeY)
-                ctrlNodeY.removeObserver('mousedown', functions.inclineYMouseDown, sender, ctrlNodeY)
+                ctrlNodeY.removeObserver('mousedown', functions.shearYMouseDown, sender, ctrlNodeY)
                 ctrlNodeRotateZ.removeObserver('mousedown', functions.rotateMouseDown, sender, ctrlNodeRotateZ)
                 sender._ctrlContext.id = 0
                 sender._ctrlContext.eventId = 0
@@ -82,12 +82,12 @@ export default (function() {
                     ctrlNodeX.visible = true
                     ctrlNodeY.visible = true
                     ctrlNodeRotateZ.visible = false
-                    ctrlNodeX.addObserver('mousedown', functions.inclineXMouseDown, sender, ctrlNodeX)
-                    ctrlNodeY.addObserver('mousedown', functions.inclineYMouseDown, sender, ctrlNodeY)
-                    app.addObserver('mousemove', functions.inclineXMouseMove, sender, app)
-                    app.addObserver('mouseup', functions.inclineXMouseUp, sender, app)
-                    app.addObserver('mousemove', functions.inclineYMouseMove, sender, app)
-                    app.addObserver('mouseup', functions.inclineYMouseUp, sender, app)
+                    ctrlNodeX.addObserver('mousedown', functions.shearXMouseDown, sender, ctrlNodeX)
+                    ctrlNodeY.addObserver('mousedown', functions.shearYMouseDown, sender, ctrlNodeY)
+                    app.addObserver('mousemove', functions.shearXMouseMove, sender, app)
+                    app.addObserver('mouseup', functions.shearXMouseUp, sender, app)
+                    app.addObserver('mousemove', functions.shearYMouseMove, sender, app)
+                    app.addObserver('mouseup', functions.shearYMouseUp, sender, app)
                 } else {
                     // 其他都忽略
                     ctrlNodeX.visible = false
@@ -329,32 +329,32 @@ export default (function() {
             scaleYMouseUp: function(sender, e) {
                 this.clearCtrlContext(32, e, false)
             },
-            inclineXMouseDown: function(sender, e) {
+            shearXMouseDown: function(sender, e) {
                 this.initCtrlContext(41, e)
             },
-            inclineXMouseMove: function(sender, e) {
+            shearXMouseMove: function(sender, e) {
                 const context = this._ctrlContext
                 if (context.bizId === 41 && context.eventId === e.id) {
                     const lStartOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
                     const lEndOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
-                    this.inclineY = context.bizStartValue.inclineY + lEndOffset[1] / lEndOffset[0] - lStartOffset[1] / lStartOffset[0]
+                    this.shearY = context.bizStartValue.shearY + lEndOffset[1] / lEndOffset[0] - lStartOffset[1] / lStartOffset[0]
                 }
             },
-            inclineXMouseUp: function(sender, e) {
+            shearXMouseUp: function(sender, e) {
                 this.clearCtrlContext(41, e, false)
             },
-            inclineYMouseDown: function(sender, e) {
+            shearYMouseDown: function(sender, e) {
                 this.initCtrlContext(42, e)
             },
-            inclineYMouseMove: function(sender, e) {
+            shearYMouseMove: function(sender, e) {
                 const context = this._ctrlContext
                 if (context.bizId === 42 && context.eventId === e.id) {
                     const lStartOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
                     const lEndOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
-                    this.inclineX = context.bizStartValue.inclineX + lEndOffset[0] / lEndOffset[1] - lStartOffset[0] / lStartOffset[1]
+                    this.shearX = context.bizStartValue.shearX + lEndOffset[0] / lEndOffset[1] - lStartOffset[0] / lStartOffset[1]
                 }
             },
-            inclineYMouseUp: function(sender, e) {
+            shearYMouseUp: function(sender, e) {
                 this.clearCtrlContext(42, e, false)
             }
         }
@@ -399,8 +399,8 @@ export default (function() {
                 context.bizStartValue.rotateZ = this.rotateZ
                 context.bizStartValue.scaleX = this.scaleX
                 context.bizStartValue.scaleY = this.scaleY
-                context.bizStartValue.inclineX = this.inclineX
-                context.bizStartValue.inclineY = this.inclineY
+                context.bizStartValue.shearX = this.shearX
+                context.bizStartValue.shearY = this.shearY
                 context.eventStartOffset.x = e.offsetX
                 context.eventStartOffset.y = e.offsetY
                 context.transformInParent = this.getTransformInParent()
@@ -586,11 +586,11 @@ export default (function() {
             }
 
             function syncNodeInclineX(sender, newVal, oldVal) {
-                syncNodeTransProperty.call(this, sender, 'inclineX', 'nodeInclineXChanged', newVal, oldVal)
+                syncNodeTransProperty.call(this, sender, 'shearX', 'nodeInclineXChanged', newVal, oldVal)
             }
 
             function syncNodeInclineY(sender, newVal, oldVal) {
-                syncNodeTransProperty.call(this, sender, 'inclineY', 'nodeInclineYChanged', newVal, oldVal)
+                syncNodeTransProperty.call(this, sender, 'shearY', 'nodeInclineYChanged', newVal, oldVal)
             }
 
             function syncNodeImg(sender, newVal, oldVal) {
@@ -646,11 +646,11 @@ export default (function() {
             }
 
             function syncTextureInclineX(sender, newVal, oldVal) {
-                syncTextureTransProperty.call(this, sender, 'inclineX', 'textureInclineXChanged', newVal, oldVal)
+                syncTextureTransProperty.call(this, sender, 'shearX', 'textureInclineXChanged', newVal, oldVal)
             }
 
             function syncTextureInclineY(sender, newVal, oldVal) {
-                syncTextureTransProperty.call(this, sender, 'inclineY', 'textureInclineYChanged', newVal, oldVal)
+                syncTextureTransProperty.call(this, sender, 'shearY', 'textureInclineYChanged', newVal, oldVal)
             }
 
             function syncTextureNonTransProperty(sender, property, eventName, newVal, oldVal) {
@@ -693,8 +693,8 @@ export default (function() {
                 syncNodeRotateZ.call(this, node, node.rotateZ, 0)
                 syncNodeScaleX.call(this, node, node.scaleX, 0)
                 syncNodeScaleY.call(this, node, node.scaleY, 0)
-                syncNodeInclineX.call(this, node, node.inclineX, 0)
-                syncNodeInclineY.call(this, node, node.inclineY, 0)
+                syncNodeInclineX.call(this, node, node.shearX, 0)
+                syncNodeInclineY.call(this, node, node.shearY, 0)
                 syncNodeImg.call(this, node, node.img, null)
             }
 
@@ -704,8 +704,8 @@ export default (function() {
                 node.addObserver('rotateZChanged', syncNodeRotateZ, this, node)
                 node.addObserver('scaleXChanged', syncNodeScaleX, this, node)
                 node.addObserver('scaleYChanged', syncNodeScaleY, this, node)
-                node.addObserver('inclineXChanged', syncNodeInclineX, this, node)
-                node.addObserver('inclineYChanged', syncNodeInclineY, this, node)
+                node.addObserver('shearXChanged', syncNodeInclineX, this, node)
+                node.addObserver('shearYChanged', syncNodeInclineY, this, node)
                 node.addObserver('imgChanged', syncNodeImg, this, node)
             }
 
@@ -715,8 +715,8 @@ export default (function() {
                 syncTextureRotateZ.call(this, texture, texture.rotateZ, 0)
                 syncTextureScaleX.call(this, texture, texture.scaleX, 0)
                 syncTextureScaleY.call(this, texture, texture.scaleY, 0)
-                syncTextureInclineX.call(this, texture, texture.inclineX, 0)
-                syncTextureInclineY.call(this, texture, texture.inclineY, 0)
+                syncTextureInclineX.call(this, texture, texture.shearX, 0)
+                syncTextureInclineY.call(this, texture, texture.shearY, 0)
                 syncTextureWidth.call(this, texture, texture.width, 0)
                 syncTextureHeight.call(this, texture, texture.height, 0)
                 syncTextureAnchorX.call(this, texture, texture.anchorX, 0)
@@ -730,8 +730,8 @@ export default (function() {
                 texture.addObserver('rotateZChanged', syncTextureRotateZ, this, texture)
                 texture.addObserver('scaleXChanged', syncTextureScaleX, this, texture)
                 texture.addObserver('scaleYChanged', syncTextureScaleY, this, texture)
-                texture.addObserver('inclineXChanged', syncTextureInclineX, this, texture)
-                texture.addObserver('inclineYChanged', syncTextureInclineY, this, texture)
+                texture.addObserver('shearXChanged', syncTextureInclineX, this, texture)
+                texture.addObserver('shearYChanged', syncTextureInclineY, this, texture)
                 texture.addObserver('widthChanged', syncTextureWidth, this, texture)
                 texture.addObserver('heightChanged', syncTextureHeight, this, texture)
                 texture.addObserver('anchorXChanged', syncTextureAnchorX, this, texture)
@@ -1345,8 +1345,8 @@ export default (function() {
                     rotateZ: node.rotateZ,
                     scaleX: node.scaleX,
                     scaleY: node.scaleY,
-                    inclineX: node.inclineX,
-                    inclineY: node.inclineY,
+                    shearX: node.shearX,
+                    shearY: node.shearY,
                     alpha: node.alpha,
                     visible: node.visible,
                     img: node.img
@@ -1373,8 +1373,8 @@ export default (function() {
                     rotateZ: texture.rotateZ,
                     scaleX: texture.scaleX,
                     scaleY: texture.scaleY,
-                    inclineX: texture.inclineX,
-                    inclineY: texture.inclineY,
+                    shearX: texture.shearX,
+                    shearY: texture.shearY,
                     alpha: texture.alpha,
                     visible: texture.visible,
                     img: texture.img

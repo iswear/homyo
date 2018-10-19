@@ -7,8 +7,8 @@ public class NodeConfig {
     private Double rotateZ;
     private Double scaleX;
     private Double scaleY;
-    private Double inclineX;
-    private Double inclineY;
+    private Double shearX;
+    private Double shearY;
     private Integer width;
     private Integer height;
     private Double anchorX;

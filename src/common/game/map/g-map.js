@@ -211,7 +211,7 @@ export default (function() {
             }
         }
 
-        function onPropertyChanged (name, newVal, oldVal) {
+        function onPropertyChanged (sender, name, newVal, oldVal) {
             var events = onEventsMap[this.mapTileType]
             if (events.hasOwnProperty(name)) {
                 events[name].call(this, newVal, oldVal);
@@ -219,7 +219,6 @@ export default (function() {
         }
 
         function onMapTileTypeChanged () {
-            onEventsMap = { mapTileType: onMapTileTypeChanged };
             this.removeObserver('render', renderSquareMap, this);
             this.removeObserver('render', renderDiamondMap, this);
             if (this.mapTileType === 'square') {

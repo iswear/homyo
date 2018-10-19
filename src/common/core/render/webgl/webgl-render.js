@@ -8,7 +8,7 @@ import Notifier from '../../notifier';
 
 export default (function () {
     var functions = (function () {
-      function onPropertyChanged (name, newVal, oldVal) {
+      function onPropertyChanged (sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
           onEventsMap[name].call(this, newVal, oldVal)
         }

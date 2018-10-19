@@ -10,11 +10,11 @@ import QueueAnimation from '../core/animation/queue-animation';
 
 export default (function() {
     var rootNodeProps = [
-        'rotateZ', 'scaleX', 'scaleY', 'inclineX', 'inclineY', 'alpha', 'visible', 'img'
+        'rotateZ', 'scaleX', 'scaleY', 'shearX', 'shearY', 'alpha', 'visible', 'img'
     ];
 
     var normalNodeProps = [
-        'x', 'y', 'rotateZ', 'scaleX', 'scaleY', 'inclineX', 'inclineY', 'alpha', 'visible', 'img'
+        'x', 'y', 'rotateZ', 'scaleX', 'scaleY', 'shearX', 'shearY', 'alpha', 'visible', 'img'
     ];
 
     var tweenNodeProps = {
@@ -23,8 +23,8 @@ export default (function() {
         rotateZ: true,
         scaleX: true,
         scaleY: true,
-        inclineX: true,
-        inclineY: true,
+        shearX: true,
+        shearY: true,
         alpha: true,
         visible: false,
         img: false

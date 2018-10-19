@@ -80,7 +80,7 @@ export default (
           mat[3] * x, mat[4] * y, mat[5]
         ];
       },
-      incline2d: function (mat, x, y) {
+      shear2d: function (mat, x, y) {
         // [
         //   1, y, 0,
         //   x, 1, 0,

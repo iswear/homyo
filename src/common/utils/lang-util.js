@@ -52,7 +52,20 @@ export default (
 
       function extend (base) {
         var obj = function (conf) {
-          this.init(conf)
+          this.init(conf);
+          if (this.defineNotifyProperty) {
+            for (var item in this) {
+              if (this.hasOwnProperty(item)) {
+                var prefix = item.charAt(0)
+                if (prefix === "_" || prefix === "$") {
+                  continue;
+                }
+                var value = this[item];
+                delete this[item];
+                this.defineNotifyProperty(item, value);
+              }
+            }
+          }
         }
         if (base) {
           obj.prototype = Object.create(base.prototype);
@@ -68,17 +81,6 @@ export default (
         }
         if (obj.prototype.super === undefined) {
           obj.prototype.super = superCallFn;
-        }
-        if (this.defineNotifyProperty) {
-          console.log('fafe' + item)
-          for (item in this) {
-            var prefix = this[item].charAt(0)
-            if (prefix === "_" || prefix === "$") {
-              continue;
-            }
-            this.defineNotifyProperty(item, this[item])
-            delete this[item]
-          }
         }
         return obj;
       }

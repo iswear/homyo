@@ -90,7 +90,7 @@ export default (function () {
         render.closePath();
       }
 
-      function onPropertyChanged (name, newVal, oldVal) {
+      function onPropertyChanged (sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
           onEventsMap[name].call(this, newVal, oldVal);
         }
@@ -169,7 +169,7 @@ export default (function () {
           render: null
         };
 
-        this.addObserver('propertyChanged', this.onPropertyChanged, this);
+        this.addObserver('propertyChanged', functions.onPropertyChanged, this);
       }
 
       InnerUIView.prototype.startClip = function (render) {

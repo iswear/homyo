@@ -65,7 +65,7 @@ export default (function () {
         }
       }
 
-      function onPropertyChanged(name, newVal, oldVal) {
+      function onPropertyChanged(sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
           onEventsMap[name].call(this, newVal, oldVal);
         }
@@ -118,7 +118,7 @@ export default (function () {
 
         functions.onRenderImageChanged.call(this, this.image, undefined);
 
-        this.addObserver('propertyChanged', this, functions.onPropertyChanged);
+        this.addObserver('propertyChanged', functions.onPropertyChanged, this);
       }
 
       return InnerGTexture;

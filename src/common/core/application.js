@@ -329,7 +329,7 @@ export default (function () {
         }
       }
 
-      function onPropertyChanged(name, newVal, oldVal) {
+      function onPropertyChanged(sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
           onEventsMap[name].call(this, newVal, oldVal);
         }

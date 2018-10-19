@@ -10,7 +10,7 @@ import GeometryUtil from '../utils/geometry-util';
 
 export default (function () {
     var functions = (function () {
-      function onPropertyChanged (name, newVal, oldVal) {
+      function onPropertyChanged (sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
           onEventsMap[name].call(this, newVal, oldVal);
         }
@@ -437,7 +437,7 @@ export default (function () {
         }
         
         if (transformCtx.localInvalid) {
-          transformCtx.localTransform = MatrixUtil.incline2d(MatrixUtil.scale2d(MatrixUtil.rotate2d(MatrixUtil.translate2d(MatrixUtil.createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.inclineX, this.inclineY);
+          transformCtx.localTransform = MatrixUtil.shear2d(MatrixUtil.scale2d(MatrixUtil.rotate2d(MatrixUtil.translate2d(MatrixUtil.createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.shearX, this.shearY);
           transformCtx.localReverseTransform = MatrixUtil.reverse2d(transformCtx.localTransform);
           transformCtx.worldTransform = MatrixUtil.mulMat2d(parentWTransform, transformCtx.localTransform);
           transformCtx.worldReverseTransform = MatrixUtil.mulMat2d(transformCtx.localReverseTransform, parentWReverseTransform);
@@ -459,19 +459,19 @@ export default (function () {
           worldZone.height = worldZone.bottom - worldZone.top;
         }
 
-        transformCtx.localInvalid = false;
-        zoneCtx.localInvalid = false;
-        dirtyCtx.render = GeometryUtil.isZoneCross(renderZone, this.getDirtyZone());
-
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
           var layer = layers[i];
           if (layer) {
             for (var j = 0, len2 = layer.length; j < len2; ++j) {
-              layer[j]._syncTransform(transformCtx.worldTransform, transformCtx.worldReverseTransform, parentUpdateTransform || transformCtx.localInvalid);
+              layer[j]._syncTransform(transformCtx.worldTransform, transformCtx.worldReverseTransform, renderZone, parentUpdateTransform || transformCtx.localInvalid);
             }
           }
         }
+
+        dirtyCtx.render = GeometryUtil.isZoneCross(renderZone, this.getDirtyZone());
+        transformCtx.localInvalid = false;
+        zoneCtx.localInvalid = false;
       }
 
       InnerNode.prototype.dirty = function () {
