@@ -27,75 +27,29 @@ import homyo from '../../../main'
   //   image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
   // });
 
-  var root = new GMap({
-    x: 250,
-    y: 250,
-    // mapX: 45,
-    // mapY: 45,
-    width: 200,
-    height: 200,
-    anchorX: 0.5,
-    anchorY: 0.5,
-    visible: true,
-    mapTileType: 'square',
-    mapTileWidth: 30,
-    mapTileHeight: 30,
-    mapTileImageIndex: {
-      1: 'images/email.jpg'
-    },
-    mapTileImageClipIndex: {
-      1: {
-        imageId: 1,
-        x: 0,
-        y: 0,
-        width: 30,
-        height: 30
-      }
-    },
-    mapTileRows: 15,
-    mapTileCols: 15,
-    mapTileData: [
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    ]
-  });
-
   // var root = new GMap({
   //   x: 250,
   //   y: 250,
-  //   mapX: 10,
-  //   mapY: 10,
+  //   // mapX: 45,
+  //   // mapY: 45,
   //   width: 200,
   //   height: 200,
   //   anchorX: 0.5,
   //   anchorY: 0.5,
   //   visible: true,
-  //   mapTileType: 'diamond',
+  //   mapTileType: 'square',
   //   mapTileWidth: 30,
   //   mapTileHeight: 30,
   //   mapTileImageIndex: {
-  //     1: 'images/203-4.png'
+  //     1: 'images/email.jpg'
   //   },
   //   mapTileImageClipIndex: {
   //     1: {
   //       imageId: 1,
   //       x: 0,
   //       y: 0,
-  //       width: 128,
-  //       height: 64
+  //       width: 30,
+  //       height: 30
   //     }
   //   },
   //   mapTileRows: 15,
@@ -119,6 +73,52 @@ import homyo from '../../../main'
   //   ]
   // });
 
+  var root = new GMap({
+    x: 250,
+    y: 250,
+    mapX: 10,
+    mapY: 10,
+    width: 200,
+    height: 200,
+    anchorX: 0.5,
+    anchorY: 0.5,
+    visible: true,
+    mapTileType: 'diamond',
+    mapTileWidth: 30,
+    mapTileHeight: 30,
+    mapTileImageIndex: {
+      1: 'images/203-4.png'
+    },
+    mapTileImageClipIndex: {
+      1: {
+        imageId: 1,
+        x: 0,
+        y: 0,
+        width: 128,
+        height: 64
+      }
+    },
+    mapTileRows: 15,
+    mapTileCols: 15,
+    mapTileData: [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ]
+  });
+
   var application = new Application({
     canvas: document.getElementById('app'),
     root: root
@@ -126,22 +126,22 @@ import homyo from '../../../main'
 
   application.run();
 
-  // root.runAnimation(new PropertyAnimation({
-  //     property: 'rotateZ',
-  //     offset: Infinity,
-  //     offsetFn: function (animation, deltaTime, sumTime) {
-  //         return sumTime / 1000;
-  //     }
-  // }), null, null, false);
+  root.runAnimation(new PropertyAnimation({
+      property: 'rotateZ',
+      offset: Infinity,
+      offsetFn: function (animation, deltaTime, sumTime) {
+          return sumTime / 1000;
+      }
+  }), null, null, false);
 
-  // for (var i = 0; i < 10; ++i) {
-  //   root.addChildNode(new GTexture({
-  //     x: 20 * i,
-  //     y: 20 * i,
-  //     visible: true,
-  //     image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
-  //   }));
-  // }
+  for (var i = 0; i < 10; ++i) {
+    root.addChildNode(new GTexture({
+      x: 20 * i,
+      y: 20 * i,
+      visible: true,
+      image: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1536657006&di=f6e8dc17d395fd0841a24aa1f068ce3c&imgtype=jpg&er=1&src=http%3A%2F%2Fp2.qhimg.com%2Ft0193dcb0a279f6ec8f.jpg',
+    }));
+  }
 
   document.onkeydown = function (e) {
     var e = e ? event : e;
