@@ -1,0 +1,42 @@
+<html>
+  <head>
+
+  </head>
+
+  <body>
+    <img id="img1" src="./images/203-4.png">
+    <img id="img2" src="./images/email.jpg">
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <script>
+      var canvas = document.getElementById("canvas");
+      var context = canvas.getContext("2d");
+      var img1 = document.getElementById("img1");
+      var img2 = document.getElementById("img2");
+      var flag = 0;
+
+      context.globalCompositeOperation = "source-out";
+
+      document.body.onclick = function(){
+        context.drawImage(img1, 100, 100);
+        context.drawImage(img2, 100, 100);
+      }
+
+      img1.onload = function() {
+        flag++;
+        if (flag === 2) {
+          context.drawImage(img1, 100, 100);
+          context.drawImage(img2, 100, 100);
+        }
+      }
+
+      img2.onload = function() {
+        flag++;
+        if (flag == 2) {
+          context.drawImage(img1, 100, 100);
+          context.drawImage(img2, 100, 100);
+        }
+      }
+      // context.globalCompositeOperation = "";
+    </script>
+  </body>
+</html>
