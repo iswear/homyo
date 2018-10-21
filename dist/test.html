@@ -6,36 +6,53 @@
   <body>
     <img id="img1" src="./images/203-4.png">
     <img id="img2" src="./images/email.jpg">
-    <canvas id="canvas" width="400" height="400"></canvas>
+    <img id="img3" src="./images/img.jpg">
+    <img id="img4" src="./images/img.jpg">
+    <canvas id="canvas" width="1440" height="1000"></canvas>
     <script>
       var canvas = document.getElementById("canvas");
       var context = canvas.getContext("2d");
       var img1 = document.getElementById("img1");
       var img2 = document.getElementById("img2");
+      var img3 = document.getElementById("img3");
       var flag = 0;
 
-      context.globalCompositeOperation = "source-out";
-
-      document.body.onclick = function(){
-        context.drawImage(img1, 100, 100);
-        context.drawImage(img2, 100, 100);
-      }
-
-      img1.onload = function() {
-        flag++;
-        if (flag === 2) {
-          context.drawImage(img1, 100, 100);
-          context.drawImage(img2, 100, 100);
+        // context.fillStyle = '#000';
+        // context.fillRect(0, 0, 100, 100);
+      // context.globalCompositeOperation = 'source-out';
+      img3.onload = function () {
+        var start = (new Date()).getTime();
+        for (var i = 0; i < 9; ++i) {
+          context.drawImage(img3, 0, 0);
         }
+        console.log((new Date()).getTime() - start);
       }
 
-      img2.onload = function() {
-        flag++;
-        if (flag == 2) {
-          context.drawImage(img1, 100, 100);
-          context.drawImage(img2, 100, 100);
-        }
-      }
+
+
+
+      // context.globalCompositeOperation = "source-out";
+
+      // document.body.onclick = function(){
+      //   context.drawImage(img1, 100, 100);
+      //   context.drawImage(img2, 100, 100);
+      // }
+
+      // img1.onload = function() {
+      //   flag++;
+      //   if (flag === 2) {
+      //     context.drawImage(img1, 100, 100);
+      //     context.drawImage(img2, 100, 100);
+      //   }
+      // }
+
+      // img2.onload = function() {
+      //   flag++;
+      //   if (flag == 2) {
+      //     context.drawImage(img1, 100, 100);
+      //     context.drawImage(img2, 100, 100);
+      //   }
+      // }
       // context.globalCompositeOperation = "";
     </script>
   </body>
