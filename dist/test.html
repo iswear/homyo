@@ -10,6 +10,10 @@
     <img id="img4" src="./images/img.jpg">
     <canvas id="canvas" width="1440" height="1000"></canvas>
     <script>
+      window.onclick = function () {
+        alert("hello world");
+      }
+
       var canvas = document.getElementById("canvas");
       var context = canvas.getContext("2d");
       var img1 = document.getElementById("img1");
@@ -27,8 +31,13 @@
         }
         console.log((new Date()).getTime() - start);
       }
+      
 
 
+img1.onclick = function(e) {
+        alert("hello godshit");
+e.stopPropagation();
+}
 
 
       // context.globalCompositeOperation = "source-out";

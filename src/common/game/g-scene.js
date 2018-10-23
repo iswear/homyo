@@ -11,8 +11,8 @@ export default (function () {
       var InnerGScene = LangUtil.extend(Node);
 
       InnerGScene.prototype.defLayer = 1;
-      InnerGScene.prototype.defAnchorX = 0;
-      InnerGScene.prototype.defAnchorY = 0;
+      InnerGScene.prototype.defAnchorX = .5;
+      InnerGScene.prototype.defAnchorY = .5;
 
       return InnerGScene;
     })();
