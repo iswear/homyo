@@ -382,9 +382,9 @@ export default (function() {
             this._ctrlNodeY.addObserver('render', functions.renderCtrlNodeY, this, this._ctrlNodeY)
             this._ctrlNodeRotateZ.addObserver('render', functions.renderCtrlNodeRotateZ, this, this._ctrlNodeRotateZ)
 
-            this.addChildNodeToLayer(this._ctrlNodeX, ULangUtil.checkAndGet(conf.ctrlLayer, 0))
-            this.addChildNodeToLayer(this._ctrlNodeY, ULangUtil.checkAndGet(conf.ctrlLayer, 0))
-            this.addChildNodeToLayer(this._ctrlNodeRotateZ, ULangUtil.checkAndGet(conf.ctrlLayer, 0))
+            this.appendChildNodeToLayer(this._ctrlNodeX, ULangUtil.checkAndGet(conf.ctrlLayer, 0))
+            this.appendChildNodeToLayer(this._ctrlNodeY, ULangUtil.checkAndGet(conf.ctrlLayer, 0))
+            this.appendChildNodeToLayer(this._ctrlNodeRotateZ, ULangUtil.checkAndGet(conf.ctrlLayer, 0))
 
             this.addObserver('modeChanged', functions.syncMode, this, this)
         }
@@ -485,7 +485,7 @@ export default (function() {
             this.defineNotifyProperty('type', ULangUtil.checkAndGet(conf.type, 1))
 
             this._textureBone = new CNode({ visible: false })
-            this.addChildNodeToLayer(this._textureBone, 0)
+            this.appendChildNodeToLayer(this._textureBone, 0)
 
             functions.syncType.call(this, this, this.type, 1)
         }
@@ -523,7 +523,7 @@ export default (function() {
 
             this._textureCtrl = new GCtrl({ x: 0, y: 0, anchorX: 0.5, anchorY: 0.5, width: 0, height: 0, visible: true, ctrlLayer: 0 })
 
-            this.addChildNodeToLayer(this._textureCtrl, 0)
+            this.appendChildNodeToLayer(this._textureCtrl, 0)
         }
 
         InnerGNodeCtrl.prototype.getTextureCtrl = function() {
@@ -850,14 +850,14 @@ export default (function() {
             }
         }
 
-        InnerGNodeBinder.prototype.addChildBinder = function(binder) {
+        InnerGNodeBinder.prototype.appendChildBinder = function(binder) {
             // 从以前的父级里面移除
             binder.removeFromParent(false)
                 // 添加到新的父级
-            this._node.addChildNode(binder.getNode())
-            this._nodeBone.addChildNode(binder.getNodeBone())
-            this._textureBone.addChildNode(binder.getTextureBone())
-            this._nodeTextureCtrl.addChildNode(binder.getNodeTextureCtrl())
+            this._node.appendChildNode(binder.getNode())
+            this._nodeBone.appendChildNode(binder.getNodeBone())
+            this._textureBone.appendChildNode(binder.getTextureBone())
+            this._nodeTextureCtrl.appendChildNode(binder.getNodeTextureCtrl())
             this.childBinders.push(binder)
             binder.parent = this
         }
@@ -941,7 +941,7 @@ export default (function() {
                 if (conf.children) {
                     const children = conf.children
                     for (let i = 0, len = children.length; i < len; ++i) {
-                        binder.addChildBinder(createBinder.call(this, children[i]))
+                        binder.appendChildBinder(createBinder.call(this, children[i]))
                     }
                 }
                 return binder
@@ -1239,7 +1239,7 @@ export default (function() {
             if (!parentBinder) {
                 console.warn('Can not find parent binder:' + parentBinderId)
             } else {
-                parentBinder.addChildBinder(binder)
+                parentBinder.appendChildBinder(binder)
                 this._binderMap[binder.id] = binder
                 functions.regNodeTextureListener.call(this, binder)
             }
@@ -1468,10 +1468,10 @@ export default (function() {
 
         GInnerModelEditor.prototype.load = function(data) {
             this._modelBinder.load(data)
-            this._map.addChildNodeToLayer(this._modelBinder.getBinder().getNode(), 0)
-            this._map.addChildNodeToLayer(this._modelBinder.getBinder().getTextureBone(), 1)
-            this._map.addChildNodeToLayer(this._modelBinder.getBinder().getNodeBone(), 2)
-            this._map.addChildNodeToLayer(this._modelBinder.getBinder().getNodeTextureCtrl(), 3)
+            this._map.appendChildNodeToLayer(this._modelBinder.getBinder().getNode(), 0)
+            this._map.appendChildNodeToLayer(this._modelBinder.getBinder().getTextureBone(), 1)
+            this._map.appendChildNodeToLayer(this._modelBinder.getBinder().getNodeBone(), 2)
+            this._map.appendChildNodeToLayer(this._modelBinder.getBinder().getNodeTextureCtrl(), 3)
         }
 
         GInnerModelEditor.prototype.createBinder = function(binderConf) {

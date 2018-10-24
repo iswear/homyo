@@ -707,7 +707,7 @@ export default (function() {
             this._mapNode = new Node({
                 rotateZ: 0
             });
-            this.addChildNode(this._mapNode);
+            this.appendChildNode(this._mapNode);
 
             this._mapCacheCtx = {
                 tile: {
@@ -727,7 +727,7 @@ export default (function() {
         }
 
         InnerGMap.prototype.addModel = function(model) {
-            this._mapNode.addChildNode(model);
+            this._mapNode.appendChildNode(model);
         }
 
         InnerGMap.prototype.removeModel = function(model, destroy) {

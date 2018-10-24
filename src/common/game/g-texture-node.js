@@ -18,7 +18,7 @@ export default (function () {
         this.super('init', [conf]);
 
         this._texture = new GTexture(LangUtil.checkAndGet(conf.texture, {}));
-        this.addChildNodeToLayer(this._texture, 0);
+        this.appendChildNodeToLayer(this._texture, 0);
       }
 
       InnerGTextureNode.prototype.getTexture = function (conf) {

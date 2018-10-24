@@ -458,6 +458,14 @@
 
 /* harmony default export */ __webpack_exports__["a"] = ((function () {
     var functions = (function () {
+      function onAppend () {
+        this.dirty();
+      }
+
+      function onRemove () {
+        this.dirty();
+      }
+
       function onPropertyChanged (sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
           onEventsMap[name].call(this, newVal, oldVal);
@@ -504,6 +512,8 @@
       }
       
       return {
+        onAppend: onAppend,
+        onRemove: onRemove,
         onPropertyChanged: onPropertyChanged,
         onRenderChanged: onRenderChanged,
         onLocalTransformChanged: onLocalTransformChanged,
@@ -598,6 +608,8 @@
         functions.onLocalZoneChanged.call(this);
         functions.onRenderChanged.call(this);
 
+        this.addObserver('append', functions.onAppend, this);
+        this.addObserver('remove', functions.onRemove, this);
         this.addObserver('propertyChanged', functions.onPropertyChanged, this);
       }
 
@@ -668,12 +680,12 @@
         return null;
       }
 
-      InnerNode.prototype.addChildNode = function (node) {
+      InnerNode.prototype.appendChildNode = function (node) {
         node.removeFromParent(false);
-        this.addChildNodeToLayer(node, this._childNodes.defLayer);
+        this.appendChildNodeToLayer(node, this._childNodes.defLayer);
       }
 
-      InnerNode.prototype.addChildNodeToLayer = function (node, layerIndex) {
+      InnerNode.prototype.appendChildNodeToLayer = function (node, layerIndex) {
         node.removeFromParent(false);
         var childNodes = this._childNodes;
         var nodeLayers = childNodes.nodeLayers;
@@ -683,6 +695,7 @@
         childNodes.count ++;
         node.parent = this;
         nodeLayers[layerIndex].push(node);
+        node.postNotification('append', [this]);
       }
 
       InnerNode.prototype.insertChildNode = function (node, nodeIndex) {
@@ -703,6 +716,7 @@
         } else {
           nodeLayers[layerIndex].push(node);
         }
+        node.postNotification('append', [this]);
       }
 
       InnerNode.prototype.removeChildNode = function (node, destroy) {
@@ -720,6 +734,7 @@
                   node.parent = null;
                   node.application = null;
                   this._childNodes.count--;
+                  node.postNotification('remove', [this, destroy]);
                   return;
                 }
               }
@@ -3126,7 +3141,7 @@
         this.super('init', [conf]);
 
         this._texture = new __WEBPACK_IMPORTED_MODULE_2__g_texture__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.texture, {}));
-        this.addChildNodeToLayer(this._texture, 0);
+        this.appendChildNodeToLayer(this._texture, 0);
       }
 
       InnerGTextureNode.prototype.getTexture = function (conf) {
@@ -3416,12 +3431,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       property: 'rotateZ',
       offset: Infinity,
       offsetFn: function (animation, deltaTime, sumTime) {
-          return sumTime / 1000;
+          return sumTime / 100;
       }
   }), null, null, false);
 
   for (var i = 0; i < 10; ++i) {
-    root.addChildNode(new GTexture({
+    root.appendChildNode(new GTexture({
       x: 20 * i,
       y: 20 * i,
       visible: true,
@@ -4565,8 +4580,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       var InnerGScene = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__core_node__["a" /* default */]);
 
       InnerGScene.prototype.defLayer = 1;
-      InnerGScene.prototype.defAnchorX = 0;
-      InnerGScene.prototype.defAnchorY = 0;
+      InnerGScene.prototype.defAnchorX = .5;
+      InnerGScene.prototype.defAnchorY = .5;
 
       return InnerGScene;
     })();
@@ -5292,7 +5307,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             this._mapNode = new __WEBPACK_IMPORTED_MODULE_1__core_node__["a" /* default */]({
                 rotateZ: 0
             });
-            this.addChildNode(this._mapNode);
+            this.appendChildNode(this._mapNode);
 
             this._mapCacheCtx = {
                 tile: {
@@ -5312,7 +5327,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
 
         InnerGMap.prototype.addModel = function(model) {
-            this._mapNode.addChildNode(model);
+            this._mapNode.appendChildNode(model);
         }
 
         InnerGMap.prototype.removeModel = function(model, destroy) {
@@ -5354,7 +5369,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         if (conf.children) {
           var children = conf.children;
           for (var i = 0, len = children.length; i < len; ++i) {
-            node.addChildNode(createNode.call(this, children[i]));
+            node.appendChildNode(createNode.call(this, children[i]));
           }
         }
         return node;
@@ -5454,7 +5469,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
         if (arguments.length > 3) {
           if (prevNodeId === null) {
-            parentNode.addChildNodeToLayer(node, 0);
+            parentNode.appendChildNodeToLayer(node, 0);
             this._nameMap[nodeId] = node;
             return;
           } else {
@@ -5468,12 +5483,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
               console.log('Can not find prev node:' + prevNodeId + ' in parent node:' + parentNodeId)
               return;
             }
-            parentNode.addChildNodeToLayer(node, location.layerIndex, location.nodeIndex + 1);
+            parentNode.appendChildNodeToLayer(node, location.layerIndex, location.nodeIndex + 1);
             this._nodeMap[nodeId] = node;
             return;
           }
         } else {
-          parentNode.addChildNode(node);
+          parentNode.appendChildNode(node);
           this._nodeMap[nodeId] = node;
           return;
         }

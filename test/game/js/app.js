@@ -130,12 +130,12 @@ import homyo from '../../../main'
       property: 'rotateZ',
       offset: Infinity,
       offsetFn: function (animation, deltaTime, sumTime) {
-          return sumTime / 1000;
+          return sumTime / 100;
       }
   }), null, null, false);
 
   for (var i = 0; i < 10; ++i) {
-    root.addChildNode(new GTexture({
+    root.appendChildNode(new GTexture({
       x: 20 * i,
       y: 20 * i,
       visible: true,

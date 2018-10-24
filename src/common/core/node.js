@@ -10,6 +10,14 @@ import GeometryUtil from '../utils/geometry-util';
 
 export default (function () {
     var functions = (function () {
+      function onAppend () {
+        this.dirty();
+      }
+
+      function onRemove () {
+        this.dirty();
+      }
+
       function onPropertyChanged (sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
           onEventsMap[name].call(this, newVal, oldVal);
@@ -56,6 +64,8 @@ export default (function () {
       }
       
       return {
+        onAppend: onAppend,
+        onRemove: onRemove,
         onPropertyChanged: onPropertyChanged,
         onRenderChanged: onRenderChanged,
         onLocalTransformChanged: onLocalTransformChanged,
@@ -150,6 +160,8 @@ export default (function () {
         functions.onLocalZoneChanged.call(this);
         functions.onRenderChanged.call(this);
 
+        this.addObserver('append', functions.onAppend, this);
+        this.addObserver('remove', functions.onRemove, this);
         this.addObserver('propertyChanged', functions.onPropertyChanged, this);
       }
 
@@ -220,12 +232,12 @@ export default (function () {
         return null;
       }
 
-      InnerNode.prototype.addChildNode = function (node) {
+      InnerNode.prototype.appendChildNode = function (node) {
         node.removeFromParent(false);
-        this.addChildNodeToLayer(node, this._childNodes.defLayer);
+        this.appendChildNodeToLayer(node, this._childNodes.defLayer);
       }
 
-      InnerNode.prototype.addChildNodeToLayer = function (node, layerIndex) {
+      InnerNode.prototype.appendChildNodeToLayer = function (node, layerIndex) {
         node.removeFromParent(false);
         var childNodes = this._childNodes;
         var nodeLayers = childNodes.nodeLayers;
@@ -235,6 +247,7 @@ export default (function () {
         childNodes.count ++;
         node.parent = this;
         nodeLayers[layerIndex].push(node);
+        node.postNotification('append', [this]);
       }
 
       InnerNode.prototype.insertChildNode = function (node, nodeIndex) {
@@ -255,6 +268,7 @@ export default (function () {
         } else {
           nodeLayers[layerIndex].push(node);
         }
+        node.postNotification('append', [this]);
       }
 
       InnerNode.prototype.removeChildNode = function (node, destroy) {
@@ -278,6 +292,7 @@ export default (function () {
             }
           }
         }
+        node.postNotification('remove', [this, destroy]);
       }
 
       InnerNode.prototype.removeFromParent = function (destroy) {

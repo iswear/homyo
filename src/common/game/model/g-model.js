@@ -18,7 +18,7 @@ export default (function () {
         if (conf.children) {
           var children = conf.children;
           for (var i = 0, len = children.length; i < len; ++i) {
-            node.addChildNode(createNode.call(this, children[i]));
+            node.appendChildNode(createNode.call(this, children[i]));
           }
         }
         return node;
@@ -118,7 +118,7 @@ export default (function () {
         }
         if (arguments.length > 3) {
           if (prevNodeId === null) {
-            parentNode.addChildNodeToLayer(node, 0);
+            parentNode.appendChildNodeToLayer(node, 0);
             this._nameMap[nodeId] = node;
             return;
           } else {
@@ -132,12 +132,12 @@ export default (function () {
               console.log('Can not find prev node:' + prevNodeId + ' in parent node:' + parentNodeId)
               return;
             }
-            parentNode.addChildNodeToLayer(node, location.layerIndex, location.nodeIndex + 1);
+            parentNode.appendChildNodeToLayer(node, location.layerIndex, location.nodeIndex + 1);
             this._nodeMap[nodeId] = node;
             return;
           }
         } else {
-          parentNode.addChildNode(node);
+          parentNode.appendChildNode(node);
           this._nodeMap[nodeId] = node;
           return;
         }
