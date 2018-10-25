@@ -254,13 +254,10 @@ export default (
             var cosy = Math.cos(y)
             mat1[0] = mat1[0] * cosy + mat1[2] * siny;
             mat1[2] = mat1[0] * -siny + mat1[2] * cosy;
-            
             mat1[4] = mat1[4] * cosy + mat1[6] * siny;
             mat1[6] = mat1[4] * -siny + mat1[6] * cosy;
-            
             mat1[8] = mat1[8] * cosy + mat1[10] * siny;
             mat1[10] = mat1[8] * -siny + mat1[10] * cosy;
-            
             mat1[12] = mat1[12] * cosy + mat1[14] * siny;
             mat1[14] = mat1[12] * -siny + mat1[14] * cosy;
           }
@@ -269,13 +266,10 @@ export default (
             var cosz = Math.cos(z)
             mat1[0] = mat1[0] * cosz + mat1[1] * sinz;
             mat1[1] = mat1[0] * -sinz + mat1[1] * cosz;
-
             mat1[4] = mat1[4] * cosz + mat1[5] * sinz;
             mat1[5] = mat1[4] * -sinz + mat1[5] * cosz;
-
             mat1[8] = mat1[8] * cosz + mat1[9] * sinz;
             mat1[9] = mat1[8] * -sinz + mat1[9] * cosz;
-
             mat1[12] = mat1[12] * cosz + mat1[13] * sinz;
             mat1[13] = mat1[12] * -sinz + mat1[13] * cosz;
           }
@@ -322,10 +316,3 @@ export default (
     return util;
   }
 )();
-
-
-for (var i = 0; i < 4; ++i) {
-  for (var j = 0; j < 4; ++j) {
-    var str = "mat1[" + (i * 4 + 1) + "] * "
-  }
-}

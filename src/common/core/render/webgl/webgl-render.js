@@ -43,9 +43,32 @@ export default (function () {
 
         this._canvas = LangUtil.checkAndGet(conf.canvas, null);
         this._context = this.$canvas.getContext('webgl') || this.$canvas.getContext('experimental-webgl');
+        this._shaderProgram = this._context.createProgram();
+        this._vertexShader = null;
+        this._fragmentShader = null;
 
         functions.onViewPortChanged.call(this);
         this.addObserver('propertyChanged', functions.onPropertyChanged, this);
+      }
+
+      InnerWebglRender.prototype.useProgram = function (vShader, fShader) {
+
+      }
+
+      InnerWebglRender.prototype.translate = function () {
+
+      }
+
+      InnerWebglRender.prototype.rotate = function () {
+
+      }
+
+      InnerWebglRender.prototype.scale = function () {
+
+      }
+
+      InnerWebglRender.prototype.shear = function () {
+
       }
 
       InnerWebglRender.prototype.lookAt = function () {
