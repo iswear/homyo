@@ -456,7 +456,10 @@
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = ((function () {
+/* harmony default export */ __webpack_exports__["a"] = ((
+  function () {
+    var M2D = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].m2d;
+    
     var functions = (function () {
       function onAppend () {
         this.dirty();
@@ -783,19 +786,19 @@
       }
 
       InnerNode.prototype.transformLVectorToW = function (vector) {
-        return __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2dAndVect2d(this._transformCtx.worldTransform, vector);
+        return M2D.mulMat2DAndVect2D(this._transformCtx.worldTransform, vector);
       }
 
       InnerNode.prototype.transformWVectorToL = function (vector) {
-        return __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2dAndVect2d(this._transformCtx.worldReverseTransform, vector);
+        return M2D.mulMat2DAndVect2D(this._transformCtx.worldReverseTransform, vector);
       }
 
       InnerNode.prototype.transformLVectorToP = function (vector) {
-        return __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2dAndVect2d(this._transformCtx.localTransform, vector);
+        return M2D.mulMat2DAndVect2D(this._transformCtx.localTransform, vector);
       }
 
       InnerNode.prototype.transformPVectorToL = function (vector) {
-        return __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2dAndVect2d(this._transformCtx.localReverseTransform, vector);
+        return M2D.mulMat2DAndVect2D(this._transformCtx.localReverseTransform, vector);
       }
 
       InnerNode.prototype.getTransformInParent = function () {
@@ -900,13 +903,13 @@
         }
         
         if (transformCtx.localInvalid) {
-          transformCtx.localTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].shear2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].scale2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].rotate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].translate2d(__WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.shearX, this.shearY);
-          transformCtx.localReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].reverse2d(transformCtx.localTransform);
-          transformCtx.worldTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(parentWTransform, transformCtx.localTransform);
-          transformCtx.worldReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(transformCtx.localReverseTransform, parentWReverseTransform);
+          transformCtx.localTransform = M2D.shear2D(M2D.scale2D(M2D.rotate2D(M2D.translate2D(M2D.newIdentityMat2D(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.shearX, this.shearY);
+          transformCtx.localReverseTransform = M2D.reverse2D(transformCtx.localTransform);
+          transformCtx.worldTransform = M2D.mulMat2D(parentWTransform, transformCtx.localTransform);
+          transformCtx.worldReverseTransform = M2D.mulMat2D(transformCtx.localReverseTransform, parentWReverseTransform);
         } else if (parentUpdateTransform) {
-          transformCtx.worldTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(parentWTransform, transformCtx.localTransform);
-          transformCtx.worldReverseTransform = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].mulMat2d(transformCtx.localReverseTransform, parentWReverseTransform);
+          transformCtx.worldTransform = M2D.mulMat2D(parentWTransform, transformCtx.localTransform);
+          transformCtx.worldReverseTransform = M2D.mulMat2D(transformCtx.localReverseTransform, parentWReverseTransform);
         }
 
         if (zoneCtx.localInvalid || transformCtx.localInvalid || parentUpdateTransform) {
@@ -2168,105 +2171,285 @@
   function () {
 
     var util = {
-      createIdentityMat2d: function () {
-        // [
-        //   1, 0, 0,
-        //   0, 1, 0,
-        //   0, 0, 1
-        // ];
-        return [
-          1, 0, 0,
-          0, 1, 0
-        ];
-      },
-      copyMat2d: function (srcMat, desMat) {
-        for (var i = 0, len = srcMat.length; i < len; ++i) {
-          desMat[i] = srcMat[i];
+      m2d: {
+        newIdentityMat2D: function () {
+          // [
+          //   1, 0, 0,
+          //   0, 1, 0,
+          //   0, 0, 1
+          // ];
+          return [
+            1, 0, 0,
+            0, 1, 0
+          ];
+        },
+        resetMat2D: function (mat) {
+          mat[0] = 1;
+          mat[1] = 0;
+          mat[2] = 0;
+          mat[3] = 0;
+          mat[4] = 1;
+          mat[5] = 0;
+          return mat;
+        },
+        copyMat2D: function (srcMat, desMat) {
+          for (var i = 0, len = srcMat.length; i < len; ++i) {
+            desMat[i] = srcMat[i];
+          }
+          return desMat;
+        },
+        mulMat2D: function (mat1, mat2) {
+          return [
+            mat1[0] * mat2[0] + mat1[1] * mat2[3], 
+            mat1[0] * mat2[1] + mat1[1] * mat2[4], 
+            mat1[0] * mat2[2] + mat1[1] * mat2[5] + mat1[2],
+            mat1[3] * mat2[0] + mat1[4] * mat2[3], 
+            mat1[3] * mat2[1] + mat1[4] * mat2[4], 
+            mat1[3] * mat2[2] + mat1[4] * mat2[5] + mat1[5]
+          ];
+        },
+        mulMat2DAndVect2D: function (mat, vect) {
+          return [
+            mat[0] * vect[0] + mat[1] * vect[1] + mat[2],
+            mat[3] * vect[0] + mat[4] * vect[1] + mat[5]
+          ];
+        },
+        translate2D: function (mat, x, y) {
+          // [
+          //   1, 0, x,
+          //   0, 1, y,
+          //   0, 0, 1
+          // ]
+          return [
+            mat[0], 
+            mat[1], 
+            mat[0] * x + mat[1] * y + mat[2],
+            mat[3], 
+            mat[4], 
+            mat[3] * x + mat[4] * y + mat[5]
+          ];
+        },
+        rotate2D: function (mat, angle) {
+          // [
+          //   cos(angle), -sin(angle), 0,
+          //   sin(angle),  cos(angle), 0,
+          //   0, 0, 1
+          // ]
+          var s = Math.sin(angle);
+          var c = Math.cos(angle);
+          return [
+            mat[0] * c + mat[1] * s, 
+            mat[1] * c - mat[0] * s, 
+            mat[2],
+            mat[3] * c + mat[4] * s,
+            mat[4] * c - mat[3] * s, 
+            mat[5]
+          ];
+        },
+        scale2D: function (mat, x, y) {
+          // [
+          //   x, 0, 0,
+          //   0, y, 0,
+          //   0, 0, 1
+          // ]
+          return [
+            mat[0] * x,
+            mat[1] * y, 
+            mat[2],
+            mat[3] * x, 
+            mat[4] * y, 
+            mat[5]
+          ];
+        },
+        shear2D: function (mat, x, y) {
+          // [
+          //   1, y, 0,
+          //   x, 1, 0,
+          //   0, 0, 1
+          // ]
+          return [
+            mat[0] + mat[1] * y, 
+            mat[0] * x + mat[1], 
+            mat[2],
+            mat[3] + mat[4] * y, 
+            mat[3] * x + mat[4], 
+            mat[5]
+          ];
+        },
+        reverse2D: function (mat) {
+          /**
+           * 伴随矩阵求解逆矩阵
+           */
+          var temp = mat[0] * mat[4] - mat[1] * mat[3];
+          return [
+            mat[4] / temp, 
+            -mat[1] / temp, 
+            (mat[1] * mat[5] - mat[2] * mat[4]) / temp,
+            -mat[3] / temp, 
+            mat[0] / temp, 
+            (mat[3] * mat[2] - mat[0] * mat[5]) / temp
+          ];
         }
-        return desMat;
       },
-      restMat2d: function (mat) {
-        mat[0] = 1;
-        mat[1] = 0;
-        mat[2] = 0;
-        mat[3] = 0;
-        mat[4] = 1;
-        mat[5] = 0;
-        return mat;
-      },
-      mulMat2d: function (mat1, mat2) {
-        return [
-          mat1[0] * mat2[0] + mat1[1] * mat2[3], mat1[0] * mat2[1] + mat1[1] * mat2[4], mat1[0] * mat2[2] + mat1[1] * mat2[5] + mat1[2],
-          mat1[3] * mat2[0] + mat1[4] * mat2[3], mat1[3] * mat2[1] + mat1[4] * mat2[4], mat1[3] * mat2[2] + mat1[4] * mat2[5] + mat1[5]
-        ];
-      },
-      mulMat2dAndVect2d: function (mat, vector) {
-        return [
-          mat[0] * vector[0] + mat[1] * vector[1] + mat[2],
-          mat[3] * vector[0] + mat[4] * vector[1] + mat[5]
-        ];
-      },
-      translate2d: function (mat, x, y) {
-        // [
-        //   1, 0, x,
-        //   0, 1, y,
-        //   0, 0, 1
-        // ]
-        return [
-          mat[0], mat[1], mat[0] * x + mat[1] * y + mat[2],
-          mat[3], mat[4], mat[3] * x + mat[4] * y + mat[5]
-        ];
-      },
-      rotate2d: function (mat, angle) {
-        // [
-        //   cos(angle), -sin(angle), 0,
-        //   sin(angle),  cos(angle), 0,
-        //   0, 0, 1
-        // ]
-        var s = Math.sin(angle);
-        var c = Math.cos(angle);
-        return [
-          mat[0] * c + mat[1] * s, mat[1] * c - mat[0] * s, mat[2],
-          mat[3] * c + mat[4] * s, mat[4] * c - mat[3] * s, mat[5]
-        ];
-      },
-      scale2d: function (mat, x, y) {
-        // [
-        //   x, 0, 0,
-        //   0, y, 0,
-        //   0, 0, 1
-        // ]
-        return [
-          mat[0] * x, mat[1] * y, mat[2],
-          mat[3] * x, mat[4] * y, mat[5]
-        ];
-      },
-      shear2d: function (mat, x, y) {
-        // [
-        //   1, y, 0,
-        //   x, 1, 0,
-        //   0, 0, 1
-        // ]
-        return [
-          mat[0] + mat[1] * y, mat[0] * x + mat[1], mat[2],
-          mat[3] + mat[4] * y, mat[3] * x + mat[4], mat[5]
-        ];
-      },
-      reverse2d: function (mat) {
-        /**
-         * 伴随矩阵求解逆矩阵
-         */
-        var temp = mat[0] * mat[4] - mat[1] * mat[3];
-        return [
-          mat[4] / temp, -mat[1] / temp, (mat[1] * mat[5] - mat[2] * mat[4]) / temp,
-          -mat[3] / temp, mat[0] / temp, (mat[3] * mat[2] - mat[0] * mat[5]) / temp
-        ];
+      m3d: {
+        newIdentityMat3D: function () {
+          return [
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+          ]
+        },
+        resetMat3D: function (mat) {
+          mat[0] = 1;
+          mat[1] = 0;
+          mat[2] = 0;
+          mat[3] = 0;
+          mat[4] = 0;
+          mat[5] = 1;
+          mat[6] = 0;
+          mat[7] = 0;
+          mat[8] = 0;
+          mat[9] = 0;
+          mat[10] = 1;
+          mat[11] = 0;
+          mat[12] = 0;
+          mat[13] = 0;
+          mat[14] = 0;
+          mat[15] = 1;
+        },
+        copyMat3D: function (srcMat, desMat) {
+          for (var i = 0, len = srcMat.length; i < len; ++i) {
+            desMat[i] = srcMat[i];
+          }
+          return desMat;
+        },
+        mulMat3D: function (mat1, mat2) {
+          return [
+            mat1[0] * mat2[0] + mat1[1] * mat2[4] + mat1[2] * mat2[8] + mat1[3] * mat2[12],
+            mat1[0] * mat2[1] + mat1[1] * mat2[5] + mat1[2] * mat2[9] + mat1[3] * mat2[13],
+            mat1[0] * mat2[2] + mat1[1] * mat2[6] + mat1[2] * mat2[10] + mat1[3] * mat2[14],
+            mat1[0] * mat2[3] + mat1[1] * mat2[7] + mat1[2] * mat2[11] + mat1[3] * mat2[15],
+            mat1[4] * mat2[0] + mat1[5] * mat2[4] + mat1[6] * mat2[8] + mat1[7] * mat2[12],
+            mat1[4] * mat2[1] + mat1[5] * mat2[5] + mat1[6] * mat2[9] + mat1[7] * mat2[13],
+            mat1[4] * mat2[2] + mat1[5] * mat2[6] + mat1[6] * mat2[10] + mat1[7] * mat2[14],
+            mat1[4] * mat2[3] + mat1[5] * mat2[7] + mat1[6] * mat2[11] + mat1[7] * mat2[15],
+            mat1[8] * mat2[0] + mat1[9] * mat2[4] + mat1[10] * mat2[8] + mat1[11] * mat2[12],
+            mat1[8] * mat2[1] + mat1[9] * mat2[5] + mat1[10] * mat2[9] + mat1[11] * mat2[13],
+            mat1[8] * mat2[2] + mat1[9] * mat2[6] + mat1[10] * mat2[10] + mat1[11] * mat2[14],
+            mat1[8] * mat2[3] + mat1[9] * mat2[7] + mat1[10] * mat2[11] + mat1[11] * mat2[15],
+            mat1[12] * mat2[0] + mat1[13] * mat2[4] + mat1[14] * mat2[8] + mat1[15] * mat2[12],
+            mat1[12] * mat2[1] + mat1[13] * mat2[5] + mat1[14] * mat2[9] + mat1[15] * mat2[13],
+            mat1[12] * mat2[2] + mat1[13] * mat2[6] + mat1[14] * mat2[10] + mat1[15] * mat2[14],
+            mat1[12] * mat2[3] + mat1[13] * mat2[7] + mat1[14] * mat2[11] + mat1[15] * mat2[15]          
+          ];
+        },
+        mulMat3DAndVect3D: function (mat, vect) {
+          return [
+            mat1[0] * mat2[0] + mat1[1] * mat2[1] + mat1[2] * mat2[2] + mat1[3] * mat2[3],
+            mat1[4] * mat2[0] + mat1[5] * mat2[1] + mat1[6] * mat2[2] + mat1[7] * mat2[3],
+            mat1[8] * mat2[0] + mat1[9] * mat2[1] + mat1[10] * mat2[2] + mat1[11] * mat2[3],
+            mat1[12] * mat2[0] + mat1[13] * mat2[1] + mat1[14] * mat2[2] + mat1[15] * mat2[3],
+          ]
+        },
+        translate3D: function (mat, x, y, z) {
+          // [
+          //   1, 0, 0, x,
+          //   0, 1, 0, y,
+          //   0, 0, 1, z,
+          //   0, 0, 0, 1
+          // ]
+          return [
+            mat[0],
+            mat[1],
+            mat[2],
+            mat[0] * x + mat[1] * y + mat[2] * z + mat[3],
+            mat[4],
+            mat[5],
+            mat[6],
+            mat[4] * x + mat[5] * y + mat[6] * z + mat[7],
+            mat[8],
+            mat[9],
+            mat[10],
+            mat[8] * x + mat[9] * y + mat[10] * z + mat[11],
+            mat[12],
+            mat[13],
+            mat[14],
+            mat[12] * x + mat[13] * y + mat[14] * z + mat[15],
+          ];
+        },
+        rotate3D: function (mat, x, y, z) {
+          // z轴旋转
+          // [
+          //   cos(z), -sin(z), 0, 0, 
+          //   sin(z), cos(z), 0, 0,
+          //   0, 0, 1, 0,
+          //   0, 0, 0, 1
+          // ]
+          // y轴旋转
+          // [
+          //   cos(y), 0, -sin(y), 0,
+          //   0, 1, 0, 0,
+          //   sin(y), 0, cos(y), 0
+          //   0, 0, 0, 1
+          // ]
+          // x轴旋转
+          // [
+          //   1, 0, 0, 0,
+          //   0, cos(x), -sin(x), 0,
+          //   0, sin(x), cos(x), 0,
+          //   0, 0, 0, 1
+          // ]
+          return null;
+        },
+        scale3D: function (mat, x, y, z) {
+          // [
+          //   x, 0, 0, 0,
+          //   0, y, 0, 0,
+          //   0, 0, z, 0,
+          //   0, 0, 0, 1
+          // ]
+          return [
+            mat[0] * x,
+            mat[1] * y,
+            mat[2] * z,
+            mat[3],
+            mat[4] * x,
+            mat[5] * y,
+            mat[6] * z,
+            mat[7],
+            mat[8] * x,
+            mat[9] * y,
+            mat[10] * z,
+            mat[11],
+            mat[12] * x,
+            mat[13] * y,
+            mat[14] * z,
+            mat[15]
+          ];
+        },
+        shear3D: function (mat, x, y, z) {
+          return null;
+        },
+        lookAt: function (mat, x, y, z) {
+          return null;
+        },
+        reverse3D: function (mat) {
+          return null;
+        }
       }
     };
 
     return util;
   }
 )());
+
+
+for (var i = 0; i < 4; ++i) {
+  for (var j = 0; j < 4; ++j) {
+    var str = "mat1[" + (i * 4 + 1) + "] * "
+  }
+}
 
 /***/ }),
 /* 13 */
@@ -4266,33 +4449,36 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       InnerWebglRender.prototype.init = function (conf) {
         this.super('init', [ conf ]);
-        this.$canvas = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.canvas, null);
-        this.$context = this.$canvas.getContext('webgl') || this.$canvas.getContext('experimental-webgl');
-
         this.viewPortX = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.x, 0);
         this.viewPortY = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.y, 0);
         this.viewPortWidth = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.width, this.$canvas.width);
         this.viewPortHeight = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.height, this.$canvas.height);
 
-        functions.onViewPortChanged.call(this);
+        this._canvas = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.canvas, null);
+        this._context = this.$canvas.getContext('webgl') || this.$canvas.getContext('experimental-webgl');
 
+        functions.onViewPortChanged.call(this);
         this.addObserver('propertyChanged', functions.onPropertyChanged, this);
       }
 
-      InnerWebglRender.prototype.createAndCompileShader = function (type, source) {
-        var shader = this.$context.createShader(type);
-        this.$context.shaderSource(shader, source);
-        this.$context.compileShader(shader);
-        return shader;
+      InnerWebglRender.prototype.lookAt = function () {
+
       }
 
-      InnerWebglRender.prototype.attachAndLinkShaderProgram = function (vShader, fShader) {
-        var shaderProgram = this.$context.createProgram();
-        shaderProgram.attachShader(shaderProgram, vShader);
-        shaderProgram.attachShader(shaderProgram, fShader);
-        this.$context.linkProgram(shaderProgram);
-        return shaderProgram;
-      }
+      // InnerWebglRender.prototype.createAndCompileShader = function (type, source) {
+      //   var shader = this.$context.createShader(type);
+      //   this.$context.shaderSource(shader, source);
+      //   this.$context.compileShader(shader);
+      //   return shader;
+      // }
+
+      // InnerWebglRender.prototype.attachAndLinkShaderProgram = function (vShader, fShader) {
+      //   var shaderProgram = this.$context.createProgram();
+      //   shaderProgram.attachShader(shaderProgram, vShader);
+      //   shaderProgram.attachShader(shaderProgram, fShader);
+      //   this.$context.linkProgram(shaderProgram);
+      //   return shaderProgram;
+      // }
 
       return InnerWebglRender;
     })();

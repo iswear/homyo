@@ -8,7 +8,10 @@ import Notifier from './notifier';
 import MatrixUtil from '../utils/matrix-util';
 import GeometryUtil from '../utils/geometry-util';
 
-export default (function () {
+export default (
+  function () {
+    var M2D = MatrixUtil.m2d;
+    
     var functions = (function () {
       function onAppend () {
         this.dirty();
@@ -335,19 +338,19 @@ export default (function () {
       }
 
       InnerNode.prototype.transformLVectorToW = function (vector) {
-        return MatrixUtil.mulMat2dAndVect2d(this._transformCtx.worldTransform, vector);
+        return M2D.mulMat2DAndVect2D(this._transformCtx.worldTransform, vector);
       }
 
       InnerNode.prototype.transformWVectorToL = function (vector) {
-        return MatrixUtil.mulMat2dAndVect2d(this._transformCtx.worldReverseTransform, vector);
+        return M2D.mulMat2DAndVect2D(this._transformCtx.worldReverseTransform, vector);
       }
 
       InnerNode.prototype.transformLVectorToP = function (vector) {
-        return MatrixUtil.mulMat2dAndVect2d(this._transformCtx.localTransform, vector);
+        return M2D.mulMat2DAndVect2D(this._transformCtx.localTransform, vector);
       }
 
       InnerNode.prototype.transformPVectorToL = function (vector) {
-        return MatrixUtil.mulMat2dAndVect2d(this._transformCtx.localReverseTransform, vector);
+        return M2D.mulMat2DAndVect2D(this._transformCtx.localReverseTransform, vector);
       }
 
       InnerNode.prototype.getTransformInParent = function () {
@@ -452,13 +455,13 @@ export default (function () {
         }
         
         if (transformCtx.localInvalid) {
-          transformCtx.localTransform = MatrixUtil.shear2d(MatrixUtil.scale2d(MatrixUtil.rotate2d(MatrixUtil.translate2d(MatrixUtil.createIdentityMat2d(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.shearX, this.shearY);
-          transformCtx.localReverseTransform = MatrixUtil.reverse2d(transformCtx.localTransform);
-          transformCtx.worldTransform = MatrixUtil.mulMat2d(parentWTransform, transformCtx.localTransform);
-          transformCtx.worldReverseTransform = MatrixUtil.mulMat2d(transformCtx.localReverseTransform, parentWReverseTransform);
+          transformCtx.localTransform = M2D.shear2D(M2D.scale2D(M2D.rotate2D(M2D.translate2D(M2D.newIdentityMat2D(), this.x, this.y), this.rotateZ), this.scaleX, this.scaleY), this.shearX, this.shearY);
+          transformCtx.localReverseTransform = M2D.reverse2D(transformCtx.localTransform);
+          transformCtx.worldTransform = M2D.mulMat2D(parentWTransform, transformCtx.localTransform);
+          transformCtx.worldReverseTransform = M2D.mulMat2D(transformCtx.localReverseTransform, parentWReverseTransform);
         } else if (parentUpdateTransform) {
-          transformCtx.worldTransform = MatrixUtil.mulMat2d(parentWTransform, transformCtx.localTransform);
-          transformCtx.worldReverseTransform = MatrixUtil.mulMat2d(transformCtx.localReverseTransform, parentWReverseTransform);
+          transformCtx.worldTransform = M2D.mulMat2D(parentWTransform, transformCtx.localTransform);
+          transformCtx.worldReverseTransform = M2D.mulMat2D(transformCtx.localReverseTransform, parentWReverseTransform);
         }
 
         if (zoneCtx.localInvalid || transformCtx.localInvalid || parentUpdateTransform) {

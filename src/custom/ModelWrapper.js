@@ -255,8 +255,8 @@ export default (function() {
             moveXMouseMove: function(sender, e) {
                 const context = this._ctrlContext
                 if (context.bizId === 11 && context.eventId === e.id) {
-                    const lStartOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
-                    const lEndOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
+                    const lStartOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
+                    const lEndOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
                     const pStartOffset = this.transformLVectorToP([0, 0])
                     const pEndOffset = this.transformLVectorToP([lEndOffset[0] - lStartOffset[0], 0])
                     this.x = context.bizStartValue.x + pEndOffset[0] - pStartOffset[0]
@@ -272,8 +272,8 @@ export default (function() {
             moveYMouseMove: function(sender, e) {
                 const context = this._ctrlContext
                 if (context.bizId === 12 && context.eventId === e.id) {
-                    const lStartOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
-                    const lEndOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
+                    const lStartOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
+                    const lEndOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
                     const pStartOffset = this.transformLVectorToP([0, 0])
                     const pEndOffset = this.transformLVectorToP([0, lEndOffset[1] - lStartOffset[1]])
                     this.x = context.bizStartValue.x + pEndOffset[0] - pStartOffset[0]
@@ -289,8 +289,8 @@ export default (function() {
             rotateMouseMove: function(sender, e) {
                 const context = this._ctrlContext
                 if (context.bizId === 21 && context.eventId === e.id) {
-                    const lStartOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
-                    const lEndOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
+                    const lStartOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
+                    const lEndOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
                     this.rotateZ = context.bizStartValue.rotateZ + Math.atan2(lEndOffset[1], lEndOffset[0]) - Math.atan2(lStartOffset[1], lStartOffset[0])
                 }
             },
@@ -303,9 +303,9 @@ export default (function() {
             scaleXMouseMove: function(sender, e) {
                 const context = this._ctrlContext
                 if (context.bizId === 31 && context.eventId === e.id) {
-                    const lStartOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
+                    const lStartOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
                     if (lStartOffset[0] > 0) {
-                        const lEndOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
+                        const lEndOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
                         this.scaleX = context.bizStartValue.scaleX * lEndOffset[0] / lStartOffset[0]
                     }
                 }
@@ -319,9 +319,9 @@ export default (function() {
             scaleYMouseMove: function(sender, e) {
                 const context = this._ctrlContext
                 if (context.bizId === 32 && context.eventId === e.id) {
-                    const lStartOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
+                    const lStartOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
                     if (lStartOffset[1] > 0) {
-                        const lEndOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
+                        const lEndOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
                         this.scaleY = context.bizStartValue.scaleY * lEndOffset[1] / lStartOffset[1]
                     }
                 }
@@ -335,8 +335,8 @@ export default (function() {
             shearXMouseMove: function(sender, e) {
                 const context = this._ctrlContext
                 if (context.bizId === 41 && context.eventId === e.id) {
-                    const lStartOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
-                    const lEndOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
+                    const lStartOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
+                    const lEndOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
                     this.shearY = context.bizStartValue.shearY + lEndOffset[1] / lEndOffset[0] - lStartOffset[1] / lStartOffset[0]
                 }
             },
@@ -349,8 +349,8 @@ export default (function() {
             shearYMouseMove: function(sender, e) {
                 const context = this._ctrlContext
                 if (context.bizId === 42 && context.eventId === e.id) {
-                    const lStartOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
-                    const lEndOffset = UMatrixUtil.mulMat2dAndVect2d(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
+                    const lStartOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [context.eventStartOffset.x, context.eventStartOffset.y])
+                    const lEndOffset = UMatrixUtil.mulMat2DAndVect2D(context.reverseTransformInWorld, [e.offsetX, e.offsetY])
                     this.shearX = context.bizStartValue.shearX + lEndOffset[0] / lEndOffset[1] - lStartOffset[0] / lStartOffset[1]
                 }
             },

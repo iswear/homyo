@@ -36,33 +36,36 @@ export default (function () {
 
       InnerWebglRender.prototype.init = function (conf) {
         this.super('init', [ conf ]);
-        this.$canvas = LangUtil.checkAndGet(conf.canvas, null);
-        this.$context = this.$canvas.getContext('webgl') || this.$canvas.getContext('experimental-webgl');
-
         this.viewPortX = LangUtil.checkAndGet(conf.x, 0);
         this.viewPortY = LangUtil.checkAndGet(conf.y, 0);
         this.viewPortWidth = LangUtil.checkAndGet(conf.width, this.$canvas.width);
         this.viewPortHeight = LangUtil.checkAndGet(conf.height, this.$canvas.height);
 
-        functions.onViewPortChanged.call(this);
+        this._canvas = LangUtil.checkAndGet(conf.canvas, null);
+        this._context = this.$canvas.getContext('webgl') || this.$canvas.getContext('experimental-webgl');
 
+        functions.onViewPortChanged.call(this);
         this.addObserver('propertyChanged', functions.onPropertyChanged, this);
       }
 
-      InnerWebglRender.prototype.createAndCompileShader = function (type, source) {
-        var shader = this.$context.createShader(type);
-        this.$context.shaderSource(shader, source);
-        this.$context.compileShader(shader);
-        return shader;
+      InnerWebglRender.prototype.lookAt = function () {
+
       }
 
-      InnerWebglRender.prototype.attachAndLinkShaderProgram = function (vShader, fShader) {
-        var shaderProgram = this.$context.createProgram();
-        shaderProgram.attachShader(shaderProgram, vShader);
-        shaderProgram.attachShader(shaderProgram, fShader);
-        this.$context.linkProgram(shaderProgram);
-        return shaderProgram;
-      }
+      // InnerWebglRender.prototype.createAndCompileShader = function (type, source) {
+      //   var shader = this.$context.createShader(type);
+      //   this.$context.shaderSource(shader, source);
+      //   this.$context.compileShader(shader);
+      //   return shader;
+      // }
+
+      // InnerWebglRender.prototype.attachAndLinkShaderProgram = function (vShader, fShader) {
+      //   var shaderProgram = this.$context.createProgram();
+      //   shaderProgram.attachShader(shaderProgram, vShader);
+      //   shaderProgram.attachShader(shaderProgram, fShader);
+      //   this.$context.linkProgram(shaderProgram);
+      //   return shaderProgram;
+      // }
 
       return InnerWebglRender;
     })();
