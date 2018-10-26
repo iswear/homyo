@@ -5,8 +5,11 @@
  */
 import LangUtil from '../../../utils/lang-util';
 import Notifier from '../../notifier';
+import MatrixUtil from '../../../utils/matrix-util';
 
-export default (function () {
+export default (
+  function () {
+    var M3D = MatrixUtil.m3d;
     var functions = (function () {
       function onPropertyChanged (sender, name, newVal, oldVal) {
         if (onEventsMap.hasOwnProperty(name)) {
@@ -43,7 +46,7 @@ export default (function () {
 
         this._canvas = LangUtil.checkAndGet(conf.canvas, null);
         this._context = this.$canvas.getContext('webgl') || this.$canvas.getContext('experimental-webgl');
-        this._shaderProgram = this._context.createProgram();
+        this._program = this._context.createProgram();
         this._vertexShader = null;
         this._fragmentShader = null;
 
@@ -52,7 +55,23 @@ export default (function () {
       }
 
       InnerWebglRender.prototype.useProgram = function (vertexShader, fragmentShader) {
-
+        var gl = this._context;
+        this._vertexShader = gl.createShader(gl.VERTEX_SHADER);
+        this._fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(this._vertexShader, vertexShader);
+        gl.compileShader(this._vertexShader);
+        if (!gl.getShaderParameter(this._vertexShader, gl.COMPILE_STATUS)) {
+          console.error('error compile vertex shader');
+        }
+        gl.shaderSource(this._fragmentShader, fragmentShader);
+        gl.compileShader(this._fragmentShader);
+        if (!gl.getShaderParameter(this._fragmentShader, gl.COMPILE_STATUS)) {
+          console.error('error compile fragment shader');
+        }
+        this._program = gl.createProgram();
+        gl.attachShader(this._program, this._vertexShader);
+        gl.attachShader(this._program, this._fragmentShader);
+        gl.linkProgram(this._program); 
       }
       
       InnerWebglRender.prototype.translate = function () {

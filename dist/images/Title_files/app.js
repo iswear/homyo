@@ -3548,9 +3548,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   var root = new GTexture({
     x: 400,
     y: 300,
-    scaleY: Math.cos(22.5 * Math.PI / 180),
-    scaleX: Math.cos(22.5 * Math.PI / 180),
-    shearY: -Math.atan(22.5 * Math.PI / 180),
+    scaleY: 0.7,
+    scaleX: 0.7,
+    shearY: -.25,
     // shearX: .5,
     // scaleY: 1,
     // rotateZ: -0.3805063771123649,

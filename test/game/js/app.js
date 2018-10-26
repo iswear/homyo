@@ -1,7 +1,8 @@
 import homyo from '../../../main'
-import default
+import glsl from '../../../src/common/core/render/webgl/shader/fragment/default.hlsl'
 
 (function () {
+  console.log(glsl)
   var Application = homyo.core.Application;
   var PropertyAnimation = homyo.core.animation.PropertyAnimation;
   var UILabel = homyo.ui.Label;
@@ -31,12 +32,14 @@ import default
   var root = new GTexture({
     x: 400,
     y: 300,
-    scaleX: 0.5,
-    // shearY: 1,
+    scaleY: Math.cos(22.5 * Math.PI / 180),
+    scaleX: Math.cos(22.5 * Math.PI / 180),
+    shearY: -Math.atan(22.5 * Math.PI / 180),
+    // shearX: .5,
     // scaleY: 1,
     // rotateZ: -0.3805063771123649,
     visible: true,
-    image: './images/frame_00015.png',
+    image: './images/test/ride1/frame_00012.png',
   });
 
   // var root = new GMap({
