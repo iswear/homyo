@@ -51,10 +51,10 @@ export default (function () {
         this.addObserver('propertyChanged', functions.onPropertyChanged, this);
       }
 
-      InnerWebglRender.prototype.useProgram = function (vShader, fShader) {
+      InnerWebglRender.prototype.useProgram = function (vertexShader, fragmentShader) {
 
       }
-
+      
       InnerWebglRender.prototype.translate = function () {
 
       }

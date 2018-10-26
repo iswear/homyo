@@ -1,4 +1,5 @@
 import homyo from '../../../main'
+import default
 
 (function () {
   var Application = homyo.core.Application;

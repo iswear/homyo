@@ -74,8 +74,8 @@ export default (
           var s = Math.sin(angle);
           var c = Math.cos(angle);
           return [
-            mat[0] * c + mat[1] * s, 
-            mat[1] * c - mat[0] * s, 
+            mat[0] * c + mat[1] * s,
+            mat[1] * c - mat[0] * s,
             mat[2],
             mat[3] * c + mat[4] * s,
             mat[4] * c - mat[3] * s, 
