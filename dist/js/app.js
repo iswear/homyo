@@ -444,7 +444,7 @@
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifier__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_geometry_util__ = __webpack_require__(4);
 /**
  *
@@ -1499,107 +1499,6 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifier__ = __webpack_require__(1);
-/**
- *
- * Author: iswear(471291492@qq.com)
- * Date: 2017/8/12
- */
-
-
-/**
- * 配置参数: 无
- */
-/* harmony default export */ __webpack_exports__["a"] = ((function () {
-    var BaseAnimation = (function () {
-      var InnerBaseAnimation = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__notifier__["a" /* default */]);
-
-      InnerBaseAnimation.prototype.execute = function (binder, deltaTime) {}
-
-      return InnerBaseAnimation;
-    })();
-
-    return BaseAnimation;
-  }
-)());
-
-/***/ }),
-/* 6 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifier__ = __webpack_require__(1);
-/**
- *
- * Author: iswear(471291492@qq.com)
- * Date: 2017/8/12
- */
-
-
-
-/**
- * 配置参数：
- * {
- *    node:,
- *    animation:,
- *    fn:,
- *    target:
- * }
- */
-/* harmony default export */ __webpack_exports__["a"] = ((function () {
-    var Binder = (function () {
-      var InnerBinder = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__notifier__["a" /* default */]);
-
-      InnerBinder.prototype.init = function (conf) {
-        this.super('init', [conf]);
-        this.defineNotifyProperty('node', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.node, null));
-        this.defineNotifyProperty('animation', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.animation, null));
-        this.defineNotifyProperty('callbackFn', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.callbackFn, null));
-        this.defineNotifyProperty('callbackTarget', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.callbackTarget, null));
-        this.defineNotifyProperty('loop', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.loop, null));
-        
-        this._runParams = {};
-      }
-
-      InnerBinder.prototype.execute = function (deltaTime) {
-        var result = this.animation.execute(this, deltaTime);
-        if (this.callbackFn !== null) {
-          this.callbackFn.call(this.callbackTarget, this, result);
-        }
-        return result;
-      }
-
-      InnerBinder.prototype.getRunParam = function (key) {
-        return this._runParams[key];
-      }
-
-      InnerBinder.prototype.setRunParam = function (key, value) {
-        this._runParams[key] = value;
-      }
-
-      InnerBinder.prototype.destroy = function () {
-        this.node = null;
-        this.animation = null;
-        this.callbackFn = null;
-        this.callbackTarget = null;
-        this.loop = null;
-        this.super('destroy');
-      }
-
-      return InnerBinder;
-    })();
-
-    return Binder;
-  }
-)());
-
-/***/ }),
-/* 7 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 /**
  *
  * Author: iswear(471291492@qq.com)
@@ -1906,8 +1805,13 @@
         shear3D: function (mat, x, y, z) {
           return null;
         },
-        lookAt: function (mat, x, y, z) {
-          return null;
+        lookAt: function (mat, eye, look, up) {
+          // var n = [eye[0] - look[0], eye[1] - look[1], eye[2] - look[2]];
+          // var v = ;
+          // var u = ;
+          // return [
+
+          // ];
         },
         reverse3D: function (mat) {
           return null;
@@ -1919,6 +1823,107 @@
   }
 )());
 
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifier__ = __webpack_require__(1);
+/**
+ *
+ * Author: iswear(471291492@qq.com)
+ * Date: 2017/8/12
+ */
+
+
+/**
+ * 配置参数: 无
+ */
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
+    var BaseAnimation = (function () {
+      var InnerBaseAnimation = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__notifier__["a" /* default */]);
+
+      InnerBaseAnimation.prototype.execute = function (binder, deltaTime) {}
+
+      return InnerBaseAnimation;
+    })();
+
+    return BaseAnimation;
+  }
+)());
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifier__ = __webpack_require__(1);
+/**
+ *
+ * Author: iswear(471291492@qq.com)
+ * Date: 2017/8/12
+ */
+
+
+
+/**
+ * 配置参数：
+ * {
+ *    node:,
+ *    animation:,
+ *    fn:,
+ *    target:
+ * }
+ */
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
+    var Binder = (function () {
+      var InnerBinder = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__notifier__["a" /* default */]);
+
+      InnerBinder.prototype.init = function (conf) {
+        this.super('init', [conf]);
+        this.defineNotifyProperty('node', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.node, null));
+        this.defineNotifyProperty('animation', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.animation, null));
+        this.defineNotifyProperty('callbackFn', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.callbackFn, null));
+        this.defineNotifyProperty('callbackTarget', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.callbackTarget, null));
+        this.defineNotifyProperty('loop', __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.loop, null));
+        
+        this._runParams = {};
+      }
+
+      InnerBinder.prototype.execute = function (deltaTime) {
+        var result = this.animation.execute(this, deltaTime);
+        if (this.callbackFn !== null) {
+          this.callbackFn.call(this.callbackTarget, this, result);
+        }
+        return result;
+      }
+
+      InnerBinder.prototype.getRunParam = function (key) {
+        return this._runParams[key];
+      }
+
+      InnerBinder.prototype.setRunParam = function (key, value) {
+        this._runParams[key] = value;
+      }
+
+      InnerBinder.prototype.destroy = function () {
+        this.node = null;
+        this.animation = null;
+        this.callbackFn = null;
+        this.callbackTarget = null;
+        this.loop = null;
+        this.super('destroy');
+      }
+
+      return InnerBinder;
+    })();
+
+    return Binder;
+  }
+)());
 
 /***/ }),
 /* 8 */
@@ -2185,7 +2190,7 @@
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifier__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__binder__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__binder__ = __webpack_require__(7);
 /**
  *
  * Author: iswear(471291492@qq.com)
@@ -2488,8 +2493,8 @@
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__base_animation__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__binder__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__base_animation__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__binder__ = __webpack_require__(7);
 /**
  *
  * Author: iswear(471291492@qq.com)
@@ -2564,7 +2569,7 @@
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__base_animation__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__base_animation__ = __webpack_require__(6);
 /**
  *
  * Author: iswear(471291492@qq.com)
@@ -2636,7 +2641,7 @@
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__base_animation__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__base_animation__ = __webpack_require__(6);
 /**
  *
  * Author: iswear(471291492@qq.com)
@@ -3513,7 +3518,7 @@
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__main__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_common_core_render_webgl_shader_fragment_default_hlsl__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_common_core_render_webgl_shader_fragment_default_hlsl__ = __webpack_require__(31);
 
 
 
@@ -3526,11 +3531,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   var GTexture = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Texture;
   var GMap = __WEBPACK_IMPORTED_MODULE_0__main__["a" /* default */].game.Map;
 
-  // var root = new CNode({
-  //   x: 400,
-  //   y: 300,
-  //   visible: true
-  // });
+  var root = new CNode({
+    x: 400,
+    y: 150,
+    visible: true
+  });
 
   // var root = new UILabel({
   //   x: 400,
@@ -3545,18 +3550,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   //   borderRadius: 10
   // });
 
-  var root = new GTexture({
-    x: 400,
-    y: 300,
-    scaleY: Math.cos(22.5 * Math.PI / 180),
-    scaleX: Math.cos(22.5 * Math.PI / 180),
-    shearY: -Math.atan(22.5 * Math.PI / 180),
-    // shearX: .5,
-    // scaleY: 1,
-    // rotateZ: -0.3805063771123649,
-    visible: true,
-    image: './images/test/ride1/frame_00012.png',
-  });
+  // var root = new GTexture({
+  //   x: 400,
+  //   y: 300,
+  //   scaleY: Math.cos(22.5 * Math.PI / 180),
+  //   scaleX: Math.cos(22.5 * Math.PI / 180),
+  //   shearY: -Math.atan(22.5 * Math.PI / 180),
+  //   // shearX: .5,
+  //   // scaleY: 1,
+  //   // rotateZ: -0.3805063771123649,
+  //   visible: true,
+  //   image: './images/test/ride1/frame_00012.png',
+  // });
 
   // var root = new GMap({
   //   x: 250,
@@ -3655,6 +3660,58 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     root: root
   });
 
+  root.appendChildNode(new GTexture({
+    x: -300,
+    y: 0,
+    // scaleY: Math.cos(22.5 * Math.PI / 180),
+    // scaleX: Math.cos(22.5 * Math.PI / 180),
+    // shearY: -Math.atan(22.5 * Math.PI / 180),
+    // shearX: .5,
+    // scaleY: 1,
+    // rotateZ: -0.3805063771123649,
+    visible: true,
+    image: './images/test/ride1/frame_00012.png'
+  }));
+
+ root.appendChildNode(new GTexture({
+    x: -100,
+    y: 0,
+    scaleY: Math.cos(22.5 * Math.PI / 180),
+    scaleX: Math.cos(22.5 * Math.PI / 180),
+    shearY: -Math.atan(22.5 * Math.PI / 180),
+    // shearX: .5,
+    // scaleY: 1,
+    // rotateZ: -0.3805063771123649,
+    visible: true,
+    image: './images/test/ride1/frame_00012.png'
+  }));
+
+  root.appendChildNode(new GTexture({
+    x: 100,
+    y: 0,
+    // scaleY: Math.cos(22.5 * Math.PI / 180),
+    // scaleX: Math.cos(22.5 * Math.PI / 180),
+    // shearY: Math.atan(22.5 * Math.PI / 180),
+    // shearX: .5,
+    // scaleY: 1,
+    // rotateZ: -0.3805063771123649,
+    visible: true,
+    image: './images/test/ride1/frame_00005.png'
+  }));
+
+  root.appendChildNode(new GTexture({
+    x: 300,
+    y: 0,
+    scaleY: 1 / Math.cos(22.5 * Math.PI / 180),
+    scaleX: 1 / Math.cos(22.5 * Math.PI / 180),
+    shearY: Math.atan(22.5 * Math.PI / 180),
+    // shearX: .5,
+    // scaleY: 1,
+    // rotateZ: -0.3805063771123649,
+    visible: true,
+    image: './images/test/ride1/frame_00005.png'
+  }));
+
   application.run();
 
   // root.runAnimation(new PropertyAnimation({
@@ -3699,28 +3756,28 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_common_core_notifier__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_common_core_io_file_loader__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_common_core_animation_manager__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_common_core_animation_binder__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__src_common_core_animation_base_animation__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_common_core_animation_binder__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__src_common_core_animation_base_animation__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__src_common_core_animation_queue_animation__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__src_common_core_animation_scheduler_animation__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__src_common_core_animation_property_animation__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__src_common_core_render_canvas_canvas_render__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__src_common_core_render_webgl_webgl_render__ = __webpack_require__(24);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__src_common_ui_ui_view__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__src_common_ui_ui_label__ = __webpack_require__(25);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__src_common_game_g_scene__ = __webpack_require__(26);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__src_common_game_map_g_map__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__src_common_game_model_g_model__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__src_common_ui_ui_label__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__src_common_game_g_scene__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__src_common_game_map_g_map__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__src_common_game_model_g_model__ = __webpack_require__(29);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__src_common_game_g_texture__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__src_common_game_g_texture_node__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__src_common_game_g_util__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__src_common_utils_event_util__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__src_common_utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__src_common_utils_matrix_util__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__src_common_utils_matrix_util__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__src_common_utils_platform_util__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__src_common_utils_text_util__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__src_common_utils_timer_util__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__src_common_utils_number_util__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__src_common_utils_number_util__ = __webpack_require__(30);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__src_common_utils_geometry_util__ = __webpack_require__(4);
 
 
@@ -4447,12 +4504,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifier__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__webgl_camera__ = __webpack_require__(25);
 /**
  *
  * Author: iswear(471291492@qq.com)
  * Date: 2017/8/13
  */
+
 
 
 
@@ -4468,14 +4527,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       }
       
       function onViewPortChanged () {
-        this.$context.viewport(this.viewPortX, this.viewPortY, this.viewPortWidth, this.viewPortHeight)
+        this.$context.viewport(this.x, this.y, this.width, this.height)
       }
       
       var onEventsMap = {
-        viewPortX: onViewPortChanged,
-        viewPortY: onViewPortChanged,
-        viewPortWidth: onViewPortChanged,
-        viewPortHeight: onViewPortChanged
+        x: onViewPortChanged,
+        y: onViewPortChanged,
+        width: onViewPortChanged,
+        height: onViewPortChanged
       }
 
       return {
@@ -4489,14 +4548,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       InnerWebglRender.prototype.init = function (conf) {
         this.super('init', [ conf ]);
-        this.viewPortX = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.x, 0);
-        this.viewPortY = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.y, 0);
-        this.viewPortWidth = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.width, this.$canvas.width);
-        this.viewPortHeight = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.height, this.$canvas.height);
+        this.x = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.x, 0);
+        this.y = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.y, 0);
+        this.width = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.width, this.$canvas.width);
+        this.height = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.height, this.$canvas.height);
+        this.camera = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.camera, new __WEBPACK_IMPORTED_MODULE_3__webgl_camera__["a" /* default */]());
 
         this._canvas = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.canvas, null);
         this._context = this.$canvas.getContext('webgl') || this.$canvas.getContext('experimental-webgl');
-        this._shaderProgram = this._context.createProgram();
+        this._mvpMatrix = M3D.newIdentityMat3D();
+        this._program = this._context.createProgram();
         this._vertexShader = null;
         this._fragmentShader = null;
 
@@ -4505,9 +4566,25 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       }
 
       InnerWebglRender.prototype.useProgram = function (vertexShader, fragmentShader) {
-        
+        var gl = this._context;
+        this._vertexShader = gl.createShader(gl.VERTEX_SHADER);
+        this._fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(this._vertexShader, vertexShader);
+        gl.compileShader(this._vertexShader);
+        if (!gl.getShaderParameter(this._vertexShader, gl.COMPILE_STATUS)) {
+          console.error('error compile vertex shader');
+        }
+        gl.shaderSource(this._fragmentShader, fragmentShader);
+        gl.compileShader(this._fragmentShader);
+        if (!gl.getShaderParameter(this._fragmentShader, gl.COMPILE_STATUS)) {
+          console.error('error compile fragment shader');
+        }
+        this._program = gl.createProgram();
+        gl.attachShader(this._program, this._vertexShader);
+        gl.attachShader(this._program, this._fragmentShader);
+        gl.linkProgram(this._program); 
       }
-      
+
       InnerWebglRender.prototype.translate = function () {
 
       }
@@ -4520,14 +4597,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       }
 
-      InnerWebglRender.prototype.shear = function () {
-
-      }
-
-      InnerWebglRender.prototype.lookAt = function () {
-
-      }
-
+      // InnerWebglRender.prototype.shear = function () {
+      // }
+      
       // InnerWebglRender.prototype.createAndCompileShader = function (type, source) {
       //   var shader = this.$context.createShader(type);
       //   this.$context.shaderSource(shader, source);
@@ -4552,6 +4624,46 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 /***/ }),
 /* 25 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__notifier__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__ = __webpack_require__(5);
+
+
+
+
+/* harmony default export */ __webpack_exports__["a"] = ((
+  function () {
+    var M3D = __WEBPACK_IMPORTED_MODULE_2__utils_matrix_util__["a" /* default */].m3d;
+
+    var WebglCamera = (function () {
+      var InnerWebglCamera = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_1__notifier__["a" /* default */]);
+
+      InnerWebglCamera.prototype.init = function (conf) {
+        this.super('init', [conf]);
+        this.eye = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.eye, [0, 0, 0]);
+        this.look = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.look, [0, 0, -1]);
+        this.up = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.up, [0, 1, 0])
+      }
+
+      InnerWebglCamera.prototype.translate = function (x, y, z) {
+        this.eye[0] += x;
+        this.eye[1] += y;
+        this.eye[2] += z;
+      }
+      
+      return InnerWebglCamera;
+    })();
+
+    return WebglCamera;
+  }
+)());
+
+
+/***/ }),
+/* 26 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4821,7 +4933,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 )());
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4851,7 +4963,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 )());
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5601,7 +5713,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 })());
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5831,7 +5943,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5865,7 +5977,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 )());
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

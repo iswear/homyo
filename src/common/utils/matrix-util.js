@@ -304,8 +304,13 @@ export default (
         shear3D: function (mat, x, y, z) {
           return null;
         },
-        lookAt: function (mat, x, y, z) {
-          return null;
+        lookAt: function (mat, eye, look, up) {
+          // var n = [eye[0] - look[0], eye[1] - look[1], eye[2] - look[2]];
+          // var v = ;
+          // var u = ;
+          // return [
+
+          // ];
         },
         reverse3D: function (mat) {
           return null;
