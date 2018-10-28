@@ -326,6 +326,7 @@ export default (function () {
           renderZone.right = width;
           renderZone.bottom = height;
           transformCtx.invalid = false;
+          this.receiveDirtyZone(null, renderZone);
         }
       }
 

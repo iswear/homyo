@@ -39,10 +39,10 @@ export default (
 
       InnerWebglRender.prototype.init = function (conf) {
         this.super('init', [ conf ]);
-        this.viewPortX = LangUtil.checkAndGet(conf.x, 0);
-        this.viewPortY = LangUtil.checkAndGet(conf.y, 0);
-        this.viewPortWidth = LangUtil.checkAndGet(conf.width, this.$canvas.width);
-        this.viewPortHeight = LangUtil.checkAndGet(conf.height, this.$canvas.height);
+        this.x = LangUtil.checkAndGet(conf.x, 0);
+        this.y = LangUtil.checkAndGet(conf.y, 0);
+        this.width = LangUtil.checkAndGet(conf.width, this.$canvas.width);
+        this.height = LangUtil.checkAndGet(conf.height, this.$canvas.height);
 
         this._canvas = LangUtil.checkAndGet(conf.canvas, null);
         this._context = this.$canvas.getContext('webgl') || this.$canvas.getContext('experimental-webgl');

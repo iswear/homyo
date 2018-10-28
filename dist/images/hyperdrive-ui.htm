@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<!-- saved from url=(0028)http://localhost:8999/#/game -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>hyperdrive-ui</title>
+  <style type="text/css">
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  background-color: #666;
+}
+.router-link {
+  display: block;
+  padding: 0 1rem;
+  color: white;
+  background-color: #2ecc71;
+  text-align: center;
+}
+.router-link:hover {
+  background-color: #2ecc89;
+}
+.router-link:active {
+  background-color: #2ecccc;
+}
+</style><style type="text/css">
+.g-abs-per-full {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.g-fix-per-full {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+.g-rel-per-full {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.g-sta-hor-center {
+  margin: auto;
+}
+.g-layout-row:after {
+  display: block;
+  content: ' ';
+  clear: both;
+}
+.g-layout-row > .col-1 {
+  float: left;
+  width: 5%;
+}
+.g-layout-row > .col-2 {
+  float: left;
+  width: 10%;
+}
+.g-layout-row > .col-3 {
+  float: left;
+  width: 15%;
+}
+.g-layout-row > .col-4 {
+  float: left;
+  width: 20%;
+}
+.g-layout-row > .col-5 {
+  float: left;
+  width: 25%;
+}
+.g-layout-row > .col-6 {
+  float: left;
+  width: 30%;
+}
+.g-layout-row > .col-7 {
+  float: left;
+  width: 35%;
+}
+.g-layout-row > .col-8 {
+  float: left;
+  width: 40%;
+}
+.g-layout-row > .col-9 {
+  float: left;
+  width: 45%;
+}
+.g-layout-row > .col-10 {
+  float: left;
+  width: 50%;
+}
+.g-layout-row > .col-11 {
+  float: left;
+  width: 55%;
+}
+.g-layout-row > .col-12 {
+  float: left;
+  width: 60%;
+}
+.g-layout-row > .col-13 {
+  float: left;
+  width: 65%;
+}
+.g-layout-row > .col-14 {
+  float: left;
+  width: 70%;
+}
+.g-layout-row > .col-15 {
+  float: left;
+  width: 75%;
+}
+.g-layout-row > .col-16 {
+  float: left;
+  width: 80%;
+}
+.g-layout-row > .col-17 {
+  float: left;
+  width: 85%;
+}
+.g-layout-row > .col-18 {
+  float: left;
+  width: 90%;
+}
+.g-layout-row > .col-19 {
+  float: left;
+  width: 95%;
+}
+.g-layout-row > .col-20 {
+  float: left;
+  width: 100%;
+}
+</style><style type="text/css">
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+}
+.hd-model-struct-tree {
+  background-color: #000;
+  color: #ffffff;
+  list-style: none;
+}
+.hd-model-struct-tree li {
+  list-style: none;
+}
+.hd-model-struct-tree ul {
+  list-style: none;
+}
+</style><style type="text/css">
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+}
+.hd-model-struct-tree-node {
+  position: relative;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  overflow: hidden;
+  line-height: 26px;
+}
+.hd-model-struct-tree-node > ul.expanded {
+  display: block;
+}
+.hd-model-struct-tree-node > ul.collapsed {
+  display: none;
+}
+.hd-model-struct-tree-node > .view {
+  overflow: hidden;
+  color: #ffffff;
+}
+.hd-model-struct-tree-node > .view:hover {
+  background-color: #111111;
+  color: #ffffff;
+}
+.hd-model-struct-tree-node > .view:hover > .container > .switch:before {
+  border-left-color: #ffffff;
+}
+.hd-model-struct-tree-node > .view:active {
+  background-color: #f58400;
+  color: #ffffff;
+}
+.hd-model-struct-tree-node > .view:active > .container > .switch:before {
+  border-left-color: #ffffff;
+}
+.hd-model-struct-tree-node > .view.hover {
+  background-color: #111111;
+  color: #ffffff;
+}
+.hd-model-struct-tree-node > .view.hover > .container > .switch:before {
+  border-left-color: #ffffff;
+}
+.hd-model-struct-tree-node > .view.active {
+  background-color: #f58400;
+  color: #ffffff;
+}
+.hd-model-struct-tree-node > .view.active > .container > .switch:before {
+  border-left-color: #ffffff;
+}
+.hd-model-struct-tree-node > .view > .container {
+  position: relative;
+  padding-left: 16px;
+}
+.hd-model-struct-tree-node > .view > .container > .switch {
+  position: absolute;
+  display: block;
+  width: 16px;
+  height: 100%;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+}
+.hd-model-struct-tree-node > .view > .container > .switch:before {
+  position: absolute;
+  display: block;
+  width: 0;
+  height: 0;
+  top: 50%;
+  left: 50%;
+  content: ' ';
+  margin-top: -4px;
+  margin-left: -2px;
+  border: solid 4px transparent;
+  border-left-color: #ffffff;
+}
+.hd-model-struct-tree-node > .view > .container > .switch.expanded {
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+.hd-model-struct-tree-node > .view > .container > .content {
+  cursor: default;
+  display: block;
+}
+.hd-model-struct-tree-node > .view > .container > .move-mark {
+  position: absolute;
+  right: 0;
+  z-index: 1;
+}
+.hd-model-struct-tree-node > .view > .container > .move-mark.hidden {
+  display: none;
+}
+.hd-model-struct-tree-node > .view > .container > .move-mark.before {
+  left: 6px;
+  top: 0px;
+  background-color: red;
+  height: 1px;
+}
+.hd-model-struct-tree-node > .view > .container > .move-mark.inner {
+  left: 13px;
+  top: 0;
+  bottom: 0;
+  border: solid 1px red;
+}
+.hd-model-struct-tree-node > .view > .container > .move-mark.after {
+  left: 6px;
+  bottom: 0px;
+  background-color: red;
+  height: 1px;
+}
+</style><style type="text/css"></style><style type="text/css">
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+}
+.hd-model-time-axis-name-tree {
+  background-color: #000;
+  color: #ffffff;
+  list-style: none;
+}
+.hd-model-time-axis-name-tree li {
+  list-style: none;
+}
+.hd-model-time-axis-name-tree ul {
+  list-style: none;
+}
+</style><style type="text/css">
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+}
+.hd-model-time-axis-name-tree-node {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+.hd-model-time-axis-name-tree-node > .view {
+  position: relative;
+  height: 26px;
+  line-height: 26px;
+  padding-left: 16px;
+}
+.hd-model-time-axis-name-tree-node > .view > .switch {
+  position: absolute;
+  display: block;
+  width: 16px;
+  height: 100%;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+}
+.hd-model-time-axis-name-tree-node > .view > .switch:before {
+  position: absolute;
+  display: block;
+  width: 6px;
+  height: 2px;
+  top: 50%;
+  left: 50%;
+  content: ' ';
+  background-color: #ffffff;
+  margin-top: -1px;
+  margin-left: -3px;
+}
+.hd-model-time-axis-name-tree-node > .view > .switch.collapsed:after {
+  position: absolute;
+  display: block;
+  width: 2px;
+  height: 6px;
+  top: 50%;
+  left: 50%;
+  content: ' ';
+  background-color: #ffffff;
+  margin-top: -3px;
+  margin-left: -1px;
+}
+.hd-model-time-axis-name-tree-node > .frames {
+  color: #999;
+}
+.hd-model-time-axis-name-tree-node > .frames.expanded {
+  display: block;
+}
+.hd-model-time-axis-name-tree-node > .frames.collapsed {
+  display: none;
+}
+.hd-model-time-axis-name-tree-node > .frames > li {
+  height: 26px;
+  line-height: 26px;
+  padding-left: 16px;
+  font-size: 12px;
+}
+</style><style type="text/css">
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+}
+.hd-model-time-axis-tree {
+  background-color: #000;
+  color: #ffffff;
+  list-style: none;
+}
+.hd-model-time-axis-tree li {
+  list-style: none;
+}
+.hd-model-time-axis-tree ul {
+  list-style: none;
+}
+</style><style type="text/css">
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+}
+.hd-model-time-axis-tree-node {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+.hd-model-time-axis-tree-node > .frames.expanded {
+  display: block;
+}
+.hd-model-time-axis-tree-node > .frames.collapsed {
+  display: none;
+}
+</style><style type="text/css">
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+}
+.hd-time-axis {
+  position: relative;
+  height: 26px;
+}
+.hd-time-axis:hover {
+  background-color: #111111;
+}
+.hd-time-axis:active {
+  background-color: #f58400;
+}
+.hd-time-axis.hover {
+  background-color: #111111;
+}
+.hd-time-axis.active {
+  background-color: #f58400;
+}
+.hd-time-axis > .frame {
+  position: absolute;
+  display: inline-block;
+  top: 3px;
+  bottom: 3px;
+  width: 3px;
+  background-color: #e67e22;
+  border: solid 1px black;
+  cursor: default;
+  z-index: 1;
+}
+.hd-time-axis > .frame:hover {
+  background-color: #bf6516;
+}
+.hd-time-axis > .frame:active {
+  background-color: #924d10;
+}
+.hd-time-axis > .tween {
+  position: absolute;
+  height: 1px;
+  top: 50%;
+  background-color: #2ecc71;
+  z-index: 1;
+}
+</style><style type="text/css">
+.hd-model-canvas {
+  position: relative;
+}
+.hd-model-canvas > canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+</style></head>
+  <body>
+    <div><div style="position: absolute; right: 0px; bottom: 0px; z-index: 999;"><a href="http://localhost:8999/#/ui" class="router-link">ui</a> <a href="http://localhost:8999/#/game" class="router-link router-link-exact-active router-link-active">game</a></div> <div><h1>一、模型动画编辑器</h1> <h3>1. ModelStructTree</h3> <ul class="hd-model-struct-tree"><li class="hd-model-struct-tree-node"><div class="view" style="padding-left: 0px;"><div class="container"><i class="switch collapsed"></i> <span>节点1</span></div> <!----></div> <ul class="collapsed"><li class="hd-model-struct-tree-node"><div class="view" style="padding-left: 14px;"><div class="container"><i class="switch collapsed"></i> <span>节点1-1</span></div> <!----></div> <!----></li><li class="hd-model-struct-tree-node"><div class="view" style="padding-left: 14px;"><div class="container"><i class="switch collapsed"></i> <span>节点1-2</span></div> <!----></div> <!----></li></ul></li></ul> <h3>2. ModelTimeAxisNameTree</h3> <ul class="hd-model-time-axis-name-tree"><li class="hd-model-time-axis-name-tree-node"><div class="view"><i class="switch collapsed"></i> <span>节点1</span></div> <ul class="frames collapsed"><li>
+      平移-X
+    </li> <!----> <!----> <!----> <!----> <!----> <!----> <!----> <!----> <!----></ul> <ul class="children"><li class="hd-model-time-axis-name-tree-node"><div class="view"><i class="switch collapsed"></i> <span>节点1-1</span></div> <!----> <!----></li><li class="hd-model-time-axis-name-tree-node"><div class="view"><i class="switch collapsed"></i> <span>节点1-2</span></div> <!----> <!----></li></ul></li></ul> <h3>3. ModelTimeAxisTree</h3> <ul class="hd-model-time-axis-tree"><li class="hd-model-time-axis-tree-node"><div class="hd-time-axis" style="width: 9.45px;"> <!----></div> <ul class="frames collapsed"><li><div class="hd-time-axis" style="width: 9.45px;"><div class="frame" style="left: 2px;"> <!----></div>  <!----></div></li> <!----> <!----> <!----> <!----> <!----> <!----> <!----> <!----> <!----></ul> <ul><li class="hd-model-time-axis-tree-node"><div class="hd-time-axis" style="width: 9.45px;"> <!----></div> <!----> <!----></li><li class="hd-model-time-axis-tree-node"><div class="hd-time-axis" style="width: 9.45px;"> <!----></div> <!----> <!----></li></ul></li></ul> <h3>4. ModelVisualView</h3> <div class="hd-model-canvas" style="height: 300px; background-color: black;"><canvas width="1191" height="300"></canvas></div> <h1>二、地图编辑器</h1> <h3>1. MapStructTree</h3> <h3>2. MapTimeAxisNameTree</h3> <h3>3. MapTimeAxisTree</h3></div></div>
+    <!-- built files will be auto injected -->
+  <script type="text/javascript" src="./hyperdrive-ui_files/app.js"></script>
+
+</body></html>

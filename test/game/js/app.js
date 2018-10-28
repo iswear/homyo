@@ -13,8 +13,21 @@ import glsl from '../../../src/common/core/render/webgl/shader/fragment/default.
   var root = new CNode({
     x: 400,
     y: 150,
-    visible: true
+    width: 100, 
+    height: 100,
+    visible: true,
+    interactive: true
   });
+
+  root.addObserver('render', function(sender, render){
+    render.fillStyle = '#f00'
+    render.fillRect(-50, -50, 100, 100)
+  }, root);
+
+  root.addObserver('mousedown', function(sender, render){
+    console.log('mouseodwn')
+  });
+
 
   // var root = new UILabel({
   //   x: 400,
@@ -139,57 +152,57 @@ import glsl from '../../../src/common/core/render/webgl/shader/fragment/default.
     root: root
   });
 
-  root.appendChildNode(new GTexture({
-    x: -300,
-    y: 0,
-    // scaleY: Math.cos(22.5 * Math.PI / 180),
-    // scaleX: Math.cos(22.5 * Math.PI / 180),
-    // shearY: -Math.atan(22.5 * Math.PI / 180),
-    // shearX: .5,
-    // scaleY: 1,
-    // rotateZ: -0.3805063771123649,
-    visible: true,
-    image: './images/test/ride1/frame_00012.png'
-  }));
+  // root.appendChildNode(new GTexture({
+  //   x: -300,
+  //   y: 0,
+  //   // scaleY: Math.cos(22.5 * Math.PI / 180),
+  //   // scaleX: Math.cos(22.5 * Math.PI / 180),
+  //   // shearY: -Math.atan(22.5 * Math.PI / 180),
+  //   // shearX: .5,
+  //   // scaleY: 1,
+  //   // rotateZ: -0.3805063771123649,
+  //   visible: true,
+  //   image: './images/test/ride1/frame_00012.png'
+  // }));
 
- root.appendChildNode(new GTexture({
-    x: -100,
-    y: 0,
-    scaleY: Math.cos(22.5 * Math.PI / 180),
-    scaleX: Math.cos(22.5 * Math.PI / 180),
-    shearY: -Math.atan(22.5 * Math.PI / 180),
-    // shearX: .5,
-    // scaleY: 1,
-    // rotateZ: -0.3805063771123649,
-    visible: true,
-    image: './images/test/ride1/frame_00012.png'
-  }));
+//  root.appendChildNode(new GTexture({
+//     x: -100,
+//     y: 0,
+//     scaleY: Math.cos(22.5 * Math.PI / 180),
+//     scaleX: Math.cos(22.5 * Math.PI / 180),
+//     shearY: -Math.atan(22.5 * Math.PI / 180),
+//     // shearX: .5,
+//     // scaleY: 1,
+//     // rotateZ: -0.3805063771123649,
+//     visible: true,
+//     image: './images/test/ride1/frame_00012.png'
+//   }));
 
-  root.appendChildNode(new GTexture({
-    x: 100,
-    y: 0,
-    // scaleY: Math.cos(22.5 * Math.PI / 180),
-    // scaleX: Math.cos(22.5 * Math.PI / 180),
-    // shearY: Math.atan(22.5 * Math.PI / 180),
-    // shearX: .5,
-    // scaleY: 1,
-    // rotateZ: -0.3805063771123649,
-    visible: true,
-    image: './images/test/ride1/frame_00005.png'
-  }));
+//   root.appendChildNode(new GTexture({
+//     x: 100,
+//     y: 0,
+//     // scaleY: Math.cos(22.5 * Math.PI / 180),
+//     // scaleX: Math.cos(22.5 * Math.PI / 180),
+//     // shearY: Math.atan(22.5 * Math.PI / 180),
+//     // shearX: .5,
+//     // scaleY: 1,
+//     // rotateZ: -0.3805063771123649,
+//     visible: true,
+//     image: './images/test/ride1/frame_00005.png'
+//   }));
 
-  root.appendChildNode(new GTexture({
-    x: 300,
-    y: 0,
-    scaleY: 1 / Math.cos(22.5 * Math.PI / 180),
-    scaleX: 1 / Math.cos(22.5 * Math.PI / 180),
-    shearY: Math.atan(22.5 * Math.PI / 180),
-    // shearX: .5,
-    // scaleY: 1,
-    // rotateZ: -0.3805063771123649,
-    visible: true,
-    image: './images/test/ride1/frame_00005.png'
-  }));
+  // root.appendChildNode(new GTexture({
+  //   x: 300,
+  //   y: 0,
+  //   scaleY: 1 / Math.cos(22.5 * Math.PI / 180),
+  //   scaleX: 1 / Math.cos(22.5 * Math.PI / 180),
+  //   shearY: Math.atan(22.5 * Math.PI / 180),
+  //   // shearX: .5,
+  //   // scaleY: 1,
+  //   // rotateZ: -0.3805063771123649,
+  //   visible: true,
+  //   image: './images/test/ride1/frame_00005.png'
+  // }));
 
   application.run();
 
