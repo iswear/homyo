@@ -6,7 +6,6 @@
 import LangUtil from '../../../utils/lang-util';
 import Notifier from '../../notifier';
 import MatrixUtil from '../../../utils/matrix-util';
-import WebglCamera from './webgl-camera';
 
 export default (
   function () {
@@ -19,14 +18,14 @@ export default (
       }
       
       function onViewPortChanged () {
-        this.$context.viewport(this.x, this.y, this.width, this.height)
+        this.$context.viewport(this.viewPortX, this.viewPortY, this.viewPortWidth, this.viewPortHeight)
       }
       
       var onEventsMap = {
-        x: onViewPortChanged,
-        y: onViewPortChanged,
-        width: onViewPortChanged,
-        height: onViewPortChanged
+        viewPortX: onViewPortChanged,
+        viewPortY: onViewPortChanged,
+        viewPortWidth: onViewPortChanged,
+        viewPortHeight: onViewPortChanged
       }
 
       return {
@@ -40,15 +39,13 @@ export default (
 
       InnerWebglRender.prototype.init = function (conf) {
         this.super('init', [ conf ]);
-        this.x = LangUtil.checkAndGet(conf.x, 0);
-        this.y = LangUtil.checkAndGet(conf.y, 0);
-        this.width = LangUtil.checkAndGet(conf.width, this.$canvas.width);
-        this.height = LangUtil.checkAndGet(conf.height, this.$canvas.height);
-        this.camera = LangUtil.checkAndGet(conf.camera, new WebglCamera());
+        this.viewPortX = LangUtil.checkAndGet(conf.x, 0);
+        this.viewPortY = LangUtil.checkAndGet(conf.y, 0);
+        this.viewPortWidth = LangUtil.checkAndGet(conf.width, this.$canvas.width);
+        this.viewPortHeight = LangUtil.checkAndGet(conf.height, this.$canvas.height);
 
         this._canvas = LangUtil.checkAndGet(conf.canvas, null);
         this._context = this.$canvas.getContext('webgl') || this.$canvas.getContext('experimental-webgl');
-        this._mvpMatrix = M3D.newIdentityMat3D();
         this._program = this._context.createProgram();
         this._vertexShader = null;
         this._fragmentShader = null;
@@ -76,9 +73,9 @@ export default (
         gl.attachShader(this._program, this._fragmentShader);
         gl.linkProgram(this._program); 
       }
-
+      
       InnerWebglRender.prototype.translate = function () {
-        
+
       }
 
       InnerWebglRender.prototype.rotate = function () {
@@ -89,9 +86,14 @@ export default (
 
       }
 
-      // InnerWebglRender.prototype.shear = function () {
-      // }
-      
+      InnerWebglRender.prototype.shear = function () {
+
+      }
+
+      InnerWebglRender.prototype.lookAt = function () {
+
+      }
+
       // InnerWebglRender.prototype.createAndCompileShader = function (type, source) {
       //   var shader = this.$context.createShader(type);
       //   this.$context.shaderSource(shader, source);
