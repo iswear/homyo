@@ -6,24 +6,11 @@
 import LangUtil from '../../utils/lang-util';
 import Notifier from '../../core/notifier';
 import GUtil from '../g-util';
-import GNode from '../g-texture-node';
+import GModelNode from './g-model-node';
+import Proxy from '../../core/proxy';
 
 export default (function () {
     var functions = (function () {
-      function createNode (conf) {
-        var node = new GNode(conf.node);
-        if (conf.id) {
-          this._nodeMap[conf.id] = node;
-        }
-        if (conf.children) {
-          var children = conf.children;
-          for (var i = 0, len = children.length; i < len; ++i) {
-            node.appendChildNode(createNode.call(this, children[i]));
-          }
-        }
-        return node;
-      }
-
       function createNodes (conf) {
         if (conf) {
           this._nodeMap = {};
@@ -60,6 +47,20 @@ export default (function () {
         }
       }
 
+      function createNode (conf) {
+        var node = new GModelNode(conf.node);
+        if (conf.id) {
+          this._nodeMap[conf.id] = node;
+        }
+        if (conf.children) {
+          var children = conf.children;
+          for (var i = 0, len = children.length; i < len; ++i) {
+            node.appendChildNode(createNode.call(this, children[i]));
+          }
+        }
+        return node;
+      }
+
       function runAction () {
         var context = this._actionsContext;
         if (context.runningAct) {
@@ -84,16 +85,22 @@ export default (function () {
       }
 
       return {
+        initSkin: initSkin,
         createNodes: createNodes,
-        compileActions: compileActions
+        compileActions: compileActions,
+        onSkinPropertyChanged: onSkinPropertyChanged
       }
     })();
 
     var GModel = (function () {
       var InnerGModel = LangUtil.extend(Notifier);
 
+      InnerGModel.prototype.defName = 'model';
       InnerGModel.prototype.init = function (conf) {
         this.super('init', [conf]);
+        this.id = LangUtil.checkAndGet(conf.id, 1);
+        this.name = LangUtil.checkAndGet(conf.name, this.defName);
+        this.skin = new Proxy(LangUtil.checkAndGet(conf.skin, {}));
 
         this._node = null;
         this._nodeMap = null;
@@ -106,6 +113,7 @@ export default (function () {
           loop: false
         };
 
+        functions.initSkin.call(this);
         functions.createNodes.call(this, LangUtil.checkAndGet(conf.root, null));
         functions.compileActions.call(this, LangUtil.checkAndGet(conf.actions, null));
       }
@@ -208,6 +216,10 @@ export default (function () {
       }
 
       InnerGModel.prototype.destroy = function () {
+        this._node.destroy();
+        this._nodeMap = null;
+        this._actions = null;
+        this._actionsContext = null;
         this.super('destroy');
       }
 

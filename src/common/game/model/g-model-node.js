@@ -3,9 +3,9 @@
  * Author: iswear(471291492@qq.com)
  * Date: 2017/8/17
  */
-import LangUtil from '../utils/lang-util';
-import Node from '../core/node';
-import GTexture from './g-texture';
+import LangUtil from '../../utils/lang-util';
+import Node from '../../core/node';
+import GTexture from '../g-texture';
 
 export default (function () {
     var GTextureNode = (function () {

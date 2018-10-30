@@ -119,7 +119,6 @@ export default (
         this.parent = LangUtil.checkAndGet(conf.parent, null);
         this.application = LangUtil.checkAndGet(conf.application, null);
 
-
         this._id = ++id;
 
         this._childNodes =  {
