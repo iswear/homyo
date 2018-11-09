@@ -17,7 +17,7 @@ export default (function() {
     "shearY",
     "alpha",
     "visible",
-    "img"
+    "image"
   ];
 
   var normalNodeProps = [
@@ -30,7 +30,7 @@ export default (function() {
     "shearY",
     "alpha",
     "visible",
-    "img"
+    "image"
   ];
 
   var tweenNodeProps = {
@@ -105,6 +105,8 @@ export default (function() {
   };
 
   var GUtil = {
+
+
     compileModelFrames: function(node, frames, isRoot) {
       if (frames && frames.length > 0) {
         var prevTime = 0;

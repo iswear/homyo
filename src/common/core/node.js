@@ -82,15 +82,15 @@ export default (
 
       InnerNode.prototype.defX = 0;
       InnerNode.prototype.defY = 0;
-      InnerNode.prototype.defRotateZ = 0;
       InnerNode.prototype.defScaleX = 1;
       InnerNode.prototype.defScaleY = 1;
       InnerNode.prototype.defShearX = 0;
       InnerNode.prototype.defShearY = 0;
-      InnerNode.prototype.defWidth = 0;
-      InnerNode.prototype.defHeight = 0;
+      InnerNode.prototype.defRotateZ = 0;
       InnerNode.prototype.defAnchorX = 0.5;
       InnerNode.prototype.defAnchorY = 0.5;
+      InnerNode.prototype.defWidth = 0;
+      InnerNode.prototype.defHeight = 0;
       InnerNode.prototype.defAlpha = 1;
       InnerNode.prototype.defVisible = true;
       InnerNode.prototype.defCursor = 'default';

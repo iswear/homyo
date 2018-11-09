@@ -5,46 +5,110 @@
  */
 import LangUtil from '../../utils/lang-util';
 import Notifier from '../../core/notifier';
-import GUtil from '../g-util';
-import GModelNode from './g-model-node';
 import Proxy from '../../core/proxy';
+import Node from '../../core/node';
+import GModelNode from './g-model-node';
+import GModelUtil from './g-model-util';
 
-export default (function () {
+export default (
+  function () {
     var functions = (function () {
-      function createNodes (conf) {
+      function createNodes (nodes) {
         if (conf) {
-          this._nodeMap = {};
-          this._node = createNode.call(this, conf);
-        }
-      }
-
-      function compileActions (actions) {
-        this._actions = {};
-        if (actions) {
-          for (var i = 0, len = actions.length; i < len; ++i) {
-            var modelAction = actions[i];
-            var modelActionFrames = modelAction.frames;
-            if (modelActionFrames) {
-              var nodeCompiledActions = [];
-              for (var nodeId in modelActionFrames) {
-                var node = this._nodeMap[nodeId];
-                var nodeFrames = modelActionFrames[nodeId];
-                if (node && nodeFrames) {
-                  var animation = GUtil.compileModelFrames(node, nodeFrames, node === this._node);
-                  if (animation) {
-                    nodeCompiledActions.push({
-                      node: node,
-                      animation: animation
-                    });
-                  }
+          var queue = [];
+          if (nodes) {
+            for (var i = 0, len = nodes.length; i < len; ++i) {
+              queue.push({
+                parent: this._node,
+                conf: nodes[i]
+              });
+            }
+            while (queue.length > 0) {
+              var item = queue.unshift();
+              var itemParent = item.parent;
+              var itemConf = item.conf;
+              var itemNode = new GModelNode(itemConf.node);
+              children = itemConf.children
+              if (children) {
+                for (var i = 0, len = children.length; i < len; ++i) {
+                  queue.push[{
+                    parent: itemNode,
+                    conf: children[i]
+                  }];
                 }
               }
-              if (nodeCompiledActions.length > 0) {
-                this._actions[modelAction.id] = nodeCompiledActions;
-              }
+              itemParent.appendChildNode(itemNode);
+              this._nodeMap[itemConf.id] = itemNode;
             }
           }
         }
+      }
+
+      function compileActions (actionGroups) {
+        if (actionGroups) {
+          for (var i = 0, len = actionGroups.length; i < len; ++i) {
+            var actionGroup = actionGroups[i];
+            var actions = actionGroup.actions;
+            if (!actions) {
+              continue
+            }
+            var compiledActions = [];
+            for (var j = 0, leng = actions.length; j < leng; ++j) {
+              var action = actions[i];
+              var frames = action.frames;
+              if (!frames) {
+                continue
+              }
+              compileActions.push({
+                id: action.id,
+                name: action.name,
+                condition: {
+                  property: action.property,
+                  min: action.min,
+                  max: action.max
+                }
+              });
+              for (var nodeId in frames) {
+                var nodeFrames = frames[nodeId]
+                if (!nodeFrames) {
+                  var node = this._nodeMap[nodeId];
+                  var animation = GModelUtil.compilePropertiesFrames(this._nodeMap[nodeId], nodeFrames);
+                }
+              }
+            }
+            this._actionGroupMap[actionGroup.id] = {
+              id: actionGroup.id,
+              name: actionGroup.name,
+              actions: compiledActions
+            };
+          }
+        }
+        // this._actions = {};
+        // if (actions) {
+        //   for (var i = 0, len = actions.length; i < len; ++i) {
+        //     var modelAction = actions[i];
+        //     var modelActionFrames = modelAction.frames;
+        //     if (modelActionFrames) {
+        //       var nodeCompiledActions = [];
+        //       for (var nodeId in modelActionFrames) {
+        //         var node = this._nodeMap[nodeId];
+        //         var nodeFrames = modelActionFrames[nodeId];
+        //         if (node && nodeFrames) {
+        //           var animation = GUtil.compileModelFrames(node, nodeFrames, node === this._node);
+        //           if (animation) {
+        //             nodeCompiledActions.push({
+        //               node: node,
+        //               animation: animation
+        //             });
+        //           }
+        //         }
+        //       }
+        //       if (nodeCompiledActions.length > 0) {
+        //         this._actions[modelAction.id] = nodeCompiledActions;
+        //       }
+        //     }
+        //   }
+        // }
       }
 
       function createNode (conf) {
@@ -85,7 +149,6 @@ export default (function () {
       }
 
       return {
-        initSkin: initSkin,
         createNodes: createNodes,
         compileActions: compileActions,
         onSkinPropertyChanged: onSkinPropertyChanged
@@ -102,20 +165,35 @@ export default (function () {
         this.name = LangUtil.checkAndGet(conf.name, this.defName);
         this.skin = new Proxy(LangUtil.checkAndGet(conf.skin, {}));
 
-        this._node = null;
-        this._nodeMap = null;
+        this._node = new Node({
+          x: 0,
+          y: 0,
+          scaleX: 1,
+          scaleY: 1,
+          shearX: 0,
+          shearY: 0,
+          rotateZ: 0,
+          anchorX: .5,
+          anchorY: .5,
+          width: 0,
+          height: 0,
+          alpha: 1,
+          visible: true,
+          clip: false,
+          interactive: true
+        });
+        this._nodeMap = {};
 
-        this._actions = null;
-        this._actionsContext = {
-          runningActId: null,
-          runningAct: null,
+        this._actionGroupMap = {};
+        this._actionGroupContext = {
+          runningActionId: null,
+          runningAction: null,
           progress: 0,
           loop: false
         };
 
-        functions.initSkin.call(this);
-        functions.createNodes.call(this, LangUtil.checkAndGet(conf.root, null));
-        functions.compileActions.call(this, LangUtil.checkAndGet(conf.actions, null));
+        functions.createNodes.call(this, LangUtil.checkAndGet(conf.nodes, {}));
+        functions.compileActions.call(this, LangUtil.checkAndGet(conf.actionGroups, null));
       }
 
       InnerGModel.prototype.addNode = function (node, nodeId, parentNodeId, prevNodeId) {
