@@ -57,7 +57,7 @@ export default (
             for (var item in this) {
               if (this.hasOwnProperty(item)) {
                 var prefix = item.charAt(0)
-                if (prefix === "_" || prefix === "$") {
+                if (prefix == '_' || prefix == '$') {
                   continue;
                 }
                 var value = this[item];

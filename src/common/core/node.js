@@ -521,20 +521,19 @@ export default (
       InnerNode.prototype._reportCurDirtyZone = function (app, dirtyZones) {
         var result = false;
         var dirtyCtx = this._dirtyCtx;
-        var worldZone = this._zoneCtx.world;
         if (dirtyCtx.render) {
           if (!dirtyCtx.curReported) {
             var wTrans = this._transformCtx.worldTransform;
             if (dirtyCtx.oriReported) {
-              var dirtyZone = this.getDirtyZone();
-              result = app.receiveDirtyZone(this, dirtyZone);
+              var selfDirtyZone = this.getDirtyZone();
+              result = app.receiveDirtyZone(this, selfDirtyZone);
               dirtyCtx.curReported = true;
-            } else if (!(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 0)) {
-              var dirtyZone = this.getDirtyZone();
+            } else if (!(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 1)) {
+              var selfDirtyZone = this.getDirtyZone();
               for (var i = 0, len = dirtyZones.length; i < len; ++i) {
                 var dirtyZone = dirtyZones[i];
-                if (GeometryUtil.isZoneCross(dirtyZone, worldZone)) {
-                  result = app.receiveDirtyZone(this, dirtyZone);
+                if (GeometryUtil.isZoneCross(dirtyZone, selfDirtyZone)) {
+                  result = app.receiveDirtyZone(this, selfDirtyZone);
                   dirtyCtx.curReported = true;
                   break;
                 }
@@ -578,8 +577,8 @@ export default (
                 for (var i = 0, len = dirtyZones.length; i < len; ++i) {
                   var crossDirtyZone = GeometryUtil.getZoneCross(worldZone, dirtyZones[i]);
                   if (crossDirtyZone !== null) {
-                    crossDirtyZone.left -= w[4];
-                    crossDirtyZone.right -= w[4];
+                    crossDirtyZone.left -= w[2];
+                    crossDirtyZone.right -= w[2];
                     crossDirtyZone.top -= w[5];
                     crossDirtyZone.bottom -= [5];
                     crossDirtyZones.push(crossDirtyZone);
@@ -604,13 +603,13 @@ export default (
                 if (dirtyCtx.curReported) {
                   this.postNotification('render', [render, [this._zoneCtx.local]]);
                 } else {
-                  var worldZone = this._zoneCtx.world;
+                  var selfDirtyZone = this.getDirtyZone();
                   var crossDirtyZones = [];
                   for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-                    var crossDirtyZone = GeometryUtil.getZoneCross(worldZone, dirtyZones[i]);
+                    var crossDirtyZone = GeometryUtil.getZoneCross(selfDirtyZone, dirtyZones[i]);
                     if (crossDirtyZone !== null) {
-                      crossDirtyZone.left -= w[4];
-                      crossDirtyZone.right -= w[4];
+                      crossDirtyZone.left -= w[2];
+                      crossDirtyZone.right -= w[2];
                       crossDirtyZone.top -= w[5];
                       crossDirtyZone.bottom -= w[5];
                       crossDirtyZones.push(crossDirtyZone);
@@ -689,10 +688,6 @@ export default (
         } else {
           return false;
         }
-      }
-
-      InnerNode.prototype._getId = function () {
-        return this._id;
       }
 
       return InnerNode;

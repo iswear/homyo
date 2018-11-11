@@ -103,6 +103,8 @@ export default (function () {
       InnerGTexture.prototype.defImage = null;
       InnerGTexture.prototype.defAnchorX = 0.5;
       InnerGTexture.prototype.defAnchorY = 0.5;
+      InnerGTexture.prototype.defWidth = 2;
+      InnerGTexture.prototype.defHeight = 2;
       InnerGTexture.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.image = LangUtil.checkAndGet(conf.image, this.defImage);

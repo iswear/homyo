@@ -25,10 +25,10 @@ export default (
             }
             while (queue.length > 0) {
               var item = queue.unshift();
-              var itemParent = item.parent;
               var itemConf = item.conf;
               var itemNode = new GModelNode(itemConf.node);
-              children = itemConf.children
+              var itemParent = item.parent;
+              var children = itemConf.children;
               if (children) {
                 for (var i = 0, len = children.length; i < len; ++i) {
                   queue.push[{
@@ -150,8 +150,7 @@ export default (
 
       return {
         createNodes: createNodes,
-        compileActions: compileActions,
-        onSkinPropertyChanged: onSkinPropertyChanged
+        compileActions: compileActions
       }
     })();
 

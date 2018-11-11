@@ -20,8 +20,8 @@ import ui_label from './src/common/ui/ui-label';
 import g_scene from './src/common/game/g-scene';
 import g_map from './src/common/game/map/g-map';
 import g_model from './src/common/game/model/g-model';
+import g_model_node from './src/common/game/model/g-model-node';
 import g_texture from './src/common/game/g-texture';
-import g_texture_node from './src/common/game/g-texture-node';
 import g_util from './src/common/game/g-util';
 
 import util_event_util from './src/common/utils/event-util';
@@ -69,8 +69,8 @@ export default (
                 Scene: g_scene,
                 Map: g_map,
                 Model: g_model,
+                ModelNode: g_model_node,
                 Texture: g_texture,
-                TextureNode: g_texture_node,
                 Util: g_util
             },
 
