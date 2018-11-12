@@ -158,6 +158,7 @@ export default (
       var InnerGModel = LangUtil.extend(Notifier);
 
       InnerGModel.prototype.defName = 'model';
+      InnerGModel.prototype.defDirtyRenderSupport = true;
       InnerGModel.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.id = LangUtil.checkAndGet(conf.id, 1);

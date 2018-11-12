@@ -228,6 +228,7 @@ export default (function () {
       InnerUILabel.prototype.defTextColor = '#000';
       InnerUILabel.prototype.defTextHorAlign = 0;
       InnerUILabel.prototype.defTextVerAlign = 0;
+      InnerUILabel.prototype.defDirtyRenderSupport = true;
       InnerUILabel.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.text = LangUtil.checkAndGet(conf.text, '');

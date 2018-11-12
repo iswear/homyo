@@ -691,6 +691,7 @@ export default (function () {
     InnerGMap.prototype.defMapTileHeight = 50;
     InnerGMap.prototype.defMapTileRows = 40;
     InnerGMap.prototype.defMapTileCols = 30;
+    InnerGMap.prototype.defDirtyRenderSupport = true;
     InnerGMap.prototype.init = function (conf) {
       this.super('init', [conf]);
       this.mapTileType = LangUtil.checkAndGet(conf.mapTileType, this.defMapTileType);

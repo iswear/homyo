@@ -96,8 +96,8 @@ export default (
       InnerNode.prototype.defCursor = 'default';
       InnerNode.prototype.defInteractive = false;
       InnerNode.prototype.defClip = false;
+      InnerNode.prototype.defDirtyRenderSupport = false;
       InnerNode.prototype.defLayer = 0;
-
       InnerNode.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.x = LangUtil.checkAndGet(conf.x, this.defX);
@@ -115,6 +115,7 @@ export default (
         this.visible = LangUtil.checkAndGet(conf.visible, this.defVisible);
         this.cursor = LangUtil.checkAndGet(conf.cursor, this.defCursor);
         this.interactive = LangUtil.checkAndGet(conf.interactive, this.defInteractive);
+        this.dirtyRenderSupport = LangUtil.checkAndGet(conf.dirtyRenderSupport, this.defDirtyRenderSupport);
         this.clip = LangUtil.checkAndGet(conf.clip, this.defClip);
         this.parent = LangUtil.checkAndGet(conf.parent, null);
         this.application = LangUtil.checkAndGet(conf.application, null);
@@ -528,7 +529,7 @@ export default (
               var selfDirtyZone = this.getDirtyZone();
               result = app.receiveDirtyZone(this, selfDirtyZone);
               dirtyCtx.curReported = true;
-            } else if (!(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 1)) {
+            } else if (!this.dirtyRenderSupport && !(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 1)) {
               var selfDirtyZone = this.getDirtyZone();
               for (var i = 0, len = dirtyZones.length; i < len; ++i) {
                 var dirtyZone = dirtyZones[i];

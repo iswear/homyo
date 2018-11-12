@@ -151,6 +151,7 @@ export default (function () {
       InnerUIView.prototype.defBorderWidth = 0;
       InnerUIView.prototype.defBorderColor = null;
       InnerUIView.prototype.defBorderRadius = 0;
+      InnerUIView.prototype.defDirtyRenderSupport = true;
       InnerUIView.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.backgroundColor = LangUtil.checkAndGet(conf.backgroundColor, this.defBackgroundColor);

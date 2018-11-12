@@ -22,7 +22,7 @@ export default (
       InnerGModelNode.prototype.defAnchorY = 0.5;
       InnerGModelNode.prototype.defWidth = 0;
       InnerGModelNode.prototype.defHeight = 0;
-      InnerGModelNode.prototype.def
+      InnerGModelNode.prototype.defDirtyRenderSupport = true;
       InnerGModelNode.prototype.init = function (conf) {
         this.super('init', [conf]);
         this.texture = LangUtil.checkAndGet(conf.texture, null);
