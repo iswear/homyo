@@ -469,10 +469,10 @@ export default (
           var p2 = this.transformLVectorToW([localZone.left, localZone.bottom]);
           var p3 = this.transformLVectorToW([localZone.right, localZone.top]);
           var p4 = this.transformLVectorToW([localZone.right, localZone.bottom]);
-          worldZone.top = Math.min(Math.min(p1[1], p2[1]), Math.min(p3[1], p4[1]));
-          worldZone.bottom = Math.max(Math.max(p1[1], p2[1]), Math.max(p3[1], p4[1]));
-          worldZone.left = Math.min(Math.min(p1[0], p2[0]), Math.min(p3[0], p4[0]));
-          worldZone.right = Math.max(Math.max(p1[0], p2[0]), Math.max(p3[0], p4[0]));
+          worldZone.top = Math.min(p1[1], p2[1], p3[1], p4[1]);
+          worldZone.bottom = Math.max(p1[1], p2[1], p3[1], p4[1]);
+          worldZone.left = Math.min(p1[0], p2[0], p3[0], p4[0]);
+          worldZone.right = Math.max(p1[0], p2[0], p3[0], p4[0]);
           worldZone.width = worldZone.right - worldZone.left;
           worldZone.height = worldZone.bottom - worldZone.top;
         }
@@ -505,7 +505,7 @@ export default (
           if (dirtyCtx.render) {
             app.receiveDirtyZone(this, this.getDirtyZone());
           }
-          this.oriReported = true;
+          dirtyCtx.oriReported = true;
         }
 
         var layers = this._childNodes.nodeLayers;
@@ -529,7 +529,7 @@ export default (
               var selfDirtyZone = this.getDirtyZone();
               result = app.receiveDirtyZone(this, selfDirtyZone);
               dirtyCtx.curReported = true;
-            } else if (!this.dirtyRenderSupport && !(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 1)) {
+            } else if (!this.dirtyRenderSupport || !(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 1)) {
               var selfDirtyZone = this.getDirtyZone();
               for (var i = 0, len = dirtyZones.length; i < len; ++i) {
                 var dirtyZone = dirtyZones[i];
