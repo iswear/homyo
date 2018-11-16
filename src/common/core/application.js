@@ -331,8 +331,8 @@ export default (function () {
       }
 
       function onPropertyChanged(sender, name, newVal, oldVal) {
-        if (onEventsMap.hasOwnProperty(name)) {
-          onEventsMap[name].call(this, newVal, oldVal);
+        if (propertyChangedMap.hasOwnProperty(name)) {
+          propertyChangedMap[name].call(this, newVal, oldVal);
         }
       }
 
@@ -340,7 +340,7 @@ export default (function () {
         this._transformCtx.invalid = true;
       }
 
-      var onEventsMap = {
+      var propertyChangedMap = {
         scaleMode: onTransformInvalid
       }
 

@@ -532,7 +532,7 @@ export default (function () {
     }
 
     function onPropertyChanged(sender, name, newVal, oldVal) {
-      var events = onEventsMap[this.mapTileType]
+      var events = propertyChangedMap[this.mapTileType]
       if (events.hasOwnProperty(name)) {
         events[name].call(this, newVal, oldVal);
       }
@@ -643,7 +643,7 @@ export default (function () {
       onMapAllCacheInvalid.call(this);
     }
 
-    var onEventsMap = {
+    var propertyChangedMap = {
       square: {
         mapTileType: onMapTileTypeChanged,
         width: onMapForeCacheInvalid,
@@ -694,9 +694,9 @@ export default (function () {
     InnerGMap.prototype.defDirtyRenderSupport = true;
     InnerGMap.prototype.init = function (conf) {
       this.super('init', [conf]);
-      this.mapTileType = LangUtil.checkAndGet(conf.mapTileType, this.defMapTileType);
       this.mapX = LangUtil.checkAndGet(conf.mapX, 0);
       this.mapY = LangUtil.checkAndGet(conf.mapY, 0);
+      this.mapTileType = LangUtil.checkAndGet(conf.mapTileType, this.defMapTileType);
       this.mapTileWidth = LangUtil.checkAndGet(conf.mapTileWidth, this.defMapTileWidth);
       this.mapTileHeight = LangUtil.checkAndGet(conf.mapTileHeight, this.defMapTileHeight);
       this.mapTileImageIndex = LangUtil.checkAndGet(conf.mapTileImageIndex, {});

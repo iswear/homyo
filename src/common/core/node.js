@@ -22,8 +22,8 @@ export default (
       }
 
       function onPropertyChanged (sender, name, newVal, oldVal) {
-        if (onEventsMap.hasOwnProperty(name)) {
-          onEventsMap[name].call(this, newVal, oldVal);
+        if (propertyChangedMap.hasOwnProperty(name)) {
+          propertyChangedMap[name].call(this, newVal, oldVal);
         }
       }
 
@@ -49,7 +49,7 @@ export default (
         this.dirty();
       }
 
-      var onEventsMap = {
+      var propertyChangedMap = {
         x: onLocalTransformChanged,
         y: onLocalTransformChanged,
         anchorX: onLocalZoneChanged,

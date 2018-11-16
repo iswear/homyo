@@ -12,8 +12,8 @@ export default (
     var M3D = MatrixUtil.m3d;
     var functions = (function () {
       function onPropertyChanged (sender, name, newVal, oldVal) {
-        if (onEventsMap.hasOwnProperty(name)) {
-          onEventsMap[name].call(this, newVal, oldVal)
+        if (propertyChangedMap.hasOwnProperty(name)) {
+          propertyChangedMap[name].call(this, newVal, oldVal)
         }
       }
       
@@ -21,7 +21,7 @@ export default (
         this.$context.viewport(this.viewPortX, this.viewPortY, this.viewPortWidth, this.viewPortHeight)
       }
       
-      var onEventsMap = {
+      var propertyChangedMap = {
         viewPortX: onViewPortChanged,
         viewPortY: onViewPortChanged,
         viewPortWidth: onViewPortChanged,
