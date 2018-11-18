@@ -134,7 +134,6 @@ export default (function () {
             if (startX < endX) {
               render.moveTo(startX + offsetLeft, startY + offsetTop);
               render.lineTo(endX + offsetLeft, endY + offsetTop);
-              console.log(startX + offsetLeft, startY + offsetTop, endX + offsetLeft, endY + offsetTop);
             }
           }
           // 绘制列
@@ -152,7 +151,6 @@ export default (function () {
             if (startX < endX) {
               render.moveTo(startX + offsetLeft, startY + offsetTop);
               render.lineTo(endX + offsetLeft, endY + offsetTop);
-              console.log(startX + offsetLeft, startY + offsetTop, endX + offsetLeft, endY + offsetTop);
             }
           }
         }
