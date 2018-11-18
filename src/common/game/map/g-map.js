@@ -19,14 +19,14 @@ export default (function () {
         renderSquareMapCache.call(this, tileCtx);
         tileCtx.foreInvalid = false;
       }
-      var mapZone = this.getLocalZone();
       var mapNodeZone = this._mapNode.getLocalZone();
       /* test */
-      render.lineWidth = 1;
-      render.strokeStyle = '#f00';
-      render.strokeRect(mapZone.left, mapZone.top, mapZone.width, mapZone.height);
-      render.strokeStyle = '#0f0';
-      render.strokeRect(mapNodeZone.left - this.mapX, mapNodeZone.top - this.mapY, mapNodeZone.width, mapNodeZone.height);
+      // var mapZone = this.getLocalZone();
+      // render.lineWidth = 1;
+      // render.strokeStyle = '#f00';
+      // render.strokeRect(mapZone.left, mapZone.top, mapZone.width, mapZone.height);
+      // render.strokeStyle = '#0f0';
+      // render.strokeRect(mapNodeZone.left - this.mapX, mapNodeZone.top - this.mapY, mapNodeZone.width, mapNodeZone.height);
       /* test */
       var offsetLeft = this.mapX - mapNodeZone.left - tileCtx.left;
       var offsetTop = this.mapY - mapNodeZone.top - tileCtx.top;
@@ -39,6 +39,37 @@ export default (function () {
       }
     }
 
+    function renderSquareMapGrid(sender, render, dirtyZones) {
+      var mapNodeZone = this._mapNode.getLocalZone();
+      var offsetLeft = mapNodeZone.left + this._mapNode.x;
+      var offsetTop = mapNodeZone.top + this._mapNode.y;
+      var offsetRight = mapNodeZone.right + this._mapNode.x;
+      var offsetBottom = mapNodeZone.bottom + this._mapNode.y;
+      render.beginPath();
+      for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+        var dirtyZone = dirtyZones[i];
+        var rowStartX = Math.max(dirtyZone.left, offsetLeft);
+        var rowEndX = Math.min(dirtyZone.right, offsetRight);
+        var colStartY = Math.max(dirtyZone.top, offsetTop);
+        var colEndY = Math.min(dirtyZone.bottom, offsetBottom);
+        if (rowStartX <= rowEndX && colStartY <= colEndY) {
+          var miny = Math.ceil((colStartY - offsetTop) / this.mapTileHeight) * this.mapTileHeight + offsetTop;
+          for (var y = miny; y <= colEndY; y += this.mapTileHeight) {
+            render.moveTo(rowStartX, y + 0.5);
+            render.lineTo(rowEndX, y + 0.5);
+          }
+          var minx = Math.ceil((rowStartX - offsetLeft) / this.mapTileWidth) * this.mapTileWidth + offsetLeft;
+          for (var x = minx; x <= rowEndX; x += this.mapTileWidth) {
+            render.moveTo(x + 0.5, colStartY);
+            render.lineTo(x + 0.5, colEndY);
+          }
+        }
+      }
+      render.lineWidth = 1;
+      render.strokeStyle = '#000';
+      render.stroke();
+    }
+
     function renderDiamondMap(sender, render, dirtyZones) {
       var ctx = this._mapCacheCtx;
       var tileCtx = ctx.tile;
@@ -46,14 +77,14 @@ export default (function () {
         renderDiamondMapCache.call(this, tileCtx);
         tileCtx.foreInvalid = false;
       }
-      var mapZone = this.getLocalZone();
       var mapNodeZone = this._mapNode.getLocalZone();
       /* test */
-      render.lineWidth = 1;
-      render.strokeStyle = '#f00';
-      render.strokeRect(mapZone.left, mapZone.top, mapZone.width, mapZone.height);
-      render.strokeStyle = '#0f0';
-      render.strokeRect(mapNodeZone.left - this.mapX, mapNodeZone.top - this.mapY, mapNodeZone.width, mapNodeZone.height);
+      // var mapZone = this.getLocalZone();
+      // render.lineWidth = 1;
+      // render.strokeStyle = '#f00';
+      // render.strokeRect(mapZone.left, mapZone.top, mapZone.width, mapZone.height);
+      // render.strokeStyle = '#0f0';
+      // render.strokeRect(mapNodeZone.left - this.mapX, mapNodeZone.top - this.mapY, mapNodeZone.width, mapNodeZone.height);
       /* test */
       var offsetLeft = this.mapX - mapNodeZone.left - tileCtx.left;
       var offsetTop = this.mapY - mapNodeZone.top - tileCtx.top;
@@ -64,6 +95,72 @@ export default (function () {
           dirtyZone.left + offsetLeft, dirtyZone.top + offsetTop, dirtyZone.width, dirtyZone.height,
           dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
       }
+    }
+
+    function renderDiamondMapGrid(sender, render, dirtyZones) {
+      var mapNodeZone = this._mapNode.getLocalZone();
+      var halfTileWidth = this.mapTileWidth / 2;
+      var halfTileHeight = this.mapTileHeight / 2;
+      var offsetLeft = mapNodeZone.left + this._mapNode.x + this.mapTileRows * halfTileWidth;
+      var offsetTop = mapNodeZone.top + this._mapNode.y;
+      var slopeX2Y = this.mapTileHeight / this.mapTileWidth;
+      var slopeY2X = this.mapTileWidth / this.mapTileHeight;
+      render.beginPath();
+      for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+        var dirtyZone = dirtyZones[i];
+        var mapLeft = dirtyZone.left - offsetLeft;
+        var mapRight = dirtyZone.right - offsetLeft;
+        var mapTop = dirtyZone.top - offsetTop;
+        var mapBottom = dirtyZone.bottom - offsetTop;
+        // 计算并绘制行
+        var startRow = Math.max(Math.ceil(mapTop / this.mapTileHeight - mapRight / this.mapTileWidth), 0);
+        var endRow = Math.min(Math.floor(mapBottom / this.mapTileHeight - mapLeft / this.mapTileWidth), this.mapTileRows);
+        var startCol = Math.max(Math.ceil(mapTop / this.mapTileHeight + mapLeft / this.mapTileWidth), 0);
+        var endCol = Math.min(Math.floor(mapBottom / this.mapTileHeight + mapRight / this.mapTileWidth), this.mapTileCols);
+        
+        if (startRow <= endRow && startCol <= endCol) {
+          // 绘制行
+          // y = slopeX2Y * (x + row * tileWidth)
+          // x = slopeY2X * y - row * tileWidth
+          for (var row = startRow; row <= endRow; ++row) {
+            var minx = -row * halfTileWidth;
+            var maxx = (-row + this.mapTileCols) * halfTileWidth;
+            var miny = row * halfTileHeight;
+            var maxy = (row + this.mapTileCols) * halfTileHeight;
+            var startX = Math.max(minx, mapLeft, slopeY2X * mapTop - row * this.mapTileWidth);
+            var startY = Math.max(miny, mapTop, slopeX2Y * (mapLeft + row * this.mapTileWidth));
+            var endX = Math.min(maxx, mapRight, slopeY2X * mapBottom - row * this.mapTileWidth);
+            var endY = Math.min(maxy, mapBottom, slopeX2Y * (mapRight + row * this.mapTileWidth));
+            if (startX < endX) {
+              render.moveTo(startX + offsetLeft, startY + offsetTop);
+              render.lineTo(endX + offsetLeft, endY + offsetTop);
+              console.log(startX + offsetLeft, startY + offsetTop, endX + offsetLeft, endY + offsetTop);
+            }
+          }
+          // 绘制列
+          // y = -slopeX2Y * (x - col * tileWidth)
+          // x = -slopeY2X * y + col * tileWidth
+          for (var col = startCol; col <= endCol; ++col) {
+            var minx = (col - this.mapTileRows) * halfTileWidth;
+            var maxx = col * halfTileWidth;
+            var miny = col * halfTileHeight;
+            var maxy = (col + this.mapTileRows) * halfTileHeight;
+            var startX = Math.max(minx, mapLeft, -slopeY2X * mapBottom + col * this.mapTileWidth);
+            var startY = Math.min(maxy, mapBottom, -slopeX2Y * (mapLeft - col * this.mapTileWidth));
+            var endX = Math.min(maxx, mapRight, -slopeY2X * mapTop + col * this.mapTileWidth);
+            var endY = Math.max(miny, mapTop, -slopeX2Y * (mapRight - col * this.mapTileWidth));
+            if (startX < endX) {
+              render.moveTo(startX + offsetLeft, startY + offsetTop);
+              render.lineTo(endX + offsetLeft, endY + offsetTop);
+              console.log(startX + offsetLeft, startY + offsetTop, endX + offsetLeft, endY + offsetTop);
+            }
+          }
+        }
+      }
+      render.lineWidth = 1;
+      render.lineCap = 'round';
+      render.strokeStyle = '#f00';
+      render.stroke();
     }
 
     function renderSquareMapCache(ctx) {
@@ -154,8 +251,8 @@ export default (function () {
           foreRender.drawImageExt(backRender.getCanvas(), newLeft > oldLeft ? (newLeft - oldLeft) : 0, newTop > oldTop ? (newTop - oldTop) : 0, clipWidth, clipHeight,
             clipTarLeft, clipTarTop, clipWidth, clipHeight);
           /* test */
-          foreRender.strokeStyle = '#00f';
-          foreRender.strokeRect(clipTarLeft, clipTarTop, clipWidth, clipHeight);
+          // foreRender.strokeStyle = '#00f';
+          // foreRender.strokeRect(clipTarLeft, clipTarTop, clipWidth, clipHeight);
           /* test */
         }
         var application = this.findApplication();
@@ -339,8 +436,8 @@ export default (function () {
           foreRender.drawImageExt(backRender.getCanvas(), newLeft > oldLeft ? (newLeft - oldLeft) : 0, newTop > oldTop ? (newTop - oldTop) : 0, clipWidth, clipHeight,
             clipTarLeft, clipTarTop, clipWidth, clipHeight);
           /* test */
-          foreRender.strokeStyle = '#00f';
-          foreRender.strokeRect(clipTarLeft, clipTarTop, clipWidth, clipHeight);
+          // foreRender.strokeStyle = '#00f';
+          // foreRender.strokeRect(clipTarLeft, clipTarTop, clipWidth, clipHeight);
           /* test */
         }
         var application = this.findApplication();
@@ -531,19 +628,61 @@ export default (function () {
       }
     }
 
+    function invalidMapCacheFore() {
+      this._mapCacheCtx.tile.foreInvalid = true;
+      this.dirty()
+    }
+
+    function invalidMapCacheAll() {
+      var ctx = this._mapCacheCtx.tile;
+      ctx.needRender = (this.mapTileData && LangUtil.isArray(this.mapTileData)) ? true : false;
+      ctx.offsetInvalid = true;
+      ctx.sizeInvalid = true;
+      ctx.foreInvalid = true;
+      ctx.backInvalid = true;
+      this.dirty()
+    }
+    
     function onPropertyChanged(sender, name, newVal, oldVal) {
       var events = propertyChangedMap[this.mapTileType]
       if (events.hasOwnProperty(name)) {
-        events[name].call(this, newVal, oldVal);
+        events[name].call(this, sender, newVal, oldVal);
       }
     }
 
+    function onWidthChanged() {
+      invalidMapCacheFore.call(this);
+      this._mapGrid.width = this.width;
+    }
+
+    function onHeightChanged() {
+      invalidMapCacheFore.call(this);
+      this._mapGrid.height = this.height;
+    }
+
+    function onAnchorXChanged() {
+      invalidMapCacheFore.call(this);
+      this._mapNode.anchorX = this.anchorX;
+      this._mapGrid.anchorX = this.anchorX;
+    }
+
+    function onAnchorYChanged() {
+      invalidMapCacheFore.call(this);
+      this._mapNode.anchorY = this.anchorY;
+      this._mapGrid.anchorY = this.anchorY;
+    }
+
     function onMapTileTypeChanged() {
-      this.removeObserver('render', renderSquareMap, this);
-      this.removeObserver('render', renderDiamondMap, this);
+      this.removeObserver('postClipRender', renderSquareMap, this);
+      this.removeObserver('postClipRender', renderDiamondMap, this);
+      this._mapGrid.removeObserver('postClipRender', renderSquareMapGrid, this);
+      this._mapGrid.removeObserver('postClipRender', renderDiamondMapGrid, this);
       if (this.mapTileType === 'square') {
-        this.addObserver('render', renderSquareMap, this);
-        onMapForeCacheInvalid.call(this);
+        this.addObserver('postClipRender', renderSquareMap, this);
+        this._mapGrid.addObserver('postClipRender', renderSquareMapGrid, this);
+        invalidMapCacheAll.call(this);
+        onWidthChanged.call(this);
+        onHeightChanged.call(this);
         onAnchorXChanged.call(this);
         onAnchorYChanged.call(this);
         onMapXChanged.call(this);
@@ -552,10 +691,12 @@ export default (function () {
         onSquareMapTileHeightChanged.call(this);
         onSquareMapTileRowsChanged.call(this);
         onSquareMapTileColsChanged.call(this);
-        onMapAllCacheInvalid.call(this);
       } else if (this.mapTileType === 'diamond') {
-        this.addObserver('render', renderDiamondMap, this);
-        onMapForeCacheInvalid.call(this);
+        this.addObserver('postClipRender', renderDiamondMap, this);
+        this._mapGrid.addObserver('postClipRender', renderDiamondMapGrid, this);
+        invalidMapCacheAll.call(this);
+        onWidthChanged.call(this);
+        onHeightChanged.call(this);
         onAnchorXChanged.call(this);
         onAnchorYChanged.call(this);
         onMapXChanged.call(this);
@@ -564,113 +705,99 @@ export default (function () {
         onDiamondMapTileHeightChanged.call(this);
         onDiamondMapTileRowsChanged.call(this);
         onDiamondMapTileColsChanged.call(this);
-        onMapAllCacheInvalid.call(this);
       }
     }
 
-    function onMapAllCacheInvalid() {
-      var ctx = this._mapCacheCtx.tile;
-      ctx.needRender = (this.mapTileData && LangUtil.isArray(this.mapTileData)) ? true : false;
-      ctx.offsetInvalid = true;
-      ctx.sizeInvalid = true;
-      ctx.foreInvalid = true;
-      ctx.backInvalid = true;
-    }
-
-    function onMapForeCacheInvalid() {
-      this._mapCacheCtx.tile.foreInvalid = true;
-    }
-
     function onMapXChanged() {
-      this._mapCacheCtx.tile.foreInvalid = true;
+      invalidMapCacheFore.call(this);
       this._mapNode.x = -this.mapX;
     }
 
     function onMapYChanged() {
-      this._mapCacheCtx.tile.foreInvalid = true;
+      invalidMapCacheFore.call(this);
       this._mapNode.y = -this.mapY;
     }
 
-    function onAnchorXChanged() {
-      this._mapCacheCtx.tile.foreInvalid = true;
-      this._mapNode.anchorX = this.anchorX;
-    }
-
-    function onAnchorYChanged() {
-      this._mapCacheCtx.tile.foreInvalid = true;
-      this._mapNode.anchorY = this.anchorY;
-    }
-
     function onSquareMapTileWidthChanged() {
+      invalidMapCacheAll.call(this);
       this._mapNode.width = this.mapTileWidth * this.mapTileCols;
-      onMapAllCacheInvalid.call(this);
-    }
-
-    function onDiamondMapTileWidthChanged() {
-      this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
-      onMapAllCacheInvalid.call(this);
     }
 
     function onSquareMapTileHeightChanged() {
+      invalidMapCacheAll.call(this);
       this._mapNode.height = this.mapTileHeight * this.mapTileRows;
-      onMapAllCacheInvalid.call(this);
-    }
-
-    function onDiamondMapTileHeightChanged() {
-      this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
-      onMapAllCacheInvalid.call(this);
     }
 
     function onSquareMapTileRowsChanged() {
+      invalidMapCacheAll.call(this);
       this._mapNode.height = this.mapTileHeight * this.mapTileRows;
-      onMapAllCacheInvalid.call(this);
-    }
-
-    function onDiamondMapTileRowsChanged() {
-      this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
-      this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
-      onMapAllCacheInvalid.call(this);
     }
 
     function onSquareMapTileColsChanged() {
-      this._mapNode.width = this.mapTileWidth * this.mapTileCols;
-      onMapAllCacheInvalid.call(this);
+      invalidMapCacheAll.call(this);
+      this._mapNode.width = this.mapTileWidth * this.mapTileCols; 
+    }
+
+    function onDiamondMapTileWidthChanged() {
+      invalidMapCacheAll.call(this);
+      this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
+    }
+
+    function onDiamondMapTileHeightChanged() {
+      invalidMapCacheAll.call(this);
+      this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
+    }
+
+    function onDiamondMapTileRowsChanged() {
+      invalidMapCacheAll.call(this);
+      this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
+      this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
     }
 
     function onDiamondMapTileColsChanged() {
+      invalidMapCacheAll.call(this);
       this._mapNode.width = (this.mapTileRows + this.mapTileCols) * this.mapTileWidth / 2;
       this._mapNode.height = (this.mapTileRows + this.mapTileCols) * this.mapTileHeight / 2;
-      onMapAllCacheInvalid.call(this);
+    }
+
+    function onMapTileDataChanged() {
+      invalidMapCacheAll.call(this);
+    }
+
+    function onMapGridVisibleChanged() {
+      this._mapGrid.visible = this.mapGridVisible;
     }
 
     var propertyChangedMap = {
       square: {
-        mapTileType: onMapTileTypeChanged,
-        width: onMapForeCacheInvalid,
-        height: onMapForeCacheInvalid,
+        width: onWidthChanged,
+        height: onHeightChanged,
         anchorX: onAnchorXChanged,
         anchorY: onAnchorYChanged,
+        mapTileType: onMapTileTypeChanged,
         mapX: onMapXChanged,
         mapY: onMapYChanged,
         mapTileWidth: onSquareMapTileWidthChanged,
         mapTileHeight: onSquareMapTileHeightChanged,
         mapTileRows: onSquareMapTileRowsChanged,
         mapTileCols: onSquareMapTileColsChanged,
-        mapTileData: onMapAllCacheInvalid
+        mapTileData: onMapTileDataChanged,
+        mapGridVisible: onMapGridVisibleChanged
       },
       diamond: {
-        mapTileType: onMapTileTypeChanged,
-        width: onMapForeCacheInvalid,
-        height: onMapForeCacheInvalid,
+        width: onWidthChanged,
+        height: onHeightChanged,
         anchorX: onAnchorXChanged,
         anchorY: onAnchorYChanged,
+        mapTileType: onMapTileTypeChanged,
         mapX: onMapXChanged,
         mapY: onMapYChanged,
         mapTileWidth: onDiamondMapTileWidthChanged,
         mapTileHeight: onDiamondMapTileHeightChanged,
         mapTileRows: onDiamondMapTileRowsChanged,
         mapTileCols: onDiamondMapTileColsChanged,
-        mapTileData: onMapAllCacheInvalid
+        mapTileData: onMapTileDataChanged,
+        mapGridVisible: onMapGridVisibleChanged
       }
     }
 
@@ -692,6 +819,7 @@ export default (function () {
     InnerGMap.prototype.defMapTileRows = 40;
     InnerGMap.prototype.defMapTileCols = 30;
     InnerGMap.prototype.defDirtyRenderSupport = true;
+    InnerGMap.prototype.defMapGridVisible = false;
     InnerGMap.prototype.init = function (conf) {
       this.super('init', [conf]);
       this.mapX = LangUtil.checkAndGet(conf.mapX, 0);
@@ -704,11 +832,19 @@ export default (function () {
       this.mapTileRows = LangUtil.checkAndGet(conf.mapTileRows, this.defMapTileRows);
       this.mapTileCols = LangUtil.checkAndGet(conf.mapTileCols, this.defMapTileCols);
       this.mapTileData = LangUtil.checkAndGet(conf.mapTileData, []);
+      this.mapGridVisible = LangUtil.checkAndGet(conf.mapGridVisible, this.defMapGridVisible);
 
       this._mapNode = new Node({
-        rotateZ: 0
+        rotateZ: 0,
+        dirtyRenderSupport: true
       });
       this.appendChildNode(this._mapNode);
+
+      this._mapGrid = new Node({
+        rotateZ: 0,
+        dirtyRenderSupport: true,
+      });
+      this.appendChildNode(this._mapGrid);
 
       this._mapCacheCtx = {
         tile: {
@@ -723,6 +859,9 @@ export default (function () {
           backRender: new CanvasRender({ canvas: doc.createElement('canvas') })
         }
       };
+
+      document.body.appendChild(this._mapCacheCtx.tile.foreRender.getCanvas())
+      document.body.appendChild(this._mapCacheCtx.tile.backRender.getCanvas())
 
       this.addObserver('propertyChanged', functions.onPropertyChanged, this);
     }

@@ -98,18 +98,19 @@ export default (function () {
 
       function onRenderChanged () {
         var ctx = this._backgroundBorderCacheCtx;
-        this.removeObserver('render', renderBackgroundAndBorder, this);
+        this.removeObserver('preClipRender', renderBackgroundAndBorder, this);
         this._backgroundBorderCacheCtx.renderInvalid = true;
         this.dirty();
         if (!(this.backgroundColor === null && (this.borderColor === null || this.borderWidth <= 0))) {
-          this.addObserver('render', renderBackgroundAndBorder, this, -Infinity);
+          this.addObserver('preClipRender', renderBackgroundAndBorder, this, -Infinity);
           if (ctx.render === null) {
             ctx.renderInvalid = true;
             ctx.render = new CanvasRender({
               canvas: doc.createElement('canvas'),
               width: this.width,
               height: this.height
-            })
+            });
+            doc.body.appendChild(ctx.render.getCanvas());
           }
         } else {
           ctx.render = null;

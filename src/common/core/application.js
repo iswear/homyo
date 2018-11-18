@@ -405,7 +405,10 @@ export default (function () {
           width: 0,
           height: 0
         };
-        this._dirtyZones = [];
+        this._dirtyCtx = {
+          dirty: false,
+          zones: []
+        };
 
         this._prevLoopTime = 0;
         this._preCheckTime = 0;
@@ -479,6 +482,11 @@ export default (function () {
       }
 
       InnerApplication.prototype.receiveDirtyZone = function (node, dirtyZone) {
+        var dirtyCtx = this._dirtyCtx;
+        dirtyCtx.dirty = true;
+        if (dirtyZone === null) {
+          return false;
+        }
         var renderZone = this._renderZone;
         if (GeometryUtil.isZoneNotCross(renderZone, dirtyZone)) {
           return false;
@@ -489,7 +497,7 @@ export default (function () {
         dirtyZone.bottom = Math.min(renderZone.bottom, dirtyZone.bottom);
         dirtyZone.width = dirtyZone.right - dirtyZone.left;
         dirtyZone.height = dirtyZone.bottom - dirtyZone.top;
-        var dirtyZones = this._dirtyZones;
+        var dirtyZones = dirtyCtx.zones;
         while (true) {
           var insert = true;
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
@@ -532,8 +540,9 @@ export default (function () {
           this._preCheckTime += deltaTime;
         }
 
-        var dirtyZones = this._dirtyZones;
-        if (dirtyZones.length > 0) {
+        var dirtyCtx = this._dirtyCtx;
+        if (dirtyCtx.dirty) {
+          var dirtyZones = dirtyCtx.zones;
           var renderZone = this._renderZone;
           var root = this._root;
           var render = this._render;
@@ -546,18 +555,23 @@ export default (function () {
               break;
             }
           }
-          // 清理脏矩形区域
-          for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-            var dirtyZone = dirtyZones[i];
-            render.clearRect(dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
+          if (dirtyZones.length > 0) {
+            // 清理脏矩形区域
+            for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+              var dirtyZone = dirtyZones[i];
+              render.clearRect(dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
+            }
+            // 重新绘制阶段
+            console.log('frame');
+            root._dispatchRender(render, 1, true, renderZone, dirtyZones);
+            // 矩阵回归到单位矩阵
+            render.setTransform(1, 0, 0, 1, 0, 0);
+            // 清理脏矩形区
+            dirtyCtx.zones = [];
+            render.globalAlpha = 1;
           }
-          // 重新绘制阶段
-          root._dispatchRender(render, 1, renderZone, dirtyZones);
-          // 清理脏矩形
-          dirtyZones.splice(0, dirtyZones.length);
-          // 矩阵回归到单位矩阵
-          render.setTransform(1, 0, 0, 1, 0, 0);
-          this._dirtyZones = [];
+          // 是否脏了
+          dirtyCtx.dirty = false;
         }
       }
 

@@ -141,9 +141,9 @@ export default (function () {
       }
 
       function onTextChanged () {
-        this.removeObserver('render', renderLabelText, this);
+        this.removeObserver('postClipRender', renderLabelText, this);
         if (this.text || this.text !== '') {
-          this.addObserver('render', renderLabelText, this);
+          this.addObserver('postClipRender', renderLabelText, this);
           var ctx = this._textCacheCtx;
           ctx.fontInvalid = true;
           ctx.layoutInvalid = true;

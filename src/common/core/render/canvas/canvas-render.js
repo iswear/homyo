@@ -51,7 +51,6 @@ export default (function () {
         this.super('init', [ conf ]);
         this.$canvas = LangUtil.checkAndGet(conf.canvas, null);
         this.$context = this.$canvas.getContext('2d');
-        this._saveStack = [];
 
         this.defineCanvasProperty('width', LangUtil.checkAndGet(conf.width, undefined), false);
         this.defineCanvasProperty('height', LangUtil.checkAndGet(conf.height, undefined), false);
@@ -232,13 +231,10 @@ export default (function () {
 
       InnerCanvasRender.prototype.save = function () {
         this.$context.save();
-        this._saveStack.push(true);
       }
 
       InnerCanvasRender.prototype.restore = function () {
-        if (this._saveStack.pop()) {
-          this.$context.restore();
-        }
+        this.$context.restore();
       }
 
       InnerCanvasRender.prototype.toDataURL = function () {

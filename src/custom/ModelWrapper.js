@@ -378,9 +378,9 @@ export default (function() {
 
             functions.syncMode.call(this, this, this.mode, 0)
 
-            this._ctrlNodeX.addObserver('render', functions.renderCtrlNodeX, this, this._ctrlNodeX)
-            this._ctrlNodeY.addObserver('render', functions.renderCtrlNodeY, this, this._ctrlNodeY)
-            this._ctrlNodeRotateZ.addObserver('render', functions.renderCtrlNodeRotateZ, this, this._ctrlNodeRotateZ)
+            this._ctrlNodeX.addObserver('postClipRender', functions.renderCtrlNodeX, this, this._ctrlNodeX)
+            this._ctrlNodeY.addObserver('postClipRender', functions.renderCtrlNodeY, this, this._ctrlNodeY)
+            this._ctrlNodeRotateZ.addObserver('postClipRender', functions.renderCtrlNodeRotateZ, this, this._ctrlNodeRotateZ)
 
             this.appendChildNodeToLayer(this._ctrlNodeX, ULangUtil.checkAndGet(conf.ctrlLayer, 0))
             this.appendChildNodeToLayer(this._ctrlNodeY, ULangUtil.checkAndGet(conf.ctrlLayer, 0))
@@ -426,11 +426,11 @@ export default (function() {
         const functions = {
             syncType: function(sender, newVal, oldVal) {
                 if (newVal === 1) {
-                    this._textureBone.removeObserver('render', functions.renderTextureBone, this, this._textureBone)
-                    this.addObserver('render', functions.renderNodeBone, this, this)
+                    this._textureBone.removeObserver('postClipRender', functions.renderTextureBone, this, this._textureBone)
+                    this.addObserver('postClipRender', functions.renderNodeBone, this, this)
                 } else {
-                    this._textureBone.addObserver('render', functions.renderTextureBone, this, this._textureBone)
-                    this.removeObserver('render', functions.renderNodeBone, this, this)
+                    this._textureBone.addObserver('postClipRender', functions.renderTextureBone, this, this._textureBone)
+                    this.removeObserver('postClipRender', functions.renderNodeBone, this, this)
                 }
             },
             renderNodeBone: function(sender, render) {

@@ -27,14 +27,6 @@ export default (
         }
       }
 
-      function onRenderChanged (newVal, oldVal) {
-        this.removeObserver('render', this.startClip, this);
-        if (this.clip) {
-          this.addObserver('render', this.startClip, this, 0);
-        }
-        this.dirty();
-      }
-
       function onLocalTransformChanged () {
         this._transformCtx.localInvalid = true;
         this.dirty();
@@ -62,15 +54,13 @@ export default (
         height: onLocalZoneChanged,
         rotateZ: onLocalTransformChanged,
         alpha: onDirty,
-        visible: onDirty,
-        clip: onRenderChanged
+        visible: onDirty
       }
       
       return {
         onAppend: onAppend,
         onRemove: onRemove,
         onPropertyChanged: onPropertyChanged,
-        onRenderChanged: onRenderChanged,
         onLocalTransformChanged: onLocalTransformChanged,
         onLocalZoneChanged: onLocalZoneChanged
       }
@@ -154,14 +144,15 @@ export default (
           }
         };
         this._dirtyCtx = {
-          render: true,
+          isVisible: true,
+          isZoneCross: true,
+          isCheckRender: true,
           oriReported: false,
-          curReported: false,
+          curReported: false
         };
 
         functions.onLocalTransformChanged.call(this);
         functions.onLocalZoneChanged.call(this);
-        functions.onRenderChanged.call(this);
 
         this.addObserver('append', functions.onAppend, this);
         this.addObserver('remove', functions.onRemove, this);
@@ -306,21 +297,21 @@ export default (
       }
 
       InnerNode.prototype.runAnimation = function (animation, fn, target, loop) {
-        const application = this.findApplication()
+        var application = this.findApplication()
         if (application) {
           application.runNodeAnimation(this, animation, fn, target, loop);
         }
       }
 
       InnerNode.prototype.stopAnimation = function (animation) {
-        const application = this.findApplication()
+        var application = this.findApplication()
         if (application) {
           application.stopNodeAnimation(this, animation);
         }
       }
 
       InnerNode.prototype.stopAllAnimation = function (children) {
-        const application = this.findApplication()
+        var application = this.findApplication()
         if (application) {
           if (children) {
             var layers = this._childNodes.nodeLayers;
@@ -373,24 +364,20 @@ export default (
         return [t[0], t[1], t[2], t[3], t[4], t[5]];
       }
 
-      InnerNode.prototype.startClip = function (render) {
+      InnerNode.prototype.clipPath = function (render) {
         var zone = this._zoneCtx.local;
         render.beginPath();
-        render.moveTo(zone.left, zone.top);
-        render.lineTo(zone.right, zone.top);
-        render.lineTo(zone.right, zone.bottom);
-        render.lineTo(zone.left, zone.bottom);
+        render.moveTo(zone.left + 5, zone.top + 5);
+        render.lineTo(zone.right - 5, zone.top + 5);
+        render.lineTo(zone.right - 5, zone.bottom - 5);
+        render.lineTo(zone.left + 5, zone.bottom - 5);
         render.closePath();
-        render.clip();
-      }
-
-      InnerNode.prototype.stopClip = function (render) {
-        render.restore();
       }
 
       InnerNode.prototype.checkNeedRender = function (renderZone) {
-        var renders = this.getObserverByName('render');
-        return renders && renders.length > 0;
+        var preRenders = this.getObserverByName('preClipRender');
+        var postRenders = this.getObserverByName('postClipRender');
+        return (preRenders && preRenders.length > 0) || (postRenders && postRenders.length > 0) ? true : false;
       }
 
       InnerNode.prototype.checkEventTrigger = function (name, e, x, y) {
@@ -487,7 +474,9 @@ export default (
           }
         }
 
-        dirtyCtx.render = GeometryUtil.isZoneCross(renderZone, this.getDirtyZone());
+        dirtyCtx.isZoneCross = GeometryUtil.isZoneCross(renderZone, this.getDirtyZone());
+        dirtyCtx.isCheckRender = this.checkNeedRender();
+        dirtyCtx.isVisible = this.visible;
         transformCtx.localInvalid = false;
         zoneCtx.localInvalid = false;
       }
@@ -501,19 +490,21 @@ export default (
 
       InnerNode.prototype._reportOriDirtyZone = function (app) {
         var dirtyCtx = this._dirtyCtx;
-        if (!dirtyCtx.oriReported) {
-          if (dirtyCtx.render) {
-            app.receiveDirtyZone(this, this.getDirtyZone());
-          }
+        if (!dirtyCtx.oriReported && dirtyCtx.isZoneCross && dirtyCtx.isCheckRender && dirtyCtx.isVisible) {
+          app.receiveDirtyZone(this, this.getDirtyZone());
           dirtyCtx.oriReported = true;
+        } else {
+          app.receiveDirtyZone(this, null);
         }
 
-        var layers = this._childNodes.nodeLayers;
-        for (var i = 0, len = layers.length; i < len; ++i) {
-          var layer = layers[i];
-          if (layer) {
-            for (var j = 0, len2 = layer.length; j < len2; ++j) {
-              layer[j]._reportOriDirtyZone(app);
+        if (dirtyCtx.isVisible) {
+          var layers = this._childNodes.nodeLayers;
+          for (var i = 0, len = layers.length; i < len; ++i) {
+            var layer = layers[i];
+            if (layer) {
+              for (var j = 0, len2 = layer.length; j < len2; ++j) {
+                layer[j]._reportOriDirtyZone(app);
+              }
             }
           }
         }
@@ -522,7 +513,10 @@ export default (
       InnerNode.prototype._reportCurDirtyZone = function (app, dirtyZones) {
         var result = false;
         var dirtyCtx = this._dirtyCtx;
-        if (dirtyCtx.render) {
+        if (!dirtyCtx.isVisible) {
+          return false;
+        }
+        if (dirtyCtx.isZoneCross && dirtyCtx.isCheckRender) {
           if (!dirtyCtx.curReported) {
             var wTrans = this._transformCtx.worldTransform;
             if (dirtyCtx.oriReported) {
@@ -542,7 +536,6 @@ export default (
             }
           }
         }
-
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
           var layer = layers[i];
@@ -555,13 +548,14 @@ export default (
         return result;
       }
 
-      InnerNode.prototype._dispatchRender = function (render, parentAlpha, renderZone, dirtyZones) {
+      InnerNode.prototype._dispatchRender = function (render, parentAlpha, parentVisisble, renderZone, dirtyZones) {
         var dirtyCtx = this._dirtyCtx;
         var alpha = this.alpha * parentAlpha;
-        if (this.visible && alpha > 0) {
+        var visible = parentVisisble && dirtyCtx.isVisible;
+        if (visible && alpha > 0) {
           if (this.clip) {
             // 如果发生裁剪
-            if (dirtyCtx.render) {
+            if (dirtyCtx.isZoneCross) {
               var w = this._transformCtx.worldTransform;
               // 设置矩阵
               render.setTransform(w[0], w[3], w[1], w[4], w[2], w[5]);
@@ -569,9 +563,12 @@ export default (
               render.globalAplha = alpha;
               // 绘制自身
               if (dirtyCtx.curReported) {
-                this.postNotification('render', [render, [this._zoneCtx.local]]);
-                this._dispatchChildrenRender(render, alpha, renderZone, dirtyZones);
-                this.stopClip();
+                this.postNotification('preClipRender', [render, [this._zoneCtx.local]]);
+                this.clipPath(render);
+                render.clip();
+                this.postNotification('postClipRender', [render, [this._zoneCtx.local]]);
+                this._dispatchChildrenRender(render, alpha, visible, renderZone, dirtyZones);
+                render.restore();
               } else {
                 var worldZone = this._zoneCtx.world;
                 var crossDirtyZones = [];
@@ -585,16 +582,17 @@ export default (
                     crossDirtyZones.push(crossDirtyZone);
                   }
                 }
-                if (crossDirtyZones.length > 0) {
-                  this.postNotification('render', [render, crossDirtyZones]);
-                  this._dispatchChildrenRender(render, alpha, renderZone, dirtyZones);
-                  this.stopClip();
-                }
+                this.postNotification('preClipRender', [render, crossDirtyZones]);
+                this.clipPath(render);
+                render.clip();
+                this.postNotification('postClipRender', [render, crossDirtyZones]);
+                this._dispatchChildrenRender(render, alpha, crossDirtyZones.length > 0, renderZone, dirtyZones);
+                render.restore();
               }
             }
           } else {
-            if (dirtyCtx.render) {
-              if (this.checkNeedRender()) {
+            if (dirtyCtx.isZoneCross) {
+              if (dirtyCtx.isCheckRender) {
                 var w = this._transformCtx.worldTransform;
                 // 设置矩阵
                 render.setTransform(w[0], w[3], w[1], w[4], w[2], w[5]);
@@ -602,7 +600,8 @@ export default (
                 render.globalAplha = alpha;
                 // 绘制自身
                 if (dirtyCtx.curReported) {
-                  this.postNotification('render', [render, [this._zoneCtx.local]]);
+                  this.postNotification('preClipRender', [render, [this._zoneCtx.local]]);
+                  this.postNotification('postClipRender', [render, [this._zoneCtx.local]]);
                 } else {
                   var selfDirtyZone = this.getDirtyZone();
                   var crossDirtyZones = [];
@@ -617,28 +616,31 @@ export default (
                     }
                   }
                   if (crossDirtyZones.length > 0) {
-                    this.postNotification('render', [render, crossDirtyZones]);
+                    this.postNotification('preClipRender', [render, crossDirtyZones]);
+                    this.postNotification('postClipRender', [render, crossDirtyZones]);
                   }
                 }
               }
               // 绘制子元素
-              this._dispatchChildrenRender(render, alpha, renderZone, dirtyZones);
+              this._dispatchChildrenRender(render, alpha, visible, renderZone, dirtyZones);
             } else {
-              this._dispatchChildrenRender(render, alpha, renderZone, dirtyZones);
+              this._dispatchChildrenRender(render, alpha, visible, renderZone, dirtyZones);
             }
           }
+        } else {
+          this._dispatchChildrenRender(render, alpha, visible, renderZone, dirtyZones);
         }
         dirtyCtx.oriReported = false;
         dirtyCtx.curReported = false;
       }
 
-      InnerNode.prototype._dispatchChildrenRender = function (render, alpha, renderZone, dirtyZones) {
+      InnerNode.prototype._dispatchChildrenRender = function (render, alpha, visible, renderZone, dirtyZones) {
         var layers = this._childNodes.nodeLayers;
         for (var i = 0, len = layers.length; i < len; ++i) {
           var layer = layers[i];
           if (layer) {
             for (var j = 0, len2 = layer.length; j < len2; ++j) {
-              layer[j]._dispatchRender(render, alpha, renderZone, dirtyZones);
+              layer[j]._dispatchRender(render, alpha, visible, renderZone, dirtyZones);
             }
           }
         }

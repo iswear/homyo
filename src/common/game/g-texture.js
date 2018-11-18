@@ -24,22 +24,6 @@ export default (function () {
         }
       }
 
-      // function renderImageClip (sender, render, dirtyZones) {
-      //   var ctx = this._imageCtx;
-      //   var image = this.findApplication().loadImage(ctx.url, this.getID(), loadImageFinished, this);
-      //   if (image) {
-      //     var localZone = this.getLocalZone();
-      //     var offsetLeft = ctx.x - localZone.left;
-      //     var offsetTop = ctx.y - localZone.top;
-      //     for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-      //       var dirtyZone = dirtyZones[i];
-      //       render.drawImageExt(image,
-      //         dirtyZone.left + offsetLeft, dirtyZone.top + offsetTop, dirtyZone.width, dirtyZone.height,
-      //         dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
-      //     }
-      //   }
-      // }
-
       function loadImageFinished (url, image, success, async) {
         var ctx = this._imageCtx;
         if (ctx.invalid && success) {
@@ -72,15 +56,15 @@ export default (function () {
       }
 
       function onRenderImageChanged (newVal, oldVal) {
-        this.removeObserver('render', renderImage, this);
+        this.removeObserver('postClipRender', renderImage, this);
         if (newVal && newVal !== '') {
           var ctx = this._imageCtx;
           if (LangUtil.isString(newVal)) {
             ctx.url = newVal;
-            this.addObserver('render', renderImage, this);
+            this.addObserver('postClipRender', renderImage, this);
           } else {
             ctx.url = newVal.url;
-            this.addObserver('render', renderImage, this);
+            this.addObserver('postClipRender', renderImage, this);
           }
           ctx.invalid = true;
         }
