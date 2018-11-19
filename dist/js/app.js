@@ -904,10 +904,10 @@
           var p2 = this.transformLVectorToW([localZone.left, localZone.bottom]);
           var p3 = this.transformLVectorToW([localZone.right, localZone.top]);
           var p4 = this.transformLVectorToW([localZone.right, localZone.bottom]);
-          worldZone.top = Math.min(p1[1], p2[1], p3[1], p4[1]);
-          worldZone.bottom = Math.max(p1[1], p2[1], p3[1], p4[1]);
-          worldZone.left = Math.min(p1[0], p2[0], p3[0], p4[0]);
-          worldZone.right = Math.max(p1[0], p2[0], p3[0], p4[0]);
+          worldZone.top = Math.round(Math.min(p1[1], p2[1], p3[1], p4[1]));
+          worldZone.bottom = Math.round(Math.max(p1[1], p2[1], p3[1], p4[1]));
+          worldZone.left = Math.round(Math.min(p1[0], p2[0], p3[0], p4[0]));
+          worldZone.right = Math.round(Math.max(p1[0], p2[0], p3[0], p4[0]));
           worldZone.width = worldZone.right - worldZone.left;
           worldZone.height = worldZone.bottom - worldZone.top;
         }
@@ -5042,8 +5042,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var endX = Math.min(maxx, mapRight, slopeY2X * mapBottom - row * this.mapTileWidth);
             var endY = Math.min(maxy, mapBottom, slopeX2Y * (mapRight + row * this.mapTileWidth));
             if (startX < endX) {
-              render.moveTo(startX + offsetLeft + 0.5, startY + offsetTop);
-              render.lineTo(endX + offsetLeft, endY + offsetTop - 0.5);
+              render.moveTo(startX + offsetLeft, startY + offsetTop);
+              render.lineTo(endX + offsetLeft, endY + offsetTop);
             }
           }
           // 绘制列
@@ -5059,15 +5059,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var endX = Math.min(maxx, mapRight, -slopeY2X * mapTop + col * this.mapTileWidth);
             var endY = Math.max(miny, mapTop, -slopeX2Y * (mapRight - col * this.mapTileWidth));
             if (startX < endX) {
-              render.moveTo(startX + offsetLeft, startY + offsetTop - 0.5);
-              render.lineTo(endX + offsetLeft - 0.5, endY + offsetTop);
+              render.moveTo(startX + offsetLeft, startY + offsetTop);
+              render.lineTo(endX + offsetLeft, endY + offsetTop);
             }
           }
         }
       }
       render.lineWidth = 1;
-      render.lineCap = 'round';
-      render.globalAlpha = 0.2;
       render.strokeStyle = '#f00';
       render.stroke();
     }
@@ -5751,7 +5749,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       this._mapGrid = new __WEBPACK_IMPORTED_MODULE_1__core_node__["a" /* default */]({
         rotateZ: 0,
-        dirtyRenderSupport: true,
+        alpha: 0.2,
+        dirtyRenderSupport: true
       });
       this.appendChildNode(this._mapGrid);
 

@@ -132,8 +132,8 @@ export default (function () {
             var endX = Math.min(maxx, mapRight, slopeY2X * mapBottom - row * this.mapTileWidth);
             var endY = Math.min(maxy, mapBottom, slopeX2Y * (mapRight + row * this.mapTileWidth));
             if (startX < endX) {
-              render.moveTo(startX + offsetLeft + 0.5, startY + offsetTop);
-              render.lineTo(endX + offsetLeft, endY + offsetTop - 0.5);
+              render.moveTo(startX + offsetLeft, startY + offsetTop);
+              render.lineTo(endX + offsetLeft, endY + offsetTop);
             }
           }
           // 绘制列
@@ -149,15 +149,13 @@ export default (function () {
             var endX = Math.min(maxx, mapRight, -slopeY2X * mapTop + col * this.mapTileWidth);
             var endY = Math.max(miny, mapTop, -slopeX2Y * (mapRight - col * this.mapTileWidth));
             if (startX < endX) {
-              render.moveTo(startX + offsetLeft, startY + offsetTop - 0.5);
-              render.lineTo(endX + offsetLeft - 0.5, endY + offsetTop);
+              render.moveTo(startX + offsetLeft, startY + offsetTop);
+              render.lineTo(endX + offsetLeft, endY + offsetTop);
             }
           }
         }
       }
       render.lineWidth = 1;
-      render.lineCap = 'round';
-      render.globalAlpha = 0.2;
       render.strokeStyle = '#f00';
       render.stroke();
     }
@@ -815,8 +813,8 @@ export default (function () {
     InnerGMap.prototype.defMapTileType = 'square';
     InnerGMap.prototype.defMapTileWidth = 50;
     InnerGMap.prototype.defMapTileHeight = 50;
-    InnerGMap.prototype.defMapTileRows = 40;
-    InnerGMap.prototype.defMapTileCols = 30;
+    InnerGMap.prototype.defMapTileRows = 0;
+    InnerGMap.prototype.defMapTileCols = 0;
     InnerGMap.prototype.defDirtyRenderSupport = true;
     InnerGMap.prototype.defMapGridVisible = false;
     InnerGMap.prototype.init = function (conf) {
@@ -841,7 +839,8 @@ export default (function () {
 
       this._mapGrid = new Node({
         rotateZ: 0,
-        dirtyRenderSupport: true,
+        alpha: 0.2,
+        dirtyRenderSupport: true
       });
       this.appendChildNode(this._mapGrid);
 
@@ -859,8 +858,8 @@ export default (function () {
         }
       };
 
-      document.body.appendChild(this._mapCacheCtx.tile.foreRender.getCanvas())
-      document.body.appendChild(this._mapCacheCtx.tile.backRender.getCanvas())
+      // document.body.appendChild(this._mapCacheCtx.tile.foreRender.getCanvas())
+      // document.body.appendChild(this._mapCacheCtx.tile.backRender.getCanvas())
 
       this.addObserver('propertyChanged', functions.onPropertyChanged, this);
     }

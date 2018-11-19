@@ -456,10 +456,10 @@ export default (
           var p2 = this.transformLVectorToW([localZone.left, localZone.bottom]);
           var p3 = this.transformLVectorToW([localZone.right, localZone.top]);
           var p4 = this.transformLVectorToW([localZone.right, localZone.bottom]);
-          worldZone.top = Math.min(p1[1], p2[1], p3[1], p4[1]);
-          worldZone.bottom = Math.max(p1[1], p2[1], p3[1], p4[1]);
-          worldZone.left = Math.min(p1[0], p2[0], p3[0], p4[0]);
-          worldZone.right = Math.max(p1[0], p2[0], p3[0], p4[0]);
+          worldZone.top = Math.round(Math.min(p1[1], p2[1], p3[1], p4[1]));
+          worldZone.bottom = Math.round(Math.max(p1[1], p2[1], p3[1], p4[1]));
+          worldZone.left = Math.round(Math.min(p1[0], p2[0], p3[0], p4[0]));
+          worldZone.right = Math.round(Math.max(p1[0], p2[0], p3[0], p4[0]));
           worldZone.width = worldZone.right - worldZone.left;
           worldZone.height = worldZone.bottom - worldZone.top;
         }
