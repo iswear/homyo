@@ -132,8 +132,8 @@ export default (function () {
             var endX = Math.min(maxx, mapRight, slopeY2X * mapBottom - row * this.mapTileWidth);
             var endY = Math.min(maxy, mapBottom, slopeX2Y * (mapRight + row * this.mapTileWidth));
             if (startX < endX) {
-              render.moveTo(startX + offsetLeft, startY + offsetTop);
-              render.lineTo(endX + offsetLeft, endY + offsetTop);
+              render.moveTo(startX + offsetLeft + 0.5, startY + offsetTop);
+              render.lineTo(endX + offsetLeft, endY + offsetTop - 0.5);
             }
           }
           // 绘制列
@@ -149,14 +149,15 @@ export default (function () {
             var endX = Math.min(maxx, mapRight, -slopeY2X * mapTop + col * this.mapTileWidth);
             var endY = Math.max(miny, mapTop, -slopeX2Y * (mapRight - col * this.mapTileWidth));
             if (startX < endX) {
-              render.moveTo(startX + offsetLeft, startY + offsetTop);
-              render.lineTo(endX + offsetLeft, endY + offsetTop);
+              render.moveTo(startX + offsetLeft, startY + offsetTop - 0.5);
+              render.lineTo(endX + offsetLeft - 0.5, endY + offsetTop);
             }
           }
         }
       }
       render.lineWidth = 1;
       render.lineCap = 'round';
+      render.globalAlpha = 0.2;
       render.strokeStyle = '#f00';
       render.stroke();
     }

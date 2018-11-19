@@ -151,7 +151,7 @@ import glsl from '../../../src/common/core/render/webgl/shader/fragment/default.
   });
 
 
-  // root.appendChildNode(label);
+  root.appendChildNode(label);
 
   var application = new Application({
     canvas: document.getElementById('app'),

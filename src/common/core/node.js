@@ -560,7 +560,7 @@ export default (
               // 设置矩阵
               render.setTransform(w[0], w[3], w[1], w[4], w[2], w[5]);
               // 设置透明度
-              render.globalAplha = alpha;
+              render.globalAlpha = alpha;
               // 绘制自身
               if (dirtyCtx.curReported) {
                 this.postNotification('preClipRender', [render, [this._zoneCtx.local]]);
@@ -597,7 +597,7 @@ export default (
                 // 设置矩阵
                 render.setTransform(w[0], w[3], w[1], w[4], w[2], w[5]);
                 // 设置透明度
-                render.globalAplha = alpha;
+                render.globalAlpha = alpha;
                 // 绘制自身
                 if (dirtyCtx.curReported) {
                   this.postNotification('preClipRender', [render, [this._zoneCtx.local]]);
