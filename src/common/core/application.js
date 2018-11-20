@@ -568,7 +568,6 @@ export default (function () {
               render.clearRect(dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
             }
             // 重新绘制阶段
-            console.log('frame');
             root._dispatchRender(render, 1, true, renderZone, dirtyZones);
             // 矩阵回归到单位矩阵
             render.setTransform(1, 0, 0, 1, 0, 0);

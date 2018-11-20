@@ -1346,12 +1346,10 @@
       }
 
       InnerCanvasRender.prototype.drawImage = function (img, x, y) {
-        console.log("drawImage", x, y);
         this.$context.drawImage(img, x, y);
       }
 
       InnerCanvasRender.prototype.drawImageExt = function (img, sx, sy, swidth, sheight, x, y, width, height) {
-        console.log("drawImageExt", sx, sy, swidth, sheight, x, y, width, height);
         this.$context.drawImage(img, sx, sy, swidth, sheight, x, y, width, height);
       }
 
@@ -4426,7 +4424,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
               render.clearRect(dirtyZone.left, dirtyZone.top, dirtyZone.width, dirtyZone.height);
             }
             // 重新绘制阶段
-            console.log('frame');
             root._dispatchRender(render, 1, true, renderZone, dirtyZones);
             // 矩阵回归到单位矩阵
             render.setTransform(1, 0, 0, 1, 0, 0);

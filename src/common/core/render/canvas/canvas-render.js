@@ -181,12 +181,10 @@ export default (function () {
       }
 
       InnerCanvasRender.prototype.drawImage = function (img, x, y) {
-        console.log("drawImage", x, y);
         this.$context.drawImage(img, x, y);
       }
 
       InnerCanvasRender.prototype.drawImageExt = function (img, sx, sy, swidth, sheight, x, y, width, height) {
-        console.log("drawImageExt", sx, sy, swidth, sheight, x, y, width, height);
         this.$context.drawImage(img, sx, sy, swidth, sheight, x, y, width, height);
       }
 
