@@ -156,7 +156,7 @@ export default (function () {
         }
       }
       render.lineWidth = 1;
-      render.strokeStyle = '#f00';
+      render.strokeStyle = '#f0f';
       render.stroke();
     }
 
@@ -839,7 +839,7 @@ export default (function () {
 
       this._mapGrid = new Node({
         rotateZ: 0,
-        alpha: 0.2,
+        alpha: 0.5,
         dirtyRenderSupport: true
       });
       this.appendChildNode(this._mapGrid);
