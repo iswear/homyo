@@ -487,6 +487,12 @@ export default (function () {
         if (dirtyZone === null) {
           return false;
         }
+        // if (dirtyZone.width <= 0) {
+        //   return false;
+        // }
+        // if (dirtyZone.height <= 0) {
+        //   return false;
+        // }
         var renderZone = this._renderZone;
         if (GeometryUtil.isZoneNotCross(renderZone, dirtyZone)) {
           return false;

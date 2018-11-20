@@ -189,13 +189,17 @@ export default (
 
       InnerNode.prototype.getDirtyZone = function () {
         var worldZone = this._zoneCtx.world;
-        return {
-          left: worldZone.left - 1, 
-          top: worldZone.top - 1,
-          right: worldZone.right + 1,
-          bottom: worldZone.bottom + 1,
-          width: worldZone.width + 2,
-          height: worldZone.height + 2
+        if (worldZone.width > 0 && worldZone.height > 0) {
+          return {
+            left: worldZone.left - 1, 
+            top: worldZone.top - 1,
+            right: worldZone.right + 1,
+            bottom: worldZone.bottom + 1,
+            width: worldZone.width + 2,
+            height: worldZone.height + 2
+          }
+        } else {
+          return null;
         }
       }
 
@@ -433,12 +437,12 @@ export default (
         var localZone = zoneCtx.local;
         var worldZone = zoneCtx.world;
         if (zoneCtx.localInvalid) {
-          localZone.width = Math.round(this.width);
-          localZone.height = Math.round(this.height);
-          localZone.top = Math.round(localZone.height * (-this.anchorY));
-          localZone.bottom = Math.round(localZone.height + localZone.top);
-          localZone.left = Math.round(localZone.width * (-this.anchorX));
-          localZone.right = Math.round(localZone.width + localZone.left);
+          localZone.top = Math.ceil(this.height * (-this.anchorY));
+          localZone.bottom = Math.floor(this.height + localZone.top);
+          localZone.left = Math.ceil(this.width * (-this.anchorX));
+          localZone.right = Math.floor(this.width + localZone.left);
+          localZone.width = localZone.right - localZone.left;
+          localZone.height = localZone.bottom - localZone.top;
         }
         
         if (transformCtx.localInvalid) {
@@ -456,10 +460,10 @@ export default (
           var p2 = this.transformLVectorToW([localZone.left, localZone.bottom]);
           var p3 = this.transformLVectorToW([localZone.right, localZone.top]);
           var p4 = this.transformLVectorToW([localZone.right, localZone.bottom]);
-          worldZone.top = Math.round(Math.min(p1[1], p2[1], p3[1], p4[1]));
-          worldZone.bottom = Math.round(Math.max(p1[1], p2[1], p3[1], p4[1]));
-          worldZone.left = Math.round(Math.min(p1[0], p2[0], p3[0], p4[0]));
-          worldZone.right = Math.round(Math.max(p1[0], p2[0], p3[0], p4[0]));
+          worldZone.top = Math.ceil(Math.min(p1[1], p2[1], p3[1], p4[1]));
+          worldZone.bottom = Math.floor(Math.max(p1[1], p2[1], p3[1], p4[1]));
+          worldZone.left = Math.ceil(Math.min(p1[0], p2[0], p3[0], p4[0]));
+          worldZone.right = Math.floor(Math.max(p1[0], p2[0], p3[0], p4[0]));
           worldZone.width = worldZone.right - worldZone.left;
           worldZone.height = worldZone.bottom - worldZone.top;
         }
@@ -474,7 +478,7 @@ export default (
           }
         }
 
-        dirtyCtx.isZoneCross = GeometryUtil.isZoneCross(renderZone, this.getDirtyZone());
+        dirtyCtx.isZoneCross = localZone.width > 0 && localZone.height > 0 && GeometryUtil.isZoneCross(renderZone, localZone);
         dirtyCtx.isCheckRender = this.checkNeedRender();
         dirtyCtx.isVisible = this.visible;
         transformCtx.localInvalid = false;
@@ -521,16 +525,20 @@ export default (
             var wTrans = this._transformCtx.worldTransform;
             if (dirtyCtx.oriReported) {
               var selfDirtyZone = this.getDirtyZone();
-              result = app.receiveDirtyZone(this, selfDirtyZone);
               dirtyCtx.curReported = true;
+              if (selfDirtyZone !== null) {
+                result = app.receiveDirtyZone(this, selfDirtyZone);
+              }
             } else if (!this.dirtyRenderSupport || !(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 1)) {
               var selfDirtyZone = this.getDirtyZone();
-              for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-                var dirtyZone = dirtyZones[i];
-                if (GeometryUtil.isZoneCross(dirtyZone, selfDirtyZone)) {
-                  result = app.receiveDirtyZone(this, selfDirtyZone);
-                  dirtyCtx.curReported = true;
-                  break;
+              if (selfDirtyZone !== null) {
+                for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+                  var dirtyZone = dirtyZones[i];
+                  if (GeometryUtil.isZoneCross(dirtyZone, selfDirtyZone)) {
+                    result = app.receiveDirtyZone(this, selfDirtyZone);
+                    dirtyCtx.curReported = true;
+                    break;
+                  }
                 }
               }
             }
@@ -603,10 +611,10 @@ export default (
                   this.postNotification('preClipRender', [render, [this._zoneCtx.local]]);
                   this.postNotification('postClipRender', [render, [this._zoneCtx.local]]);
                 } else {
-                  var selfDirtyZone = this.getDirtyZone();
+                  var worldZone = this._zoneCtx.world;
                   var crossDirtyZones = [];
                   for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-                    var crossDirtyZone = GeometryUtil.getZoneCross(selfDirtyZone, dirtyZones[i]);
+                    var crossDirtyZone = GeometryUtil.getZoneCross(worldZone, dirtyZones[i]);
                     if (crossDirtyZone !== null) {
                       crossDirtyZone.left -= w[2];
                       crossDirtyZone.right -= w[2];
