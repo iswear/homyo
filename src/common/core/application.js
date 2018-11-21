@@ -4,15 +4,17 @@
  * Date: 2017/8/12
  */
 
-import LangUtil from '../utils/lang-util';
-import TimerUtil from '../utils/timer-util';
 import EventUtil from '../utils/event-util';
-import PlatformUtil from '../utils/platform-util';
 import GeometryUtil from '../utils/geometry-util';
+import LangUtil from '../utils/lang-util';
+import PlatformUtil from '../utils/platform-util';
+import TimerUtil from '../utils/timer-util';
+
 import Notifier from './notifier';
-import CanvasRender from './render/canvas/canvas-render';
+
 import AnimationManager from './animation/manager';
 import FileLoader from './io/file-loader';
+import CanvasRender from './render/canvas/canvas-render';
 
 export default (function () {
     var win = window;
@@ -547,6 +549,17 @@ export default (function () {
         }
 
         var dirtyCtx = this._dirtyCtx;
+        // DEBUG
+        dirtyCtx.dirty = true
+        dirtyCtx.zones.push({
+          left: this._renderZone.left,
+          top: this._renderZone.top,
+          right: this._renderZone.right,
+          bottom: this._renderZone.bottom,
+          width: this._renderZone.width,
+          height: this._renderZone.height
+        })
+        // DEBUG
         if (dirtyCtx.dirty) {
           var dirtyZones = dirtyCtx.zones;
           var renderZone = this._renderZone;
