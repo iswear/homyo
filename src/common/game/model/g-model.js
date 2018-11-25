@@ -73,6 +73,7 @@ export default (
                 if (!nodeFrames) {
                   var node = this._nodeMap[nodeId];
                   var animation = GModelUtil.compilePropertiesFrames(this._nodeMap[nodeId], nodeFrames);
+
                 }
               }
             }
@@ -164,7 +165,7 @@ export default (
         this.id = LangUtil.checkAndGet(conf.id, 1);
         this.name = LangUtil.checkAndGet(conf.name, this.defName);
         this.skin = new Proxy(LangUtil.checkAndGet(conf.skin, {}));
-
+        
         this._node = new Node({
           x: 0,
           y: 0,

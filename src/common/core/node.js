@@ -499,6 +499,7 @@ export default (
           dirtyCtx.oriReported = true;
         } else {
           app.receiveDirtyZone(this, null);
+          dirtyCtx.oriReported = true;
         }
 
         if (dirtyCtx.isVisible) {
