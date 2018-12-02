@@ -24,8 +24,8 @@ export default (function () {
       function eventPreProcessDesktop (e) {
         var eArg = this._events[0];
         var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
-        var offsetX = (e.pageX - (canvasViewOffset.left - win.pageXOffset - docEle.clientLeft)) * this._scaleX;
-        var offsetY = (e.pageY - (canvasViewOffset.top - win.pageYOffset - docEle.clientTop)) * this._scaleY;
+        var offsetX = (e.pageX - (canvasViewOffset.left + win.pageXOffset)) * this._scaleX;
+        var offsetY = (e.pageY - (canvasViewOffset.top + win.pageYOffset)) * this._scaleY;
         if (offsetX !== eArg.offsetX || offsetY !== eArg.offsetY || e.wheelDelta !== 0) {
           this.move = true;
         } else {
@@ -54,8 +54,8 @@ export default (function () {
           this._events[touch.identifier] = eArg;
         }
         var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
-        var offsetX = (e.pageX - (canvasViewOffset.left - win.pageXOffset - docEle.clientLeft)) * this._scaleX;
-        var offsetY = (e.pageY - (canvasViewOffset.top - win.pageYOffset - docEle.clientTop)) * this._scaleY;
+        var offsetX = (e.pageX - (canvasViewOffset.left + win.pageXOffset)) * this._scaleX;
+        var offsetY = (e.pageY - (canvasViewOffset.top + win.pageYOffset)) * this._scaleY;
         if (offsetX !== eArg.offsetX || offsetY !== eArg.offsetY || e.wheelDelta !== 0) {
           this.move = true;
         } else {
@@ -112,7 +112,7 @@ export default (function () {
         var touches = ee.changedTouches;
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
+          var eArg = eventPreProcessMobile.call(this, ee, touches[i]);
           this.postNotification('touchstart', [eArg]);
           root._dispatchMouseTouchEvent('touchstart', eArg);
           eArg.stopPropagation();
@@ -125,7 +125,7 @@ export default (function () {
         var touches = ee.changedTouches;
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
+          var eArg = eventPreProcessMobile.call(this, ee, touches[i]);
           if (eArg.move) {
             this.postNotification('touchmove', [eArg]);
             root._dispatchMouseTouchEvent('touchmove', eArg);
@@ -140,7 +140,7 @@ export default (function () {
         var touches = ee.changedTouches;
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
+          var eArg = eventPreProcessMobile.call(this, ee, touches[i]);
           this.postNotification('touchend', [eArg]);
           root._dispatchMouseTouchEvent('touchend', eArg);
           eArg.stopPropagation();
@@ -153,7 +153,7 @@ export default (function () {
         var touches = ee.changedTouches;
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
+          var eArg = eventPreProcessMobile.call(this, ee, touches[i]);
           this.postNotification('touchend', [eArg]);
           root._dispatchMouseTouchEvent('touchend', eArg);
           eArg.stopPropagation();
