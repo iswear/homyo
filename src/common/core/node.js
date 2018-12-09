@@ -494,14 +494,13 @@ export default (
 
       InnerNode.prototype._reportOriDirtyZone = function (app) {
         var dirtyCtx = this._dirtyCtx;
-        if (!dirtyCtx.oriReported && dirtyCtx.isZoneCross && dirtyCtx.isCheckRender && dirtyCtx.isVisible) {
+        if (dirtyCtx.isZoneCross && dirtyCtx.isCheckRender && dirtyCtx.isVisible) {
           app.receiveDirtyZone(this, this.getDirtyZone());
           dirtyCtx.oriReported = true;
         } else {
           app.receiveDirtyZone(this, null);
           dirtyCtx.oriReported = true;
         }
-
         if (dirtyCtx.isVisible) {
           var layers = this._childNodes.nodeLayers;
           for (var i = 0, len = layers.length; i < len; ++i) {
