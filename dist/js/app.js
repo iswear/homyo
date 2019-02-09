@@ -942,13 +942,13 @@
 
       InnerNode.prototype._reportOriDirtyZone = function (app) {
         var dirtyCtx = this._dirtyCtx;
-        if (!dirtyCtx.oriReported && dirtyCtx.isZoneCross && dirtyCtx.isCheckRender && dirtyCtx.isVisible) {
+        if (dirtyCtx.isZoneCross && dirtyCtx.isCheckRender && dirtyCtx.isVisible) {
           app.receiveDirtyZone(this, this.getDirtyZone());
           dirtyCtx.oriReported = true;
         } else {
           app.receiveDirtyZone(this, null);
+          dirtyCtx.oriReported = true;
         }
-
         if (dirtyCtx.isVisible) {
           var layers = this._childNodes.nodeLayers;
           for (var i = 0, len = layers.length; i < len; ++i) {
@@ -2298,90 +2298,6 @@
 
 "use strict";
 /**
- * util for text measure and layout
- * Author: iswear(471291492@qq.com)
- * Date: 2017/8/12
- */
-
-/* harmony default export */ __webpack_exports__["a"] = ((function () {
-  var win = window;
-  var reqAniFrame = (function () {
-    if (win.requestAnimationFrame) {
-      return win.requestAnimationFrame;
-    } else if (win.webkitRequestAnimationFrame) {
-      return win.webkitRequestAnimationFrame;
-    } else if (win.msRequestAnimationFrame) {
-      return win.msRequestAnimationFrame;
-    } else if (win.mozRequestAnimationFrame) {
-      return win.mozRequestAnimationFrame;
-    } else if (win.oRequestAnimationFrame) {
-      return win.oRequestAnimationFrame;
-    } else {
-      return null;
-    }
-  })();
-
-  var aniTaskId = 0;
-  var aniTaskList = [];
-  var aniLoopId = 0;
-  var aniLoopRun = false;
-
-  var reqAniLoop = function () {
-    aniTaskListUpdate();
-    reqAniFrame(reqAniLoop);
-  }
-
-  var intervalAniLoop = function () {
-    aniLoopId = win.setInterval(aniTaskListUpdate, 16);
-  }
-
-  var aniTaskListUpdate = function () {
-    var len = aniTaskList.length;
-    var i, task;
-    for (i = 0; i < len; ++i) {
-      task = aniTaskList[i];
-      task.fn.call(task.target);
-    }
-  }
-
-  var util = {
-    addAnimationTask: function (fn, target) {
-      aniTaskList.push({
-        id: ++aniTaskId,
-        fn: fn,
-        target: target
-      });
-      if (!aniLoopRun) {
-        if (reqAniFrame === null) {
-          intervalAniLoop();
-        } else {
-          reqAniLoop();
-        }
-        aniLoopRun = true;
-      }
-      return aniTaskId;
-    },
-    removeAnimationTaskById: function (id) {
-      for (var i = 0, len = aniTaskList.length; i < len; ++i) {
-        var task = aniTaskList[i];
-        if (task.id == id) {
-          aniTaskList.splice(i, 1);
-          i--;
-          len--;
-        }
-      }
-    }
-  };
-
-  return util;
-})());
-
-/***/ }),
-/* 12 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/**
  *
  * Author: iswear(471291492@qq.com)
  * Date: 2017/8/12
@@ -2528,7 +2444,7 @@
 
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2549,6 +2465,90 @@
     return util;
   }
 )());
+
+/***/ }),
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+ * util for text measure and layout
+ * Author: iswear(471291492@qq.com)
+ * Date: 2017/8/12
+ */
+
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
+  var win = window;
+  var reqAniFrame = (function () {
+    if (win.requestAnimationFrame) {
+      return win.requestAnimationFrame;
+    } else if (win.webkitRequestAnimationFrame) {
+      return win.webkitRequestAnimationFrame;
+    } else if (win.msRequestAnimationFrame) {
+      return win.msRequestAnimationFrame;
+    } else if (win.mozRequestAnimationFrame) {
+      return win.mozRequestAnimationFrame;
+    } else if (win.oRequestAnimationFrame) {
+      return win.oRequestAnimationFrame;
+    } else {
+      return null;
+    }
+  })();
+
+  var aniTaskId = 0;
+  var aniTaskList = [];
+  var aniLoopId = 0;
+  var aniLoopRun = false;
+
+  var reqAniLoop = function () {
+    aniTaskListUpdate();
+    reqAniFrame(reqAniLoop);
+  }
+
+  var intervalAniLoop = function () {
+    aniLoopId = win.setInterval(aniTaskListUpdate, 16);
+  }
+
+  var aniTaskListUpdate = function () {
+    var len = aniTaskList.length;
+    var i, task;
+    for (i = 0; i < len; ++i) {
+      task = aniTaskList[i];
+      task.fn.call(task.target);
+    }
+  }
+
+  var util = {
+    addAnimationTask: function (fn, target) {
+      aniTaskList.push({
+        id: ++aniTaskId,
+        fn: fn,
+        target: target
+      });
+      if (!aniLoopRun) {
+        if (reqAniFrame === null) {
+          intervalAniLoop();
+        } else {
+          reqAniLoop();
+        }
+        aniLoopRun = true;
+      }
+      return aniTaskId;
+    },
+    removeAnimationTaskById: function (id) {
+      for (var i = 0, len = aniTaskList.length; i < len; ++i) {
+        var task = aniTaskList[i];
+        if (task.id == id) {
+          aniTaskList.splice(i, 1);
+          i--;
+          len--;
+        }
+      }
+    }
+  };
+
+  return util;
+})());
 
 /***/ }),
 /* 14 */
@@ -3740,12 +3740,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__src_common_game_model_g_model_node__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__src_common_game_g_texture__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__src_common_game_g_util__ = __webpack_require__(31);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__src_common_utils_event_util__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__src_common_utils_event_util__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__src_common_utils_lang_util__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__src_common_utils_matrix_util__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__src_common_utils_platform_util__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__src_common_utils_platform_util__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__src_common_utils_text_util__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__src_common_utils_timer_util__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__src_common_utils_timer_util__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__src_common_utils_number_util__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__src_common_utils_geometry_util__ = __webpack_require__(4);
 
@@ -3845,15 +3845,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_timer_util__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_event_util__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_platform_util__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_geometry_util__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_event_util__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_geometry_util__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_lang_util__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_platform_util__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_timer_util__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__notifier__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__render_canvas_canvas_render__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__animation_manager__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__io_file_loader__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__animation_manager__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__io_file_loader__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__render_canvas_canvas_render__ = __webpack_require__(3);
 /**
  * the core class for app
  * Author: iswear(471291492@qq.com)
@@ -3870,16 +3870,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
+
+
 /* harmony default export */ __webpack_exports__["a"] = ((function () {
     var win = window;
-    var docEle = document.documentElement;
+    var doc = document;
 
     var functions = (function () {
-      function eventPreProcessDesktop (e) {
+      function eventPreProcessDesktop (e, fromCanvas) {
         var eArg = this._events[0];
         var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
-        var offsetX = (e.pageX - (canvasViewOffset.left - win.pageXOffset - docEle.clientLeft)) * this._scaleX;
-        var offsetY = (e.pageY - (canvasViewOffset.top - win.pageYOffset - docEle.clientTop)) * this._scaleY;
+        var offsetX = (e.pageX - (canvasViewOffset.left + win.pageXOffset)) * this._scaleX;
+        var offsetY = (e.pageY - (canvasViewOffset.top + win.pageYOffset)) * this._scaleY;
         if (offsetX !== eArg.offsetX || offsetY !== eArg.offsetY || e.wheelDelta !== 0) {
           this.move = true;
         } else {
@@ -3888,12 +3890,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         eArg.id = 1;
         eArg.event = e;
         eArg.target = null;
+        eArg.fromCanvas = fromCanvas || eArg.fromCanvas;
+
         eArg.wheelDelta = e.wheelDelta ? e.wheelDelta : e.detail;
         eArg.keyCode = e.keyCode;
         eArg.button = e.button;
         eArg.altKey = e.altKey;
         eArg.ctrlKey = e.ctrlKey;
         eArg.metaKey = e.metaKey;
+
         eArg.skip = false;
         eArg.bubble = true;
         eArg.offsetX = offsetX;
@@ -3901,15 +3906,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         return eArg;
       }
 
-      function eventPreProcessMobile (e, touch) {
+      function eventPreProcessMobile (e, touch, fromCanvas) {
         var eArg = this._events[touch.identifier];
         if (!eArg) {
           eArg = new Event();
           this._events[touch.identifier] = eArg;
         }
         var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
-        var offsetX = (e.pageX - (canvasViewOffset.left - win.pageXOffset - docEle.clientLeft)) * this._scaleX;
-        var offsetY = (e.pageY - (canvasViewOffset.top - win.pageYOffset - docEle.clientTop)) * this._scaleY;
+        var offsetX = (e.pageX - (canvasViewOffset.left + win.pageXOffset)) * this._scaleX;
+        var offsetY = (e.pageY - (canvasViewOffset.top + win.pageYOffset)) * this._scaleY;
         if (offsetX !== eArg.offsetX || offsetY !== eArg.offsetY || e.wheelDelta !== 0) {
           this.move = true;
         } else {
@@ -3919,8 +3924,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         eArg.event = e;
         eArg.touch = touch;
         eArg.target = null;
+        eArg.fromCanvas = fromCanvas || eArg.fromCanvas;
+
         eArg.skip = false;
         eArg.bubble = true;
+
         eArg.offsetX = offsetX;
         eArg.offsetY = offsetY;
         return eArg;
@@ -3930,7 +3938,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          this.postNotification('touchstart', [eventPreProcessMobile.call(this, ee, touches[i])]);
+          var eArg = eventPreProcessMobile.call(this, ee, touches[i], false);
+          if (!eArg.fromCanvas) {
+            this.postNotification('touchstart', [eArg]);
+          }
+          eArg.reset();
         }
       }
 
@@ -3938,10 +3950,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = eventPreProcessMobile(this, ee, touches[i]);
-          if (eArg.move) {
+          var eArg = eventPreProcessMobile(this, ee, touches[i], false);
+          if (!eArg.fromCanvas) {
             this.postNotification('touchmove', [eArg]);
           }
+          eArg.reset();
         }
       }
 
@@ -3949,7 +3962,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          this.postNotification('touchend', [eventPreProcessMobile.call(this, ee, touches[i])]);
+          var eArg = eventPreProcessMobile.call(this, ee, touches[i], false);
+          if (!eArg.fromCanvas) {
+            this.postNotification('touchend', [eArg]);
+          }
+          eArg.reset();
         }
       }
 
@@ -3957,7 +3974,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var ee = e ? e : win.event;
         var touches = ee.changedTouches;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          this.postNotification('touchcancel', [eventPreProcessMobile.call(this, ee, touches[i])]);
+          var eArg = eventPreProcessMobile.call(this, ee, touches[i], false);
+          if (!eArg.fromCanvas) {
+            this.postNotification('touchcancel', [eArg]);
+          }
+          eArg.reset();
         }
       }
 
@@ -3966,10 +3987,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var touches = ee.changedTouches;
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
+          var eArg = eventPreProcessMobile.call(this, ee, touches[i], true);
           this.postNotification('touchstart', [eArg]);
           root._dispatchMouseTouchEvent('touchstart', eArg);
-          eArg.stopPropagation();
           eArg.preventDefault();
         }
       }
@@ -3979,12 +3999,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var touches = ee.changedTouches;
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
+          var eArg = eventPreProcessMobile.call(this, ee, touches[i], true);
           if (eArg.move) {
             this.postNotification('touchmove', [eArg]);
             root._dispatchMouseTouchEvent('touchmove', eArg);
           }
-          eArg.stopPropagation();
           eArg.preventDefault();
         }
       }
@@ -3994,10 +4013,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var touches = ee.changedTouches;
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
+          var eArg = eventPreProcessMobile.call(this, ee, touches[i], true);
           this.postNotification('touchend', [eArg]);
           root._dispatchMouseTouchEvent('touchend', eArg);
-          eArg.stopPropagation();
           eArg.preventDefault();
         }
       }
@@ -4007,122 +4025,137 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         var touches = ee.changedTouches;
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
-          var eArg = event_prehandler_mobile.call(this, ee, touches[i]);
+          var eArg = eventPreProcessMobile.call(this, ee, touches[i], true);
           this.postNotification('touchend', [eArg]);
           root._dispatchMouseTouchEvent('touchend', eArg);
-          eArg.stopPropagation();
           eArg.preventDefault();
         }
       }
 
       function eventKeyDownDoc (e) {
-        this.postNotification('keydown', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event, false);
+        if (!eArg.fromCanvas) {
+          this.postNotification('keydown', [eArg]);
+        }
+        eArg.reset();
       }
 
       function eventKeyPressDoc (e) {
-        this.postNotification('keypress', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event, false);
+        if (!eArg.fromCanvas) {
+          this.postNotification('keypress', [eArg]);
+        }
+        eArg.reset();
       }
 
       function eventKeyUpDoc (e) {
-        this.postNotification('keyup', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event, false);
+        if (!eArg.fromCanvas) {
+          this.postNotification('keyup', [eArg]);
+        }
+        eArg.reset();
       }
 
       function eventMouseDownDoc (e) {
-        this.postNotification('mousedown', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event, false);
+        if (!eArg.fromCanvas) {
+          this.postNotification('mousedown', [eArg]);
+        }
+        eArg.reset();
       }
 
       function eventMouseMoveDoc (e) {
-        this.postNotification('mousemove', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event, false);
+        if (!eArg.fromCanvas) {
+          this.postNotification('mousemove', [eArg]);
+        }
+        eArg.reset();
       }
 
       function eventMouseUpDoc (e) {
-        this.postNotification('mouseup', [eventPreProcessDesktop.call(this, e ? e : win.event)]);
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event, false);
+        if (!eArg.fromCanvas) {
+          this.postNotification('mouseup', [eArg]);
+        }
+        eArg.reset();
       }
 
       function eventClickCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event, true);
         this.postNotification('click', [eArg]);
         this._root._dispatchMouseTouchEvent('click', eArg);
-        eArg.stopPropagation();
         eArg.preventDefault();
       }
 
       function eventDblClickCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event, true);
         this.postNotification('dblclick', [eArg]);
         this._root._dispatchMouseTouchEvent('dblclick', eArg);
-        eArg.stopPropagation();
         eArg.preventDefault();
       }
 
       function eventContextMenuCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event, true);
         this.postNotification('contextmenu', [eArg]);
         this._root._dispatchMouseTouchEvent('contextmenu', eArg);
-        eArg.stopPropagation();
         eArg.preventDefault();
       }
 
       function eventMouseDownCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event, true);
         this.postNotification('mousedown', [eArg]);
         this._root._dispatchMouseTouchEvent('mousedown', eArg);
-        eArg.stopPropagation();
         eArg.preventDefault();
       }
 
       function eventMouseMoveCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event, true);
         this.postNotification('mousemove', [eArg]);
         this._root._dispatchMouseTouchEvent('mousemove', eArg);
-        eArg.stopPropagation();
         eArg.preventDefault();
       }
 
       function eventMouseUpCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event, true);
         this.postNotification('mouseup', [eArg]);
         this._root._dispatchMouseTouchEvent('mouseup', eArg);
-        eArg.stopPropagation();
         eArg.preventDefault();
       }
 
       function eventMouseWheelCanvas (e) {
-        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event);
+        var eArg = eventPreProcessDesktop.call(this, e ? e : win.event, true);
         this.postNotification('wheel', [eArg]);
         this._root._dispatchMouseTouchEvent('wheel', eArg);
-        eArg.stopPropagation();
         eArg.preventDefault();
       }
 
       function initEvent () {
         var canvas = this._render.getCanvas();
-        var doc = document;
         if (__WEBPACK_IMPORTED_MODULE_3__utils_platform_util__["a" /* default */].isMobile) {
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(doc, 'touchstart', this, eventTouchStartDoc);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(doc, 'touchmove', this, eventTouchMoveDoc);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(doc, 'touchend', this, eventTouchEndDoc);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(doc, 'touchcancel', this, eventTouchCancelDoc);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(canvas, 'touchstart', this, eventTouchStartCanvas);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(canvas, 'touchmove', this, eventTouchMoveCanvas);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(canvas, 'touchend', this, eventTouchEndCanvas);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(canvas, 'touchcancel', this, eventTouchCancelCanvas);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(doc, 'touchstart', this, eventTouchStartDoc);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(doc, 'touchmove', this, eventTouchMoveDoc);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(doc, 'touchend', this, eventTouchEndDoc);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(doc, 'touchcancel', this, eventTouchCancelDoc);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(canvas, 'touchstart', this, eventTouchStartCanvas);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(canvas, 'touchmove', this, eventTouchMoveCanvas);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(canvas, 'touchend', this, eventTouchEndCanvas);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(canvas, 'touchcancel', this, eventTouchCancelCanvas);
         } else {
           this._events.push(new Event());
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(doc, 'keydown', this, eventKeyDownDoc);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(doc, 'keypress', this, eventKeyPressDoc);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(doc, 'keyup', this, eventKeyUpDoc);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(doc, 'mousedown', this, eventMouseDownDoc);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(doc, 'mousemove', this, eventMouseMoveDoc);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(doc, 'mouseup', this, eventMouseUpDoc);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(canvas, 'click', this, eventClickCanvas);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(canvas, 'dblclick', this, eventDblClickCanvas);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(canvas, 'contextmenu', this, eventContextMenuCanvas);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(canvas, 'mousedown', this, eventMouseDownCanvas);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(canvas, 'mousemove', this, eventMouseMoveCanvas);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(canvas, 'mouseup', this, eventMouseUpCanvas);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(canvas, 'mousewheel', this, eventMouseWheelCanvas);
-          __WEBPACK_IMPORTED_MODULE_2__utils_event_util__["a" /* default */].addEventListener(canvas, 'wheel', this, eventMouseWheelCanvas);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(doc, 'keydown', this, eventKeyDownDoc);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(doc, 'keypress', this, eventKeyPressDoc);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(doc, 'keyup', this, eventKeyUpDoc);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(doc, 'mousedown', this, eventMouseDownDoc);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(doc, 'mousemove', this, eventMouseMoveDoc);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(doc, 'mouseup', this, eventMouseUpDoc);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(canvas, 'click', this, eventClickCanvas);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(canvas, 'dblclick', this, eventDblClickCanvas);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(canvas, 'contextmenu', this, eventContextMenuCanvas);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(canvas, 'mousedown', this, eventMouseDownCanvas);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(canvas, 'mousemove', this, eventMouseMoveCanvas);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(canvas, 'mouseup', this, eventMouseUpCanvas);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(canvas, 'mousewheel', this, eventMouseWheelCanvas);
+          __WEBPACK_IMPORTED_MODULE_0__utils_event_util__["a" /* default */].addEventListener(canvas, 'wheel', this, eventMouseWheelCanvas);
         }
       }
 
@@ -4212,9 +4245,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       function InnerEvent() {
         this.id = 0;
         this.event = null;
-
         this.touch = null;
         this.target = null;
+        this.fromCanvas = true;
+
         this.wheelDelta = 0;
         this.keyCode = 0;
         this.button = 0;
@@ -4238,21 +4272,25 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.event.preventDefault();
       }
 
+      InnerEvent.prototype.reset = function () {
+        this.fromCanvas = false;
+      }
+
       return InnerEvent;
     })();
 
     var Application = (function () {
-      var InnerApplication = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_5__notifier__["a" /* default */]);
+      var InnerApplication = __WEBPACK_IMPORTED_MODULE_2__utils_lang_util__["a" /* default */].extend(__WEBPACK_IMPORTED_MODULE_5__notifier__["a" /* default */]);
 
       InnerApplication.prototype.defScaleMode = 0;
       InnerApplication.prototype.init = function (conf) {
         this.super('init', [conf]);
-        this.scaleMode = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.scaleMode, this.defScaleMode);
+        this.scaleMode = __WEBPACK_IMPORTED_MODULE_2__utils_lang_util__["a" /* default */].checkAndGet(conf.scaleMode, this.defScaleMode);
 
-        this._root = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.root, null);
+        this._root = __WEBPACK_IMPORTED_MODULE_2__utils_lang_util__["a" /* default */].checkAndGet(conf.root, null);
         this._root.application = this;
 
-        this._render = new __WEBPACK_IMPORTED_MODULE_6__render_canvas_canvas_render__["a" /* default */]({canvas: conf.canvas, width: __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.width, undefined), height: __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.height, undefined)});
+        this._render = new __WEBPACK_IMPORTED_MODULE_8__render_canvas_canvas_render__["a" /* default */]({canvas: conf.canvas, width: __WEBPACK_IMPORTED_MODULE_2__utils_lang_util__["a" /* default */].checkAndGet(conf.width, undefined), height: __WEBPACK_IMPORTED_MODULE_2__utils_lang_util__["a" /* default */].checkAndGet(conf.height, undefined)});
         this._renderZone = {
           top: 0,
           left: 0,
@@ -4272,11 +4310,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this._events = [];
 
         this._animationCtx = {
-          manager: new __WEBPACK_IMPORTED_MODULE_7__animation_manager__["a" /* default */]({})
+          manager: new __WEBPACK_IMPORTED_MODULE_6__animation_manager__["a" /* default */]({})
         };
         this._loaderCtx = {
           callbacks: {},
-          loader: new __WEBPACK_IMPORTED_MODULE_8__io_file_loader__["a" /* default */]({})
+          loader: new __WEBPACK_IMPORTED_MODULE_7__io_file_loader__["a" /* default */]({})
         };
 
         this._clientWidth = 0;
@@ -4343,14 +4381,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         if (dirtyZone === null) {
           return false;
         }
-        // if (dirtyZone.width <= 0) {
-        //   return false;
-        // }
-        // if (dirtyZone.height <= 0) {
-        //   return false;
-        // }
         var renderZone = this._renderZone;
-        if (__WEBPACK_IMPORTED_MODULE_4__utils_geometry_util__["a" /* default */].isZoneNotCross(renderZone, dirtyZone)) {
+        if (__WEBPACK_IMPORTED_MODULE_1__utils_geometry_util__["a" /* default */].isZoneNotCross(renderZone, dirtyZone)) {
           return false;
         }
         dirtyZone.left = Math.max(renderZone.left, dirtyZone.left);
@@ -4364,7 +4396,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           var insert = true;
           for (var i = 0, len = dirtyZones.length; i < len; ++i) {
             var zone = dirtyZones[i];
-            if (__WEBPACK_IMPORTED_MODULE_4__utils_geometry_util__["a" /* default */].isZoneNotCross(zone, dirtyZone)) {
+            if (__WEBPACK_IMPORTED_MODULE_1__utils_geometry_util__["a" /* default */].isZoneNotCross(zone, dirtyZone)) {
               continue;
             }
             dirtyZone.left = Math.min(zone.left, dirtyZone.left);
@@ -4403,6 +4435,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
 
         var dirtyCtx = this._dirtyCtx;
+        // DEBUG
+        // dirtyCtx.dirty = true
+        // dirtyCtx.zones.push({
+        //   left: this._renderZone.left,
+        //   top: this._renderZone.top,
+        //   right: this._renderZone.right,
+        //   bottom: this._renderZone.bottom,
+        //   width: this._renderZone.width,
+        //   height: this._renderZone.height
+        // })
+        // DEBUG
         if (dirtyCtx.dirty) {
           var dirtyZones = dirtyCtx.zones;
           var renderZone = this._renderZone;
@@ -4447,14 +4490,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
               width: this._renderZone.width,
               height: this._renderZone.height
             });
-            this._timerTaskId = __WEBPACK_IMPORTED_MODULE_1__utils_timer_util__["a" /* default */].addAnimationTask(this.loop, this);
+            this._timerTaskId = __WEBPACK_IMPORTED_MODULE_4__utils_timer_util__["a" /* default */].addAnimationTask(this.loop, this);
             this.postNotification('resize', [this._render.width, this._render.height]);
           }
         }
       }
 
       InnerApplication.prototype.stop = function () {
-        __WEBPACK_IMPORTED_MODULE_1__utils_timer_util__["a" /* default */].removeAnimationTaskById(this._timerTaskId);
+        __WEBPACK_IMPORTED_MODULE_4__utils_timer_util__["a" /* default */].removeAnimationTaskById(this._timerTaskId);
         this._timerTaskId = 0;
       }
 
@@ -5079,7 +5122,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
       }
       render.lineWidth = 1;
-      render.strokeStyle = '#f00';
+      render.strokeStyle = '#f0f';
       render.stroke();
     }
 
@@ -5762,7 +5805,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
       this._mapGrid = new __WEBPACK_IMPORTED_MODULE_1__core_node__["a" /* default */]({
         rotateZ: 0,
-        alpha: 0.2,
+        alpha: 0.5,
         dirtyRenderSupport: true
       });
       this.appendChildNode(this._mapGrid);
@@ -5887,6 +5930,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 if (!nodeFrames) {
                   var node = this._nodeMap[nodeId];
                   var animation = __WEBPACK_IMPORTED_MODULE_5__g_model_util__["a" /* default */].compilePropertiesFrames(this._nodeMap[nodeId], nodeFrames);
+
                 }
               }
             }
@@ -5978,7 +6022,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.id = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.id, 1);
         this.name = __WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.name, this.defName);
         this.skin = new __WEBPACK_IMPORTED_MODULE_2__core_proxy__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__utils_lang_util__["a" /* default */].checkAndGet(conf.skin, {}));
-
+        
         this._node = new __WEBPACK_IMPORTED_MODULE_3__core_node__["a" /* default */]({
           x: 0,
           y: 0,
