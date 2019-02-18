@@ -3,10 +3,11 @@
  * Author: iswear(471291492@qq.com)
  * Date: 2017/8/12
  */
-import LangUtil from '../utils/lang-util';
-import Notifier from './notifier';
-import MatrixUtil from '../utils/matrix-util';
 import GeometryUtil from '../utils/geometry-util';
+import LangUtil from '../utils/lang-util';
+import MatrixUtil from '../utils/matrix-util';
+
+import Notifier from './notifier';
 
 export default (
   function () {
@@ -517,43 +518,44 @@ export default (
       InnerNode.prototype._reportCurDirtyZone = function (app, dirtyZones) {
         var result = false;
         var dirtyCtx = this._dirtyCtx;
-        if (!dirtyCtx.isVisible) {
-          return false;
-        }
-        if (dirtyCtx.isZoneCross && dirtyCtx.isCheckRender) {
-          if (!dirtyCtx.curReported) {
-            var wTrans = this._transformCtx.worldTransform;
-            if (dirtyCtx.oriReported) {
-              var selfDirtyZone = this.getDirtyZone();
-              dirtyCtx.curReported = true;
-              if (selfDirtyZone !== null) {
-                result = app.receiveDirtyZone(this, selfDirtyZone);
-              }
-            } else if (!this.dirtyRenderSupport || !(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 1)) {
-              var selfDirtyZone = this.getDirtyZone();
-              if (selfDirtyZone !== null) {
-                for (var i = 0, len = dirtyZones.length; i < len; ++i) {
-                  var dirtyZone = dirtyZones[i];
-                  if (GeometryUtil.isZoneCross(dirtyZone, selfDirtyZone)) {
-                    result = app.receiveDirtyZone(this, selfDirtyZone);
-                    dirtyCtx.curReported = true;
-                    break;
+        if (dirtyCtx.isVisible) {
+          if (dirtyCtx.isZoneCross && dirtyCtx.isCheckRender) {
+            if (!dirtyCtx.curReported) {
+              var wTrans = this._transformCtx.worldTransform;
+              if (dirtyCtx.oriReported) {
+                var selfDirtyZone = this.getDirtyZone();
+                dirtyCtx.curReported = true;
+                if (selfDirtyZone !== null) {
+                  result = app.receiveDirtyZone(this, selfDirtyZone);
+                }
+              } else if (!this.dirtyRenderSupport || !(wTrans[0] === 1 && wTrans[1] === 0 && wTrans[3] === 0 && wTrans[4] === 1)) {
+                var selfDirtyZone = this.getDirtyZone();
+                if (selfDirtyZone !== null) {
+                  for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+                    var dirtyZone = dirtyZones[i];
+                    if (GeometryUtil.isZoneCross(dirtyZone, selfDirtyZone)) {
+                      result = app.receiveDirtyZone(this, selfDirtyZone);
+                      dirtyCtx.curReported = true;
+                      break;
+                    }
                   }
                 }
               }
             }
           }
-        }
-        var layers = this._childNodes.nodeLayers;
-        for (var i = 0, len = layers.length; i < len; ++i) {
-          var layer = layers[i];
-          if (layer) {
-            for (var j = 0, len2 = layer.length; j < len2; ++j) {
-              result = result || layer[j]._reportCurDirtyZone(app, dirtyZones);
+          var layers = this._childNodes.nodeLayers;
+          for (var i = 0, len = layers.length; i < len; ++i) {
+            var layer = layers[i];
+            if (layer) {
+              for (var j = 0, len2 = layer.length; j < len2; ++j) {
+                result = result || layer[j]._reportCurDirtyZone(app, dirtyZones);
+              }
             }
           }
+          return result;
+        } else {
+          return false;
         }
-        return result;
       }
 
       InnerNode.prototype._dispatchRender = function (render, parentAlpha, parentVisisble, renderZone, dirtyZones) {
