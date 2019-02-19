@@ -30,32 +30,36 @@ export default (
 
       function onLocalTransformChanged () {
         this._transformCtx.localInvalid = true;
-        this.dirty();
+        this.dirty(true);
       }
 
       function onLocalZoneChanged () {
         this._zoneCtx.localInvalid = true;
+        this.dirty(false);
+      }
+
+      function onDirty (sender, newVal, oldVal) {
         this.dirty();
       }
 
-      function onDirty (newVal, oldVal) {
-        this.dirty();
+      function onDirtyChildren (sender, newVal, oldVal) {
+        this.dirty(true);
       }
 
       var propertyChangedMap = {
         x: onLocalTransformChanged,
         y: onLocalTransformChanged,
-        anchorX: onLocalZoneChanged,
-        anchorY: onLocalZoneChanged,
         scaleX: onLocalTransformChanged,
         scaleY: onLocalTransformChanged,
         shearX: onLocalTransformChanged,
         shearY: onLocalTransformChanged,
+        rotateZ: onLocalTransformChanged,
+        anchorX: onLocalZoneChanged,
+        anchorY: onLocalZoneChanged,
         width: onLocalZoneChanged,
         height: onLocalZoneChanged,
-        rotateZ: onLocalTransformChanged,
-        alpha: onDirty,
-        visible: onDirty
+        alpha: onDirtyChildren,
+        visible: onDirtyChildren
       }
       
       return {
@@ -486,14 +490,14 @@ export default (
         zoneCtx.localInvalid = false;
       }
 
-      InnerNode.prototype.dirty = function () {
+      InnerNode.prototype.dirty = function (children) {
         var app = this.findApplication();
         if (app !== null) {
-          this._reportOriDirtyZone(app);
+          this._reportOriDirtyZone(app, children);
         }
       }
 
-      InnerNode.prototype._reportOriDirtyZone = function (app) {
+      InnerNode.prototype._reportOriDirtyZone = function (app, children) {
         var dirtyCtx = this._dirtyCtx;
         if (dirtyCtx.isZoneCross && dirtyCtx.isCheckRender && dirtyCtx.isVisible) {
           app.receiveDirtyZone(this, this.getDirtyZone());
@@ -502,7 +506,7 @@ export default (
           app.receiveDirtyZone(this, null);
           dirtyCtx.oriReported = true;
         }
-        if (dirtyCtx.isVisible) {
+        if (children) {
           var layers = this._childNodes.nodeLayers;
           for (var i = 0, len = layers.length; i < len; ++i) {
             var layer = layers[i];
