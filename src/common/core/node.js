@@ -512,7 +512,7 @@ export default (
             var layer = layers[i];
             if (layer) {
               for (var j = 0, len2 = layer.length; j < len2; ++j) {
-                layer[j]._reportOriDirtyZone(app);
+                layer[j]._reportOriDirtyZone(app, children);
               }
             }
           }
