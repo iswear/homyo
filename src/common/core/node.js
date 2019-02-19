@@ -520,9 +520,9 @@ export default (
       }
 
       InnerNode.prototype._reportCurDirtyZone = function (app, dirtyZones) {
-        var result = false;
         var dirtyCtx = this._dirtyCtx;
         if (dirtyCtx.isVisible) {
+          var result = false;
           if (dirtyCtx.isZoneCross && dirtyCtx.isCheckRender) {
             if (!dirtyCtx.curReported) {
               var wTrans = this._transformCtx.worldTransform;
