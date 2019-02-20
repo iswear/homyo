@@ -528,20 +528,18 @@ export default (function () {
         var dirtyZones = dirtyCtx.zones;
         while (true) {
           var insert = true;
-          for (var i = 0, len = dirtyZones.length; i < len; ++i) {
+          for (var i = dirtyZones.length - 1; i >= 0; --i) {
             var zone = dirtyZones[i];
-            if (GeometryUtil.isZoneNotCross(zone, dirtyZone)) {
-              continue;
-            }
-            dirtyZone.left = Math.min(zone.left, dirtyZone.left);
-            dirtyZone.right = Math.max(zone.right, dirtyZone.right);
-            dirtyZone.top = Math.min(zone.top, dirtyZone.top);
-            dirtyZone.bottom = Math.max(zone.bottom, dirtyZone.bottom);
-            dirtyZone.width = dirtyZone.right - dirtyZone.left;
-            dirtyZone.height = dirtyZone.bottom - dirtyZone.top;
-            insert = false;
-            dirtyZones.splice(i, 1);
-            break;
+            if (GeometryUtil.isZoneCross(zone, dirtyZone)) {
+              dirtyZone.left = Math.min(zone.left, dirtyZone.left);
+              dirtyZone.right = Math.max(zone.right, dirtyZone.right);
+              dirtyZone.top = Math.min(zone.top, dirtyZone.top);
+              dirtyZone.bottom = Math.max(zone.bottom, dirtyZone.bottom);
+              dirtyZone.width = dirtyZone.right - dirtyZone.left;
+              dirtyZone.height = dirtyZone.bottom - dirtyZone.top;
+              dirtyZones.splice(i, 1);
+              insert = false;
+            } 
           }
           if (insert) {
             dirtyZones.push(dirtyZone);

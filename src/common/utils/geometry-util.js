@@ -12,7 +12,7 @@ export default (
       }
 
       function isZoneNotCross(zone1, zone2) {
-        return zone1.left >= zone2.right || zone1.right <= zone2.left || zone1.top >= zone2.bottom || zone1.bottom <= zone2.top;
+        return zone1.left >= zone2.right || zone2.left >= zone1.right || zone1.top >= zone2.bottom || zone2.top > zone1.bottom;
       }
 
       function getZoneCross(zone1, zone2) {
