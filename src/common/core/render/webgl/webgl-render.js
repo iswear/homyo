@@ -3,8 +3,8 @@
  * Author: iswear(471291492@qq.com)
  * Date: 2017/8/13
  */
-import LangUtil from '../../../utils/lang-util';
 import Notifier from '../../notifier';
+import LangUtil from '../../../utils/lang-util';
 import MatrixUtil from '../../../utils/matrix-util';
 
 export default (
@@ -45,7 +45,7 @@ export default (
         this.height = LangUtil.checkAndGet(conf.height, this.$canvas.height);
 
         this._canvas = LangUtil.checkAndGet(conf.canvas, null);
-        this._context = this.$canvas.getContext('webgl') || this.$canvas.getContext('experimental-webgl');
+        this._context = this.$canvas.getContext('webgl') || this._canvas.getContext('experimental-webgl');
         this._program = this._context.createProgram();
         this._vertexShader = null;
         this._fragmentShader = null;
@@ -87,7 +87,7 @@ export default (
       }
 
       InnerWebglRender.prototype.shear = function () {
-
+        
       }
 
       InnerWebglRender.prototype.lookAt = function () {
