@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
-<body style="background-color: black">
+<body style="background-color: red">
 <canvas id="canvas" style="position: absolute; top: 35px; left: 0;" width="1024" height="1024"></canvas>
-<img id="img" src="img/email.jpg" style="position: absolute; left: 0; top: 0;  left: 35px;">
+<img id="img" src="img/email.png" style="position: absolute; left: 0; top: 0;  left: 35px;">
 <img id="img2" src="img/102221a.png" style="display: none;">
 <script>
     var img = document.getElementById('img');
@@ -46,8 +46,8 @@
         //   a = a - 0.23;
         // }
         // context.globalCompositeOperation = 'destination-over';
-        for (var i = 0; i < 100; ++i) {
-          // context.drawImage(img2, 0, 0);
+        for (var i = 0; i < 2560; ++i) {
+          context.drawImage(img, i % 256, i % 256);
           // if (i % 2 === 0) {
           //   context.drawImage(img, 50, 50);
           // } else {

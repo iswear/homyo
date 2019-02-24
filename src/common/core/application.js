@@ -24,13 +24,9 @@ export default (function () {
       function eventPreProcessDesktop (e, fromCanvas) {
         var eArg = this._events[0];
         var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
-        var offsetX = (e.pageX - (canvasViewOffset.left + win.pageXOffset)) * this._scaleX;
-        var offsetY = (e.pageY - (canvasViewOffset.top + win.pageYOffset)) * this._scaleY;
-        if (offsetX !== eArg.offsetX || offsetY !== eArg.offsetY || e.wheelDelta !== 0) {
-          this.move = true;
-        } else {
-          this.move = false;
-        }
+        var offsetX = (e.clientX - canvasViewOffset.left) * this._scaleX;
+        var offsetY = (e.clientY - canvasViewOffset.top) * this._scaleY;
+
         eArg.id = 1;
         eArg.event = e;
         eArg.target = null;
@@ -45,6 +41,7 @@ export default (function () {
 
         eArg.skip = false;
         eArg.bubble = true;
+
         eArg.offsetX = offsetX;
         eArg.offsetY = offsetY;
         return eArg;
@@ -56,14 +53,8 @@ export default (function () {
           eArg = new Event();
           this._events[touch.identifier] = eArg;
         }
-        var canvasViewOffset = this._render.getCanvas().getBoundingClientRect();
-        var offsetX = (e.pageX - (canvasViewOffset.left + win.pageXOffset)) * this._scaleX;
-        var offsetY = (e.pageY - (canvasViewOffset.top + win.pageYOffset)) * this._scaleY;
-        if (offsetX !== eArg.offsetX || offsetY !== eArg.offsetY || e.wheelDelta !== 0) {
-          this.move = true;
-        } else {
-          this.move = false;
-        }
+        var offsetX = (e.clientX - canvasViewOffset.left) * this._scaleX;
+        var offsetY = (e.clientY - canvasViewOffset.top) * this._scaleY;
         eArg.id = touch.identifier;
         eArg.event = e;
         eArg.touch = touch;
@@ -143,10 +134,8 @@ export default (function () {
         var root = this._root;
         for (var i = 0, len = touches.length; i < len; ++i) {
           var eArg = eventPreProcessMobile.call(this, ee, touches[i], true);
-          if (eArg.move) {
-            this.postNotification('touchmove', [eArg]);
-            root._dispatchMouseTouchEvent('touchmove', eArg);
-          }
+          this.postNotification('touchmove', [eArg]);
+          root._dispatchMouseTouchEvent('touchmove', eArg);
         }
       }
 
@@ -424,7 +413,7 @@ export default (function () {
         this._root = LangUtil.checkAndGet(conf.root, null);
         this._root.application = this;
 
-        this._render = new CanvasRender({canvas: conf.canvas, width: LangUtil.checkAndGet(conf.width, undefined), height: LangUtil.checkAndGet(conf.height, undefined)});
+        this._render = new CanvasRender({canvas: conf.canvas, width: conf.width, height: conf.height});
         this._renderZone = {
           top: 0,
           left: 0,
@@ -551,6 +540,7 @@ export default (function () {
 
       InnerApplication.prototype.loop = function () {
         var now = (new Date()).getTime(), deltaTime = 0;
+        // 计算间隔
         if (this._prevLoopTime !== 0) {
           deltaTime = now - this._prevLoopTime;
           this._prevLoopTime = now;

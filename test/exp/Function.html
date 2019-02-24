@@ -3,17 +3,34 @@
 
   </head>
   <body>
+    <div id="1" style="position: fixed; left: 100px; top: 100px; height: 100px; width: 200px; height: 200px; background-color: red;">
+      
+    </div>
     <script>
-      var a = '(function() { return function() { alert(this.x) } })()';
-      for (var i = 0; i < 1000; ++i) {
+      var el = document.getElementById("1");
+      var prev = (new Date()).getTime();
+      var now;
+      var count = 0;
+      el.addEventListener('touchstart', function (e) {
         var start = (new Date()).getTime();
-        var b = eval(a);
-        console.log("time:" + ((new Date()).getTime() - start));
-      }
-      var c = {
-        x: 'feafe'
-      };
-      b.call(c);
+        for (var i = 0; i < 6000; ++i) {
+          el.getBoundingClientRect()
+        }
+        console.log('yaya', (new Date()).getTime() - start);
+        console.log(e);
+        console.log('page', e.pageX, e.pageY);
+        console.log('client', e.clientX, e.clientY);
+        console.log('offset', e.offsetX, e.offsetY);
+
+        // now = (new Date()).getTime();
+        // if (now > prev + 1000) {
+        //   console.log(count + '/' + (now - prev))
+        //   prev = now;
+        //   count = 0;
+        // } else {
+        //   count++;
+        // }
+      }, false);
     </script>
   </body>
 </html>

@@ -26,7 +26,7 @@ export default (
             while (queue.length > 0) {
               var item = queue.unshift();
               var itemConf = item.conf;
-              var itemNode = new GModelNode(itemConf.node);
+              var itemNode = new GModelNode(itemConf.property);
               var itemParent = item.parent;
               var children = itemConf.children;
               if (children) {
@@ -110,20 +110,6 @@ export default (
         //     }
         //   }
         // }
-      }
-
-      function createNode (conf) {
-        var node = new GModelNode(conf.node);
-        if (conf.id) {
-          this._nodeMap[conf.id] = node;
-        }
-        if (conf.children) {
-          var children = conf.children;
-          for (var i = 0, len = children.length; i < len; ++i) {
-            node.appendChildNode(createNode.call(this, children[i]));
-          }
-        }
-        return node;
       }
 
       function runAction () {
