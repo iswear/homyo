@@ -27,7 +27,7 @@ export default (function () {
         var offsetX = (e.clientX - canvasViewOffset.left) * this._scaleX;
         var offsetY = (e.clientY - canvasViewOffset.top) * this._scaleY;
 
-        eArg.id = 1;
+        eArg.id = 0;
         eArg.event = e;
         eArg.target = null;
         eArg.fromCanvas = fromCanvas || eArg.fromCanvas;

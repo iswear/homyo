@@ -4,9 +4,9 @@
  * Date: 2017/8/18
  */
 import LangUtil from "../utils/lang-util";
-import SchedulerAnimation from "../core/animation/scheduler-animation";
 import PropertyAnimation from "../core/animation/property-animation";
 import QueueAnimation from "../core/animation/queue-animation";
+import SchedulerAnimation from "../core/animation/scheduler-animation";
 
 export default (function() {
   var rootNodeProps = [
