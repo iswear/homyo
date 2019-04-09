@@ -103,7 +103,7 @@ export default (
         }
       }
 
-      return 
+      return {
         createNodes: createNodes,
         compileActions: compileActions
       }
