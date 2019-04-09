@@ -46,70 +46,38 @@ export default (
 
       function compileActions (actionGroups) {
         if (actionGroups) {
+          // 动画分组路由
+          // 动画编译
           for (var i = 0, len = actionGroups.length; i < len; ++i) {
             var actionGroup = actionGroups[i];
             var actions = actionGroup.actions;
             if (!actions) {
-              continue
+              continue;
             }
-            var compiledActions = [];
-            for (var j = 0, leng = actions.length; j < leng; ++j) {
+            for (var i = 0, leng = actions.length; j < leng; ++i) {
               var action = actions[i];
               var frames = action.frames;
               if (!frames) {
-                continue
+                continue;
               }
-              compileActions.push({
-                id: action.id,
-                name: action.name,
-                condition: {
-                  property: action.property,
-                  min: action.min,
-                  max: action.max
-                }
-              });
+              var compiledActions = [];
               for (var nodeId in frames) {
-                var nodeFrames = frames[nodeId]
+                var nodeFrames = frames[nodeId];
                 if (!nodeFrames) {
-                  var node = this._nodeMap[nodeId];
-                  var animation = GModelUtil.compilePropertiesFrames(this._nodeMap[nodeId], nodeFrames);
-
+                  continue;
                 }
+                var node = this._nodeMap[nodeId];
+                var animation = GModelUtil.compilePropertiesFrames(node, nodeFrames);
+                if (animation) {
+                  compiledActions.push({node: node, animation: animation});
+                }
+              }
+              if (compileActions.length > 0) {
+                this._actionMap[action.id] = compiledActions;
               }
             }
-            this._actionGroupMap[actionGroup.id] = {
-              id: actionGroup.id,
-              name: actionGroup.name,
-              actions: compiledActions
-            };
           }
         }
-        // this._actions = {};
-        // if (actions) {
-        //   for (var i = 0, len = actions.length; i < len; ++i) {
-        //     var modelAction = actions[i];
-        //     var modelActionFrames = modelAction.frames;
-        //     if (modelActionFrames) {
-        //       var nodeCompiledActions = [];
-        //       for (var nodeId in modelActionFrames) {
-        //         var node = this._nodeMap[nodeId];
-        //         var nodeFrames = modelActionFrames[nodeId];
-        //         if (node && nodeFrames) {
-        //           var animation = GUtil.compileModelFrames(node, nodeFrames, node === this._node);
-        //           if (animation) {
-        //             nodeCompiledActions.push({
-        //               node: node,
-        //               animation: animation
-        //             });
-        //           }
-        //         }
-        //       }
-        //       if (nodeCompiledActions.length > 0) {
-        //         this._actions[modelAction.id] = nodeCompiledActions;
-        //       }
-        //     }
-        //   }
-        // }
       }
 
       function runAction () {
@@ -135,7 +103,7 @@ export default (
         }
       }
 
-      return {
+      return 
         createNodes: createNodes,
         compileActions: compileActions
       }
@@ -170,9 +138,9 @@ export default (
           interactive: true
         });
         this._nodeMap = {};
-
-        this._actionGroupMap = {};
-        this._actionGroupContext = {
+        this._actionMap = {};
+        this._actionRoute = {};
+        this._actionContext = {
           runningActionId: null,
           runningAction: null,
           progress: 0,
@@ -181,6 +149,14 @@ export default (
 
         functions.createNodes.call(this, LangUtil.checkAndGet(conf.nodes, {}));
         functions.compileActions.call(this, LangUtil.checkAndGet(conf.actionGroups, null));
+      }
+
+      InnerGModel.prototype.getNode = function (nodeId) {
+        if (arguments.length === 0) {
+          return this._node;
+        } else {
+          return this._nodeMap[nodeId]
+        }
       }
 
       InnerGModel.prototype.addNode = function (node, nodeId, parentNodeId, prevNodeId) {
@@ -216,14 +192,6 @@ export default (
         }
       }
 
-      InnerGModel.prototype.getNode = function (nodeId) {
-        if (arguments.length === 0) {
-          return this._node;
-        } else {
-          return this._nodeMap[nodeId]
-        }
-      }
-
       InnerGModel.prototype.removeNode = function (nodeId, destroy) {
         var node = this._nodeMap[nodeId];
         if (!node) {
@@ -234,44 +202,21 @@ export default (
         return node;
       }
 
-      InnerGModel.prototype.compileAndSetAction = function (actConf) {
-        var nodeActions = []
-        var modelActFrames = actConf.frames;
-        for (var nodeId in modelActFrames) {
-          var node = this._nodeMap[nodeId];
-          var nodeActFrames = modelActFrames[nodeId];
-          if (node && nodeActFrames) {
-            var animation = GUtil.compileModelFrames(node, nodeActFrames, node === this._node);
-            if (animation) {
-              nodeActions.push({
-                node: node,
-                animation: animation
-              });
-            }
-          }
-        }
-        if (nodeActions.length > 0) {
-          this._actions[actConf.id] = nodeActions;
-        } else {
-          delete this._actions[actConf.id];
-        }
-      }
-
-      InnerGModel.prototype.runAction = function (actId, loop) {
+      InnerGModel.prototype.runAction = function (actionId, startTime, loop) {
         var context = this._actionsContext;
-        if (name === context.runningActId) {
+        if (actionId === context.runningActId) {
           return;
         }
         this.stopAction();
-        context.runningActId = actId;
-        context.runningAct = this._actions[actId];
+        context.runningActId = actionId;
+        context.runningAct = this._actions[actionId];
         context.loop = loop;
-        functions.runAction.call(this);
+        functions.runAction.call(this, startTime);
       }
 
       InnerGModel.prototype.stopAction = function () {
         var context = this._actionsContext;
-        if (context.runningActId != null) {
+        if (context.runningActId !== null) {
           this._node.stopAnimation(true);
         }
         context.runningActId = null;

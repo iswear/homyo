@@ -1,10 +1,26 @@
 import SchedulerAnimation from "../../core/animation/scheduler-animation";
 import PropertyAnimation from "../../core/animation/property-animation";
 import QueueAnimation from "../../core/animation/queue-animation";
-import AlgebraUtil from "../../utils/algebra-util";
 
 export default (
   function () {
+    function propertySchduleUpdate (binder, param) {
+      binder.node[param.property] = param.value
+    }
+
+    function propertyLineUpdate (v) {
+      return function (binder, dt, st) {
+        return st * v
+      }
+    }
+
+    function propertyCurveUpdate (params) {
+      return function() {
+        
+      }
+    }
+
+
     function propertySchedularUpdate (binder, param) {
       binder.node[param.property] = param.value
     }
